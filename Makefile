@@ -1,25 +1,43 @@
-OC = ocamlopt
-OCMKLIB = ocamlmklib
+# Toolchain Configuration
+#-------------------------------------------------------------------------------
+ifeq ($(NATIVE), 1)
+    OC         = ocamlopt
+    OCFLAGS    =
+    MKLIB      = ocamlmklib
+    MKLIBFLAGS = -custom
+    OBJEXT     = cmx
+    LIBEXT     = cmxa
+else
+    OC         = ocamlc
+    OCFLAGS    =
+    MKLIB      = ocamlmklib
+    MKLIBFLAGS = -custom
+    OBJEXT     = cmo
+    LIBEXT     = cma
+endif
 
+# Target Definitions
+#-------------------------------------------------------------------------------
 .PHONY: all clean
-
-env.cmxa: env.cmx envprims.o
-tide: env.cmxa tide.cmx
 
 all: tide
 
 clean:
-	$(RM) *.cm* *.o *.a
+	$(RM) tide *.cm* *.o *.a
 
+env.$(LIBEXT): env.$(OBJEXT) envprims.o
+tide: env.$(LIBEXT) tide.$(OBJEXT)
+
+# Implicit Rule Definitions
+#-------------------------------------------------------------------------------
 %:
-	$(OC) -o $@ $^ -I .
+	$(OC) $(OCFLAGS) -o $@ $^ -I .
 
-%.cmxa:
-	$(OCMKLIB) -custom -o $* $^
+%.$(LIBEXT):
+	$(MKLIB) $(MKLIBFLAGS) $(OCFLAGS) -o $* $^
 
-%.cmx: %.ml
-	$(OC) -c -o $@ $^
+%.$(OBJEXT): %.ml
+	$(OC) $(OCFLAGS) -c -o $@ $^
 
 %.o: %.c
 	$(OC) $(OCFLAGS) -c -o $@ $^
-

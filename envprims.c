@@ -5,19 +5,19 @@
 #include <caml/custom.h>
 #include <stdlib.h>
 
-CAMLprim value caml_env_set(value var, value val) {
+CAMLprim value env_set(value var, value val) {
     CAMLparam2(var, val);
     puts("foo");
     CAMLreturn(Val_int(0));
 }
 
-CAMLprim value caml_env_get(value var) {
+CAMLprim value env_get(value var) {
     CAMLparam1(var);
     puts("bar");
     CAMLreturn(caml_copy_string(""));
 }
 
-CAMLprim value caml_env_unset(value var) {
+CAMLprim value env_unset(value var) {
     CAMLparam1(var);
     puts("baz");
     CAMLreturn(Val_int(0));

@@ -1,4 +1,5 @@
 open Env
+open Printf
 
 let () =
   let foo = Env.set "foo" "bar" in

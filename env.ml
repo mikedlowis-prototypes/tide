@@ -1,4 +1,4 @@
 (* Environment variable management routines *)
-external set : string -> string -> int = "caml_env_set"
-external get : string -> string = "caml_env_get"
-external unset : string -> int = "caml_env_unset"
+external set : string -> string -> int = "env_set"
+external get : string -> string = "env_get"
+external unset : string -> int = "env_unset"
