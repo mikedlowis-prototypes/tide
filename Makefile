@@ -1,5 +1,6 @@
 # Toolchain Configuration
 #-------------------------------------------------------------------------------
+# -nostdlib - Reimplement the Pervasives module to not suck.
 ifeq ($(NATIVE), 1)
     OC         = ocamlopt
     OCFLAGS    =
@@ -25,7 +26,7 @@ all: tide
 clean:
 	$(RM) tide *.cm* *.o *.a
 
-env.$(LIBEXT): env.$(OBJEXT) envprims.o
+env.$(LIBEXT): env.$(OBJEXT) env_set.o env_get.o env_unset.o
 tide: env.$(LIBEXT) tide.$(OBJEXT)
 
 # Implicit Rule Definitions
