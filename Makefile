@@ -3,11 +3,12 @@
 # -nostdlib - Reimplement the Pervasives module to not suck.
 ifeq ($(NATIVE), 1)
     OC         = ocamlopt
-    OCFLAGS    =
+    OCFLAGS    = -compact
     MKLIB      = ocamlmklib
     MKLIBFLAGS = -custom
     OBJEXT     = cmx
     LIBEXT     = cmxa
+    OLDFLAGS   = -compact -ccopt -dead_strip
 else
     OC         = ocamlc
     OCFLAGS    =
@@ -15,6 +16,7 @@ else
     MKLIBFLAGS = -custom
     OBJEXT     = cmo
     LIBEXT     = cma
+    OLDFLAGS   =
 endif
 
 # Target Definitions
@@ -32,7 +34,7 @@ tide: env.$(LIBEXT) tide.$(OBJEXT)
 # Implicit Rule Definitions
 #-------------------------------------------------------------------------------
 %:
-	$(OC) $(OCFLAGS) -o $@ $^ -I .
+	$(OC) $(OCFLAGS) $(OLDFLAGS) -o $@ $^ -I .
 
 %.$(LIBEXT):
 	$(MKLIB) $(MKLIBFLAGS) $(OCFLAGS) -o $* $^
