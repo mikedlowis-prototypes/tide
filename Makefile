@@ -15,7 +15,7 @@ else
     MKLIBFLAGS =
     OBJEXT     = cmo
     LIBEXT     = cma
-    OLDFLAGS   =
+    OLDFLAGS   = -dllpath .
 endif
 
 # Target Definitions
@@ -26,20 +26,22 @@ all: tide
 
 clean:
 	$(RM) tide *.cm* *.o *.a *.so
+	$(RM) tide lib/*.cm* lib/*.o
 
-env.$(LIBEXT): env.$(OBJEXT) env_set.o env_get.o env_unset.o
+env.$(LIBEXT): lib/env.$(OBJEXT) lib/env_prims.o
 tide: env.$(LIBEXT) tide.$(OBJEXT)
 
 # Implicit Rule Definitions
 #-------------------------------------------------------------------------------
 %:
-	$(OC) $(OLDFLAGS) -o $@ $^ -I .
+	$(OC) $(OLDFLAGS) -o $@ $^ -I . -I lib
 
 %.$(LIBEXT):
 	$(MKLIB) $(MKLIBFLAGS) $(OCFLAGS) -o $* -oc $* $^
 
 %.$(OBJEXT): %.ml
-	$(OC) $(OCFLAGS) -c -o $@ $^
+	$(OC) $(OCFLAGS) -c -o $@ $^ -I lib
 
 %.o: %.c
-	$(OC) $(OCFLAGS) -c -o $@ $^
+	$(OC) $(OCFLAGS) -c $^
+	mv $(notdir $@) $(dir $@)
