@@ -1,6 +1,5 @@
 # Toolchain Configuration
 #-------------------------------------------------------------------------------
-# -nostdlib - Reimplement the Pervasives module to not suck.
 ifeq ($(NATIVE), 1)
     OC         = ocamlopt
     OCFLAGS    = -compact
@@ -13,7 +12,7 @@ else
     OC         = ocamlc
     OCFLAGS    =
     MKLIB      = ocamlmklib
-    MKLIBFLAGS = -custom
+    MKLIBFLAGS =
     OBJEXT     = cmo
     LIBEXT     = cma
     OLDFLAGS   =
@@ -26,7 +25,7 @@ endif
 all: tide
 
 clean:
-	$(RM) tide *.cm* *.o *.a
+	$(RM) tide *.cm* *.o *.a *.so
 
 env.$(LIBEXT): env.$(OBJEXT) env_set.o env_get.o env_unset.o
 tide: env.$(LIBEXT) tide.$(OBJEXT)
@@ -34,10 +33,10 @@ tide: env.$(LIBEXT) tide.$(OBJEXT)
 # Implicit Rule Definitions
 #-------------------------------------------------------------------------------
 %:
-	$(OC) $(OCFLAGS) $(OLDFLAGS) -o $@ $^ -I .
+	$(OC) $(OLDFLAGS) -o $@ $^ -I .
 
 %.$(LIBEXT):
-	$(MKLIB) $(MKLIBFLAGS) $(OCFLAGS) -o $* $^
+	$(MKLIB) $(MKLIBFLAGS) $(OCFLAGS) -o $* -oc $* $^
 
 %.$(OBJEXT): %.ml
 	$(OC) $(OCFLAGS) -c -o $@ $^
