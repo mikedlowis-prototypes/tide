@@ -1,5 +1,3 @@
-open Tide
-
 let () =
   let server = Tide.start_server () in
   let nargs = Array.length Sys.argv in
