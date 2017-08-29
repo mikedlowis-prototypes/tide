@@ -32,15 +32,16 @@ LIBOBJS = \
 all: edit
 
 clean:
-	$(RM) tide *.cm* *.o *.a *.so
-	$(RM) tide lib/*.cm* lib/*.o
+	$(RM) deps.mk tide *.cm* *.o *.a *.so lib/*.cm* lib/*.o
 
 # Executable targets
 edit: tide.$(LIBEXT) edit.$(OBJEXT)
 
 # Library targets
 tide.$(LIBEXT): $(LIBOBJS)
-lib/tide.$(OBJEXT): lib/tide.$(IFEXT)
+
+deps.mk:
+	ocamldep *.ml* lib/*.ml* > deps.mk
 
 -include deps.mk
 
@@ -56,7 +57,6 @@ lib/tide.$(OBJEXT): lib/tide.$(IFEXT)
 	$(OC) $(OCFLAGS) -c -o $@ $< -I . -I lib
 
 %.$(LIBEXT):
-	ocamldep *.ml* lib/*.ml* > deps.mk
 	$(MKLIB) $(MKLIBFLAGS) $(OCFLAGS) -o $* -oc $* $^
 
 %.o: %.c
