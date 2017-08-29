@@ -23,8 +23,8 @@ endif
 BINS = edit
 LIBOBJS = \
     lib/tide.$(OBJEXT) \
-    lib/env.$(OBJEXT) \
-    lib/env_prims.o
+    lib/x11.$(OBJEXT) \
+    lib/x11_prims.o
 
 .PHONY: all clean
 
