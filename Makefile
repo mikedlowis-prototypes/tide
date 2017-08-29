@@ -5,7 +5,6 @@ ifeq ($(NATIVE), 1)
     OCFLAGS    =
     MKLIB      = ocamlmklib
     MKLIBFLAGS = -custom
-    IFEXT      = cmi
     OBJEXT     = cmx
     LIBEXT     = cmxa
     OLDFLAGS   = -compact -ccopt -dead_strip
@@ -14,7 +13,6 @@ else
     OCFLAGS    =
     MKLIB      = ocamlmklib
     MKLIBFLAGS =
-    IFEXT      = cmi
     OBJEXT     = cmo
     LIBEXT     = cma
     OLDFLAGS   = -dllpath .
@@ -22,6 +20,7 @@ endif
 
 # Target Definitions
 #-------------------------------------------------------------------------------
+BINS = edit
 LIBOBJS = \
     lib/tide.$(OBJEXT) \
     lib/env.$(OBJEXT) \
@@ -29,10 +28,10 @@ LIBOBJS = \
 
 .PHONY: all clean
 
-all: edit
+all: $(BINS)
 
 clean:
-	$(RM) deps.mk tide *.cm* *.o *.a *.so lib/*.cm* lib/*.o
+	$(RM) deps.mk $(BINS) *.cm* *.o *.a *.so lib/*.cm* lib/*.o
 
 # Executable targets
 edit: tide.$(LIBEXT) edit.$(OBJEXT)
@@ -50,7 +49,7 @@ deps.mk:
 %:
 	$(OC) $(OLDFLAGS) -o $@ $^ -I . -I lib
 
-%.$(IFEXT): %.mli
+%.cmi: %.mli
 	$(OC) $(OCFLAGS) -c -o $@ $< -I . -I lib
 
 %.$(OBJEXT): %.ml
