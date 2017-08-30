@@ -1,5 +1,8 @@
 # Toolchain Configuration
 #-------------------------------------------------------------------------------
+INCS = -I . -I lib -I /usr/X11R6/include
+LIBS = -L/usr/X11R6/lib -lX11
+
 ifeq ($(NATIVE), 1)
     OC         = ocamlopt
     OCFLAGS    =
@@ -47,17 +50,17 @@ deps.mk:
 # Implicit Rule Definitions
 #-------------------------------------------------------------------------------
 %:
-	$(OC) $(OLDFLAGS) -o $@ $^ -I . -I lib
+	$(OC) $(OLDFLAGS) -o $@ $^ $(INCS)
 
 %.cmi: %.mli
-	$(OC) $(OCFLAGS) -c -o $@ $< -I . -I lib
+	$(OC) $(OCFLAGS) -c -o $@ $< $(INCS)
 
 %.$(OBJEXT): %.ml
-	$(OC) $(OCFLAGS) -c -o $@ $< -I . -I lib
+	$(OC) $(OCFLAGS) -c -o $@ $< $(INCS)
 
 %.$(LIBEXT):
-	$(MKLIB) $(MKLIBFLAGS) $(OCFLAGS) -o $* -oc $* $^
+	$(MKLIB) $(MKLIBFLAGS) $(OCFLAGS) -o $* -oc $* $^ $(LIBS)
 
 %.o: %.c
-	$(OC) $(OCFLAGS) -c $^
+	$(OC) $(OCFLAGS) -c $^ $(INCS)
 	mv $(notdir $@) $(dir $@)
