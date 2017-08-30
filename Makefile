@@ -1,7 +1,7 @@
 # Toolchain Configuration
 #-------------------------------------------------------------------------------
-INCS = -I . -I lib -I /usr/X11R6/include
-LIBS = -L/usr/X11R6/lib -lX11
+INCS = -I . -I lib -I /usr/X11R6/include -I /usr/include/freetype2
+LIBS = -L/usr/X11R6/lib -lX11 -lXft
 
 ifeq ($(NATIVE), 1)
     OC         = ocamlopt

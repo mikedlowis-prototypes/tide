@@ -1,5 +1,5 @@
 type atom
-type window
+type winid
 
 external connect : unit -> unit
                  = "x11_connect"
@@ -7,25 +7,36 @@ external connect : unit -> unit
 external disconnect : unit -> unit
                     = "x11_disconnect"
 
+external make_window : int -> int -> unit
+                     = "x11_make_window"
+
+external make_dialog : int -> int -> unit
+                     = "x11_make_dialog"
+
+external show_window : bool -> unit
+                  = "x11_show_window"
+
 external errno : unit -> int
                = "x11_errno"
 
 external intern : string -> atom
                 = "x11_intern"
 
-external prop_set : window -> atom -> string -> unit
+external prop_set : winid -> atom -> string -> unit
                   = "x11_prop_set"
 
-external prop_get : window -> atom -> string
+external prop_get : winid -> atom -> string
                   = "x11_prop_get"
 
 (* to be implemented
-external mkwindow : int -> int -> window
-                  = "x11_mkwindow"
-external mkdialog : int -> int -> window
-                  = "x11_mkdialog"
 external sel_set : atom -> string -> unit
                   = "x11_sel_set"
 external sel_get : atom -> unit
                  = "x11_sel_get"
 *)
+
+(* Automatically connect and disconnect to the display server *)
+let () =
+  connect ();
+  at_exit disconnect
+
