@@ -20,7 +20,7 @@ static struct {
     unsigned depth;
     int screen;
     Window root;
-    int errno;
+    int errnum;
     /* assume one window per process for now */
     Window self;
     XftDraw* xft;
@@ -53,10 +53,15 @@ CAMLprim value x11_disconnect(void) {
     CAMLreturn(Val_unit);
 }
 
+CAMLprim value x11_connfd(void) {
+    CAMLparam0();
+    CAMLreturn(Val_int( ConnectionNumber(X.display) ));
+}
+
 CAMLprim value x11_make_window(value height, value width) {
     CAMLparam2(height, width);
     create_window(Int_val(height), Int_val(width));
-    CAMLreturn(Val_unit);
+    CAMLreturn(Val_int(X.self));
 }
 
 CAMLprim value x11_make_dialog(value height, value width) {
@@ -65,7 +70,7 @@ CAMLprim value x11_make_dialog(value height, value width) {
     Atom WindowType = XInternAtom(X.display, "_NET_WM_WINDOW_TYPE", False);
     Atom DialogType = XInternAtom(X.display, "_NET_WM_WINDOW_TYPE_DIALOG", False);
     XChangeProperty(X.display, X.self, WindowType, XA_ATOM, 32, PropModeReplace, (unsigned char*)&DialogType, 1);
-    CAMLreturn(Val_unit);
+    CAMLreturn(Val_int(X.self));
 }
 
 CAMLprim value x11_show_window(value state) {
@@ -86,7 +91,7 @@ CAMLprim value x11_show_window(value state) {
 
 CAMLprim value x11_errno(void) {
     CAMLparam0();
-    CAMLreturn(Val_int(X.errno));
+    CAMLreturn(Val_int(X.errnum));
 }
 
 CAMLprim value x11_intern(value name) {
@@ -120,7 +125,7 @@ static char* readprop(Window win, Atom prop) {
 }
 
 static int error_handler(Display* disp, XErrorEvent* ev) {
-    X.errno = ev->error_code;
+    X.errnum = ev->error_code;
     return 0;
 }
 
