@@ -3,7 +3,7 @@
 #include <caml/fail.h>
 #include <caml/memory.h>
 #include <caml/alloc.h>
-//#include <caml/custom.h>
+#include <caml/callback.h>
 
 #include <X11/Xlib.h>
 #include <X11/Xatom.h>
@@ -14,6 +14,7 @@ static char* readprop(Window win, Atom prop);
 static void create_window(int height, int width);
 
 static struct {
+    bool running;
     Display* display;
     Visual* visual;
     Colormap colormap;
@@ -30,26 +31,35 @@ static struct {
     XIC xic;
     XIM xim;
     GC gc;
-} X;
+} X = {0};
 
 CAMLprim value x11_connect(void) {
     CAMLparam0();
-    if (!(X.display = XOpenDisplay(NULL)))
-        caml_failwith("could not open display");
-    XSetErrorHandler(error_handler);
-    X.root = DefaultRootWindow(X.display);
-    XWindowAttributes wa;
-    XGetWindowAttributes(X.display, X.root, &wa);
-    X.visual   = wa.visual;
-    X.colormap = wa.colormap;
-    X.screen   = DefaultScreen(X.display);
-    X.depth    = DefaultDepth(X.display, X.screen);
+    if (!X.display) {
+        if (!(X.display = XOpenDisplay(NULL)))
+            caml_failwith("could not open display");
+        XSetErrorHandler(error_handler);
+        X.root = DefaultRootWindow(X.display);
+        XWindowAttributes wa;
+        XGetWindowAttributes(X.display, X.root, &wa);
+        X.visual   = wa.visual;
+        X.colormap = wa.colormap;
+        X.screen   = DefaultScreen(X.display);
+        X.depth    = DefaultDepth(X.display, X.screen);
+        X.running  = true;
+    }
     CAMLreturn(Val_unit);
 }
 
 CAMLprim value x11_disconnect(void) {
     CAMLparam0();
-    XCloseDisplay(X.display);
+    if (X.display) {
+        if (X.self) {
+            XUnmapWindow(X.display, X.self);
+            XSync(X.display, True);
+        }
+        XCloseDisplay(X.display);
+    }
     CAMLreturn(Val_unit);
 }
 
@@ -75,16 +85,39 @@ CAMLprim value x11_make_dialog(value height, value width) {
 
 CAMLprim value x11_show_window(value state) {
     CAMLparam1(state);
-    if (Bool_val(state)) {
-        /* simulate an initial resize and map the window */
-        XConfigureEvent ce;
-        ce.type   = ConfigureNotify;
-        ce.width  = X.width;
-        ce.height = X.height;
-        XSendEvent(X.display, X.self, False, StructureNotifyMask, (XEvent *)&ce);
+    if (Bool_val(state))
         XMapWindow(X.display, X.self);
-    } else {
+    else
         XUnmapWindow(X.display, X.self);
+    CAMLreturn(Val_unit);
+}
+
+CAMLprim value x11_event_loop(value ms, value cbfn) {
+    CAMLparam2(ms, cbfn);
+    while (X.running) {
+        XEvent e; XPeekEvent(X.display, &e);
+        bool pending = false; //pollfds(Int_val(ms), cbfn);
+        int nevents  = XEventsQueued(X.display, QueuedAfterFlush);
+        if (pending || nevents) {
+            /* pare down irrelevant mouse drag events to just the latest */
+            XTimeCoord* coords = XGetMotionEvents(X.display, X.self, CurrentTime, CurrentTime, &nevents);
+            if (coords) XFree(coords);
+
+            /* now take the events, convert them, and call the callback */
+            for (XEvent e; XPending(X.display);) {
+                XNextEvent(X.display, &e);
+                if (!XFilterEvent(&e, None)) {
+                    // Convert the event.
+                    caml_callback(cbfn, Val_unit);
+                }
+            }
+
+            if (X.running) {
+                caml_callback(cbfn, Val_unit /* redraw event */);
+                XCopyArea(X.display, X.pixmap, X.self, X.gc, 0, 0, X.width, X.height, 0, 0);
+            }
+        }
+        XFlush(X.display);
     }
     CAMLreturn(Val_unit);
 }
@@ -137,7 +170,7 @@ static void create_window(int height, int width) {
     XGetWindowAttributes(X.display, X.root, &wa);
     X.self = XCreateSimpleWindow(X.display, X.root,
         (wa.width  - X.width) / 2,
-        (wa.height - X.height) /2,
+        (wa.height - X.height) / 2,
         X.width,
         X.height,
         0, X.depth,
@@ -153,7 +186,7 @@ static void create_window(int height, int width) {
     swa.backing_store = WhenMapped;
     swa.bit_gravity = NorthWestGravity;
     XChangeWindowAttributes(X.display, X.self, CWBackingStore|CWBitGravity, &swa);
-    XStoreName(X.display, X.self, "tide");
+    //XStoreName(X.display, X.self, "tide");
     XSelectInput(X.display, X.self,
           StructureNotifyMask
         | ButtonPressMask
