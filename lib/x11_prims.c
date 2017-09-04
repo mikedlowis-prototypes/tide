@@ -1,4 +1,4 @@
-#include <curses.h>
+#include <stdbool.h>
 #include <caml/mlvalues.h>
 #include <caml/fail.h>
 #include <caml/memory.h>
@@ -9,9 +9,51 @@
 #include <X11/Xatom.h>
 #include <X11/Xft/Xft.h>
 
+enum Keys {
+    KEY_F1     = (0xE000+0),
+    KEY_F2     = (0xE000+1),
+    KEY_F3     = (0xE000+2),
+    KEY_F4     = (0xE000+3),
+    KEY_F5     = (0xE000+4),
+    KEY_F6     = (0xE000+5),
+    KEY_F7     = (0xE000+6),
+    KEY_F8     = (0xE000+7),
+    KEY_F9     = (0xE000+8),
+    KEY_F10    = (0xE000+9),
+    KEY_F11    = (0xE000+10),
+    KEY_F12    = (0xE000+11),
+    KEY_INSERT = (0xE000+12),
+    KEY_DELETE = (0xE000+13),
+    KEY_HOME   = (0xE000+14),
+    KEY_END    = (0xE000+15),
+    KEY_PGUP   = (0xE000+16),
+    KEY_PGDN   = (0xE000+17),
+    KEY_UP     = (0xE000+18),
+    KEY_DOWN   = (0xE000+19),
+    KEY_RIGHT  = (0xE000+20),
+    KEY_LEFT   = (0xE000+21),
+    KEY_ESCAPE = 0x1B,
+    RUNE_ERR   = 0xFFFD
+};
+
+extern size_t utf8encode(char str[6], int32_t rune);
+extern bool utf8decode(int32_t* rune, size_t* length, int byte);
+
 static int error_handler(Display* disp, XErrorEvent* ev);
 static char* readprop(Window win, Atom prop);
 static void create_window(int height, int width);
+static value mkrecord(char* tag, int n, ...);
+static int32_t special_keys(int32_t key);
+
+static value ev_focus(XEvent*);
+static value ev_keypress(XEvent*);
+static value ev_mouse(XEvent*);
+static value ev_selclear(XEvent*);
+static value ev_selnotify(XEvent*);
+static value ev_selrequest(XEvent*);
+static value ev_propnotify(XEvent*);
+static value ev_clientmsg(XEvent*);
+static value ev_configure(XEvent*);
 
 static struct {
     bool running;
@@ -32,6 +74,21 @@ static struct {
     XIM xim;
     GC gc;
 } X = {0};
+
+static value (*EventHandlers[LASTEvent]) (XEvent*) = {
+	[FocusIn]          = ev_focus,
+	[FocusOut]         = ev_focus,
+	[KeyPress]         = ev_keypress,
+	[ButtonPress]      = ev_mouse,
+	[ButtonRelease]    = ev_mouse,
+	[MotionNotify]     = ev_mouse,
+	[SelectionClear]   = ev_selclear,
+	[SelectionNotify]  = ev_selnotify,
+	[SelectionRequest] = ev_selrequest,
+	[PropertyNotify]   = ev_propnotify,
+	[ClientMessage]    = ev_clientmsg,
+	[ConfigureNotify]  = ev_configure
+};
 
 CAMLprim value x11_connect(void) {
     CAMLparam0();
@@ -106,14 +163,17 @@ CAMLprim value x11_event_loop(value ms, value cbfn) {
             /* now take the events, convert them, and call the callback */
             for (XEvent e; XPending(X.display);) {
                 XNextEvent(X.display, &e);
-                if (!XFilterEvent(&e, None)) {
-                    // Convert the event.
-                    caml_callback(cbfn, Val_unit);
-                }
+                if (XFilterEvent(&e, None)) continue;
+                if (!EventHandlers[e.type]) continue;
+                value event = EventHandlers[e.type](&e);
+                if (event != Val_unit)
+                    caml_callback(cbfn, event);
+                else
+                	puts("ignored");
             }
 
             if (X.running) {
-                caml_callback(cbfn, Val_unit /* redraw event */);
+                caml_callback(cbfn, mkrecord("Update", 0));
                 XCopyArea(X.display, X.pixmap, X.self, X.gc, 0, 0, X.width, X.height, 0, 0);
             }
         }
@@ -186,7 +246,7 @@ static void create_window(int height, int width) {
     swa.backing_store = WhenMapped;
     swa.bit_gravity = NorthWestGravity;
     XChangeWindowAttributes(X.display, X.self, CWBackingStore|CWBitGravity, &swa);
-    //XStoreName(X.display, X.self, "tide");
+    XStoreName(X.display, X.self, "tide");
     XSelectInput(X.display, X.self,
           StructureNotifyMask
         | ButtonPressMask
@@ -211,4 +271,157 @@ static void create_window(int height, int width) {
     gcv.foreground = WhitePixel(X.display, X.screen);
     gcv.graphics_exposures = False;
     X.gc = XCreateGC(X.display, X.self, GCForeground|GCGraphicsExposures, &gcv);
+}
+
+static value mkrecord(char* tag, int nargs, ...) {
+	value rec = caml_alloc_tuple(2);
+	Store_field(rec, 0, hash_variant(tag));
+	Store_field(rec, 1, Val_unit);
+	if (nargs > 0) {
+		value tuple = caml_alloc_tuple(nargs);
+	    va_list args;
+	    va_start(args, nargs);
+	    for (int i = 0; i < nargs; i++)
+	    	Store_field(tuple, i, va_arg(args, value));
+	    va_end(args);
+    	Store_field(rec, 1, tuple);
+    }
+    return rec;
+}
+
+static value ev_focus(XEvent* e) {
+    bool focused = (e->type = FocusIn);
+    if (X.xic)
+        (focused ? XSetICFocus : XUnsetICFocus)(X.xic);
+    return mkrecord("Focus", 1, Val_true);
+}
+
+static value ev_keypress(XEvent* e) {
+    int32_t rune = RUNE_ERR;
+    size_t len = 0;
+    char buf[8];
+    KeySym key;
+    Status status;
+    /* Read the key string */
+    if (X.xic)
+        len = Xutf8LookupString(X.xic, &(e->xkey), buf, sizeof(buf), &key, &status);
+    else
+        len = XLookupString(&(e->xkey), buf, sizeof(buf), &key, 0);
+    /* if it's ascii, just return it */
+    if (key >= 0x20 && key <= 0x7F)
+        return mkrecord("KeyPress", 2, e->xkey.state, Val_int(key));
+    /* decode it */
+    if (len > 0) {
+        len = 0;
+        for (int i = 0; i < 8 && !utf8decode(&rune, &len, buf[i]); i++);
+    }
+    return mkrecord("KeyPress", 2, e->xkey.state, Val_int(special_keys(key)));
+}
+
+static value ev_mouse(XEvent* e) {
+    int mods = e->xbutton.state, btn = e->xbutton.button,
+        x = e->xbutton.x, y = e->xbutton.y;
+    if (e->type == MotionNotify)
+        return mkrecord("MouseDrag", 3, Val_int(mods), Val_int(x), Val_int(y));
+    else if (e->type == ButtonPress)
+        return mkrecord("MouseClick", 4, Val_int(mods), Val_int(btn), Val_int(x), Val_int(y));
+    else
+        return mkrecord("MouseRelease", 4, Val_int(mods), Val_int(btn), Val_int(x), Val_int(y));
+}
+
+static value ev_selclear(XEvent* e) {
+    return Val_unit;
+}
+
+static value ev_selnotify(XEvent* e) {
+	value event = Val_unit;
+	if (e->xselection.property == None) {
+        char* propdata = readprop(X.self, e->xselection.selection);
+        event = mkrecord("Paste", 1, caml_copy_string(propdata));
+        XFree(propdata);
+	}
+    return event;
+}
+
+static value ev_selrequest(XEvent* e) {
+    return Val_unit;
+}
+
+static value ev_propnotify(XEvent* e) {
+    return Val_unit;
+}
+
+static value ev_clientmsg(XEvent* e) {
+	value event = Val_unit;
+    Atom wmDeleteMessage = XInternAtom(X.display, "WM_DELETE_WINDOW", False);
+    if (e->xclient.data.l[0] == wmDeleteMessage)
+        event = mkrecord("Shutdown", 0);
+    return event;
+}
+
+static value ev_configure(XEvent* e) {
+	value event = Val_unit;
+    if (e->xconfigure.width != X.width || e->xconfigure.height != X.height) {
+        X.width  = e->xconfigure.width;
+        X.height = e->xconfigure.height;
+        X.pixmap = XCreatePixmap(X.display, X.self, X.width, X.height, X.depth);
+        X.xft    = XftDrawCreate(X.display, X.pixmap, X.visual, X.colormap);
+        event    = mkrecord("Resize", 2, X.height, X.width);
+    }
+    return event;
+}
+
+static int32_t special_keys(int32_t key) {
+    switch (key) {
+        case XK_F1:        return KEY_F1;
+        case XK_F2:        return KEY_F2;
+        case XK_F3:        return KEY_F3;
+        case XK_F4:        return KEY_F4;
+        case XK_F5:        return KEY_F5;
+        case XK_F6:        return KEY_F6;
+        case XK_F7:        return KEY_F7;
+        case XK_F8:        return KEY_F8;
+        case XK_F9:        return KEY_F9;
+        case XK_F10:       return KEY_F10;
+        case XK_F11:       return KEY_F11;
+        case XK_F12:       return KEY_F12;
+        case XK_Insert:    return KEY_INSERT;
+        case XK_Delete:    return KEY_DELETE;
+        case XK_Home:      return KEY_HOME;
+        case XK_End:       return KEY_END;
+        case XK_Page_Up:   return KEY_PGUP;
+        case XK_Page_Down: return KEY_PGDN;
+        case XK_Up:        return KEY_UP;
+        case XK_Down:      return KEY_DOWN;
+        case XK_Left:      return KEY_LEFT;
+        case XK_Right:     return KEY_RIGHT;
+        case XK_Escape:    return KEY_ESCAPE;
+        case XK_BackSpace: return '\b';
+        case XK_Tab:       return '\t';
+        case XK_Return:    return '\r';
+        case XK_Linefeed:  return '\n';
+
+        /* modifiers should not trigger key presses */
+        case XK_Scroll_Lock:
+        case XK_Shift_L:
+        case XK_Shift_R:
+        case XK_Control_L:
+        case XK_Control_R:
+        case XK_Caps_Lock:
+        case XK_Shift_Lock:
+        case XK_Meta_L:
+        case XK_Meta_R:
+        case XK_Alt_L:
+        case XK_Alt_R:
+        case XK_Super_L:
+        case XK_Super_R:
+        case XK_Hyper_L:
+        case XK_Hyper_R:
+        case XK_Menu:
+            return RUNE_ERR;
+
+        /* if it ain't special, don't touch it */
+        default:
+            return key;
+    }
 }

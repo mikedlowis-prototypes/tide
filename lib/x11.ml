@@ -3,25 +3,17 @@ type xwin
 type xevent =
   | Focus of { focused: bool }
   | KeyPress of { mods: int; rune: int }
-  | MouseBtn of {
-      mods: int;
-      btn: int;
-      x: int;
-      y: int;
-      pressed: bool;
-      dragged: bool
-    }
+  | MouseClick of { mods: int; btn: int; x: int; y: int }
+  | MouseRelease of { mods: int; btn: int; x: int; y: int }
+  | MouseDrag of { mods: int; x: int; y: int }
   | Paste of { text: string }
-  | Command of { commands: string array }
   | Resize of { height: int; width: int }
+  | Command of { commands: string array }
+  | PipeClosed of { fd: int }
+  | PipeWriteReady of { fd: int }
+  | PipeReadReady of { fd: int }
+  | Update
   | Shutdown
-  | QueueEmpty
-  | Filtered
-(*
-  | PipeClosed
-  | PipeWriteReady
-  | PipeReadReady
-*)
 
 external connect : unit -> unit
                  = "x11_connect"
@@ -43,12 +35,6 @@ external show_window : bool -> unit
 
 external event_loop : int -> (xevent -> unit) -> unit
                    = "x11_event_loop"
-
-external num_events : unit -> int
-                   = "x11_num_events"
-
-external next_event : unit -> xevent
-                   = "x11_next_event"
 
 external errno : unit -> int
                = "x11_errno"
