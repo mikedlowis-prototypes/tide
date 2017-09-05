@@ -9,6 +9,23 @@
 #include <X11/Xatom.h>
 #include <X11/Xft/Xft.h>
 
+/* The order of this enum should match the type specified in x11.ml */
+enum {
+    TFocus = 0,
+    TKeyPress,
+    TMouseClick,
+    TMouseRelease,
+    TMouseDrag,
+    TPaste,
+    TResize,
+    TCommand,
+    TPipeClosed,
+    TPipeWriteReady,
+    TPipeReadReady,
+    TUpdate,
+    TShutdown
+};
+
 enum Keys {
     KEY_F1     = (0xE000+0),
     KEY_F2     = (0xE000+1),
@@ -42,7 +59,7 @@ extern bool utf8decode(int32_t* rune, size_t* length, int byte);
 static int error_handler(Display* disp, XErrorEvent* ev);
 static char* readprop(Window win, Atom prop);
 static void create_window(int height, int width);
-static value mkrecord(char* tag, int n, ...);
+static value mkrecord(int tag, int n, ...);
 static int32_t special_keys(int32_t key);
 
 static value ev_focus(XEvent*);
@@ -76,18 +93,18 @@ static struct {
 } X = {0};
 
 static value (*EventHandlers[LASTEvent]) (XEvent*) = {
-	[FocusIn]          = ev_focus,
-	[FocusOut]         = ev_focus,
-	[KeyPress]         = ev_keypress,
-	[ButtonPress]      = ev_mouse,
-	[ButtonRelease]    = ev_mouse,
-	[MotionNotify]     = ev_mouse,
-	[SelectionClear]   = ev_selclear,
-	[SelectionNotify]  = ev_selnotify,
-	[SelectionRequest] = ev_selrequest,
-	[PropertyNotify]   = ev_propnotify,
-	[ClientMessage]    = ev_clientmsg,
-	[ConfigureNotify]  = ev_configure
+    [FocusIn]          = ev_focus,
+    [FocusOut]         = ev_focus,
+    [KeyPress]         = ev_keypress,
+    [ButtonPress]      = ev_mouse,
+    [ButtonRelease]    = ev_mouse,
+    [MotionNotify]     = ev_mouse,
+    [SelectionClear]   = ev_selclear,
+    [SelectionNotify]  = ev_selnotify,
+    [SelectionRequest] = ev_selrequest,
+    [PropertyNotify]   = ev_propnotify,
+    [ClientMessage]    = ev_clientmsg,
+    [ConfigureNotify]  = ev_configure
 };
 
 CAMLprim value x11_connect(void) {
@@ -118,11 +135,6 @@ CAMLprim value x11_disconnect(void) {
         XCloseDisplay(X.display);
     }
     CAMLreturn(Val_unit);
-}
-
-CAMLprim value x11_connfd(void) {
-    CAMLparam0();
-    CAMLreturn(Val_int( ConnectionNumber(X.display) ));
 }
 
 CAMLprim value x11_make_window(value height, value width) {
@@ -169,22 +181,17 @@ CAMLprim value x11_event_loop(value ms, value cbfn) {
                 if (event != Val_unit)
                     caml_callback(cbfn, event);
                 else
-                	puts("ignored");
+                    puts("ignored");
             }
 
             if (X.running) {
-                caml_callback(cbfn, mkrecord("Update", 0));
+                caml_callback(cbfn, mkrecord(TUpdate, 0));
                 XCopyArea(X.display, X.pixmap, X.self, X.gc, 0, 0, X.width, X.height, 0, 0);
             }
         }
         XFlush(X.display);
     }
     CAMLreturn(Val_unit);
-}
-
-CAMLprim value x11_errno(void) {
-    CAMLparam0();
-    CAMLreturn(Val_int(X.errnum));
 }
 
 CAMLprim value x11_intern(value name) {
@@ -273,18 +280,17 @@ static void create_window(int height, int width) {
     X.gc = XCreateGC(X.display, X.self, GCForeground|GCGraphicsExposures, &gcv);
 }
 
-static value mkrecord(char* tag, int nargs, ...) {
-	value rec = caml_alloc_tuple(2);
-	Store_field(rec, 0, hash_variant(tag));
-	Store_field(rec, 1, Val_unit);
-	if (nargs > 0) {
-		value tuple = caml_alloc_tuple(nargs);
-	    va_list args;
-	    va_start(args, nargs);
-	    for (int i = 0; i < nargs; i++)
-	    	Store_field(tuple, i, va_arg(args, value));
-	    va_end(args);
-    	Store_field(rec, 1, tuple);
+static value mkrecord(int tag, int nargs, ...) {
+    value rec;
+    if (nargs == 0) {
+        rec = Val_long(tag);
+    } else {
+        rec = caml_alloc(nargs, tag);
+        va_list args;
+        va_start(args, nargs);
+        for (int i = 0; i < nargs; i++)
+            Store_field(rec, i, va_arg(args, value));
+        va_end(args);
     }
     return rec;
 }
@@ -293,7 +299,7 @@ static value ev_focus(XEvent* e) {
     bool focused = (e->type = FocusIn);
     if (X.xic)
         (focused ? XSetICFocus : XUnsetICFocus)(X.xic);
-    return mkrecord("Focus", 1, Val_true);
+    return mkrecord(TFocus, 1, Val_true);
 }
 
 static value ev_keypress(XEvent* e) {
@@ -309,24 +315,24 @@ static value ev_keypress(XEvent* e) {
         len = XLookupString(&(e->xkey), buf, sizeof(buf), &key, 0);
     /* if it's ascii, just return it */
     if (key >= 0x20 && key <= 0x7F)
-        return mkrecord("KeyPress", 2, e->xkey.state, Val_int(key));
+        return mkrecord(TKeyPress, 2, e->xkey.state, Val_int(key));
     /* decode it */
     if (len > 0) {
         len = 0;
         for (int i = 0; i < 8 && !utf8decode(&rune, &len, buf[i]); i++);
     }
-    return mkrecord("KeyPress", 2, e->xkey.state, Val_int(special_keys(key)));
+    return mkrecord(TKeyPress, 2, e->xkey.state, Val_int(special_keys(key)));
 }
 
 static value ev_mouse(XEvent* e) {
     int mods = e->xbutton.state, btn = e->xbutton.button,
         x = e->xbutton.x, y = e->xbutton.y;
     if (e->type == MotionNotify)
-        return mkrecord("MouseDrag", 3, Val_int(mods), Val_int(x), Val_int(y));
+        return mkrecord(TMouseDrag, 3, Val_int(mods), Val_int(x), Val_int(y));
     else if (e->type == ButtonPress)
-        return mkrecord("MouseClick", 4, Val_int(mods), Val_int(btn), Val_int(x), Val_int(y));
+        return mkrecord(TMouseClick, 4, Val_int(mods), Val_int(btn), Val_int(x), Val_int(y));
     else
-        return mkrecord("MouseRelease", 4, Val_int(mods), Val_int(btn), Val_int(x), Val_int(y));
+        return mkrecord(TMouseRelease, 4, Val_int(mods), Val_int(btn), Val_int(x), Val_int(y));
 }
 
 static value ev_selclear(XEvent* e) {
@@ -334,12 +340,12 @@ static value ev_selclear(XEvent* e) {
 }
 
 static value ev_selnotify(XEvent* e) {
-	value event = Val_unit;
-	if (e->xselection.property == None) {
+    value event = Val_unit;
+    if (e->xselection.property == None) {
         char* propdata = readprop(X.self, e->xselection.selection);
-        event = mkrecord("Paste", 1, caml_copy_string(propdata));
+        event = mkrecord(TPaste, 1, caml_copy_string(propdata));
         XFree(propdata);
-	}
+    }
     return event;
 }
 
@@ -352,21 +358,21 @@ static value ev_propnotify(XEvent* e) {
 }
 
 static value ev_clientmsg(XEvent* e) {
-	value event = Val_unit;
+    value event = Val_unit;
     Atom wmDeleteMessage = XInternAtom(X.display, "WM_DELETE_WINDOW", False);
     if (e->xclient.data.l[0] == wmDeleteMessage)
-        event = mkrecord("Shutdown", 0);
+        event = mkrecord(TShutdown, 0);
     return event;
 }
 
 static value ev_configure(XEvent* e) {
-	value event = Val_unit;
+    value event = Val_unit;
     if (e->xconfigure.width != X.width || e->xconfigure.height != X.height) {
         X.width  = e->xconfigure.width;
         X.height = e->xconfigure.height;
         X.pixmap = XCreatePixmap(X.display, X.self, X.width, X.height, X.depth);
         X.xft    = XftDrawCreate(X.display, X.pixmap, X.visual, X.colormap);
-        event    = mkrecord("Resize", 2, X.height, X.width);
+        event    = mkrecord(TResize, 2, X.height, X.width);
     }
     return event;
 }

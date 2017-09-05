@@ -21,9 +21,6 @@ external connect : unit -> unit
 external disconnect : unit -> unit
                     = "x11_disconnect"
 
-external connfd : unit -> int
-                = "x11_connfd"
-
 external make_window : int -> int -> unit
                      = "x11_make_window"
 
@@ -35,9 +32,6 @@ external show_window : bool -> unit
 
 external event_loop : int -> (xevent -> unit) -> unit
                    = "x11_event_loop"
-
-external errno : unit -> int
-               = "x11_errno"
 
 external intern : string -> xatom
                 = "x11_intern"
