@@ -1,9 +1,8 @@
 open X11
 let () =
-  X11.make_window 640 480;
-  X11.show_window true;
-  X11.event_loop 50 (fun x ->
-  match x with
+  let win = X11.make_window 640 480 in
+  X11.show_window win true;
+  X11.event_loop 50 (function
   | Focus _          -> print_endline "focus"
   | KeyPress _       -> print_endline "keypress"
   | MouseClick _     -> print_endline "mouseclick"

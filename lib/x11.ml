@@ -7,12 +7,12 @@ type xevent =
   | MouseRelease of { mods: int; btn: int; x: int; y: int }
   | MouseDrag of { mods: int; x: int; y: int }
   | Paste of { text: string }
-  | Resize of { height: int; width: int }
+  (*| Resize of { height: int; width: int }*)
   | Command of { commands: string array }
   | PipeClosed of { fd: int }
   | PipeWriteReady of { fd: int }
   | PipeReadReady of { fd: int }
-  | Update
+  | Update of { width: int; height: int }
   | Shutdown
 
 external connect : unit -> unit
@@ -21,13 +21,13 @@ external connect : unit -> unit
 external disconnect : unit -> unit
                     = "x11_disconnect"
 
-external make_window : int -> int -> unit
+external make_window : int -> int -> xwin
                      = "x11_make_window"
 
-external make_dialog : int -> int -> unit
+external make_dialog : int -> int -> xwin
                      = "x11_make_dialog"
 
-external show_window : bool -> unit
+external show_window : xwin -> bool -> unit
                   = "x11_show_window"
 
 external event_loop : int -> (xevent -> unit) -> unit
@@ -43,6 +43,10 @@ external prop_get : xwin -> xatom -> string
                   = "x11_prop_get"
 
 (* to be implemented
+
+void x11_draw_rect(int color, int x, int y, int width, int height)
+external draw_rect : int -> int -> int -> int -> int -> unit
+
 external sel_set : xatom -> string -> unit
                  = "x11_sel_set"
 external sel_fetch : xatom -> unit

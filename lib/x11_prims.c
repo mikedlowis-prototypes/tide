@@ -17,7 +17,6 @@ enum {
     TMouseRelease,
     TMouseDrag,
     TPaste,
-    TResize,
     TCommand,
     TPipeClosed,
     TPipeWriteReady,
@@ -152,12 +151,12 @@ CAMLprim value x11_make_dialog(value height, value width) {
     CAMLreturn(Val_int(X.self));
 }
 
-CAMLprim value x11_show_window(value state) {
-    CAMLparam1(state);
+CAMLprim value x11_show_window(value win, value state) {
+    CAMLparam2(win,state);
     if (Bool_val(state))
-        XMapWindow(X.display, X.self);
+        XMapWindow(X.display, (Window)Int_val(win));
     else
-        XUnmapWindow(X.display, X.self);
+        XUnmapWindow(X.display, (Window)Int_val(win));
     CAMLreturn(Val_unit);
 }
 
@@ -185,7 +184,7 @@ CAMLprim value x11_event_loop(value ms, value cbfn) {
             }
 
             if (X.running) {
-                caml_callback(cbfn, mkrecord(TUpdate, 0));
+                caml_callback(cbfn, mkrecord(TUpdate, 2, X.width, X.height));
                 XCopyArea(X.display, X.pixmap, X.self, X.gc, 0, 0, X.width, X.height, 0, 0);
             }
         }
@@ -372,7 +371,6 @@ static value ev_configure(XEvent* e) {
         X.height = e->xconfigure.height;
         X.pixmap = XCreatePixmap(X.display, X.self, X.width, X.height, X.depth);
         X.xft    = XftDrawCreate(X.display, X.pixmap, X.visual, X.colormap);
-        event    = mkrecord(TResize, 2, X.height, X.width);
     }
     return event;
 }
