@@ -1,13 +1,12 @@
 type xatom
 type xwin
 type xevent =
-  | Focus of { focused: bool }
+  | Focus of bool
   | KeyPress of { mods: int; rune: int }
   | MouseClick of { mods: int; btn: int; x: int; y: int }
   | MouseRelease of { mods: int; btn: int; x: int; y: int }
   | MouseDrag of { mods: int; x: int; y: int }
   | Paste of { text: string }
-  (*| Resize of { height: int; width: int }*)
   | Command of { commands: string array }
   | PipeClosed of { fd: int }
   | PipeWriteReady of { fd: int }

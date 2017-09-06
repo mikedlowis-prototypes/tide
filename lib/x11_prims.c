@@ -162,6 +162,7 @@ CAMLprim value x11_show_window(value win, value state) {
 
 CAMLprim value x11_event_loop(value ms, value cbfn) {
     CAMLparam2(ms, cbfn);
+    CAMLlocal1( event );
     while (X.running) {
         XEvent e; XPeekEvent(X.display, &e);
         bool pending = false; //pollfds(Int_val(ms), cbfn);
@@ -176,11 +177,9 @@ CAMLprim value x11_event_loop(value ms, value cbfn) {
                 XNextEvent(X.display, &e);
                 if (XFilterEvent(&e, None)) continue;
                 if (!EventHandlers[e.type]) continue;
-                value event = EventHandlers[e.type](&e);
+                event = EventHandlers[e.type](&e);
                 if (event != Val_unit)
                     caml_callback(cbfn, event);
-                else
-                    puts("ignored");
             }
 
             if (X.running) {

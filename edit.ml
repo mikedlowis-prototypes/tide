@@ -1,22 +1,30 @@
 open X11
+
+let onfocus focused = ()
+let onkeypress mods rune = ()
+let onmousebtn mods btn x y pressed = ()
+let onmousedrag mods x y = ()
+let onupdate width height = ()
+let onshutdown = ()
+
 let () =
-  let win = X11.make_window 640 480 in
-  X11.show_window win true;
-  X11.event_loop 50 (function
-  | Focus _          -> print_endline "focus"
-  | KeyPress _       -> print_endline "keypress"
-  | MouseClick _     -> print_endline "mouseclick"
-  | MouseRelease _   -> print_endline "mouserelease"
-  | MouseDrag _      -> print_endline "mousedrag"
-  | Paste _          -> print_endline "paste"
-  | Resize _         -> print_endline "resize"
-  | Command _        -> print_endline "command"
-  | PipeClosed _     -> print_endline "pipeclosed"
-  | PipeWriteReady _ -> print_endline "pipewriteready"
-  | PipeReadReady _  -> print_endline "pipereadready"
-  | Update           -> print_endline "update"
-  | Shutdown         -> print_endline "shutdown"
+  let win = make_window 640 480 in
+  show_window win true;
+  event_loop 50 (function
+  | Focus state      -> onfocus state
+  | KeyPress e       -> onkeypress e.mods e.rune
+  | MouseClick e     -> onmousebtn e.mods e.btn e.x e.y true
+  | MouseRelease e   -> onmousebtn e.mods e.btn e.x e.y false
+  | MouseDrag e      -> onmousedrag e.mods e.x e.y
+  | Paste e          -> print_endline "paste"
+  | Command e        -> print_endline "command"
+  | PipeClosed e     -> print_endline "pipeclosed"
+  | PipeWriteReady e -> print_endline "pipewriteready"
+  | PipeReadReady e  -> print_endline "pipereadready"
+  | Update e         -> onupdate e.width e.height
+  | Shutdown         -> onshutdown
   )
+
 (*
   let server = Tide.start_server () in
   let nargs = Array.length Sys.argv in
