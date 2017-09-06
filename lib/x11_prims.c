@@ -15,7 +15,7 @@ enum {
     TKeyPress,
     TMouseClick,
     TMouseRelease,
-    TMouseDrag,
+    TMouseMove,
     TPaste,
     TCommand,
     TPipeClosed,
@@ -172,18 +172,28 @@ CAMLprim value x11_event_loop(value ms, value cbfn) {
             XTimeCoord* coords = XGetMotionEvents(X.display, X.self, CurrentTime, CurrentTime, &nevents);
             if (coords) XFree(coords);
 
+            /* Update the mouse posistion and simulate a mosuemove event for it */
+            // XQueryPointer
+            //caml_callback(cbfn, mkrecord(TMouseMove, 3, mods, x, y));
+
             /* now take the events, convert them, and call the callback */
             for (XEvent e; XPending(X.display);) {
                 XNextEvent(X.display, &e);
                 if (XFilterEvent(&e, None)) continue;
                 if (!EventHandlers[e.type]) continue;
                 event = EventHandlers[e.type](&e);
-                if (event != Val_unit)
+                if (event != Val_unit) {
+                puts("B event");
+                printf("event: %#x\n", event);
                     caml_callback(cbfn, event);
+                puts("A event");
+                }
             }
 
             if (X.running) {
+                puts("B event");
                 caml_callback(cbfn, mkrecord(TUpdate, 2, X.width, X.height));
+                puts("A event");
                 XCopyArea(X.display, X.pixmap, X.self, X.gc, 0, 0, X.width, X.height, 0, 0);
             }
         }
@@ -356,11 +366,10 @@ static value ev_propnotify(XEvent* e) {
 }
 
 static value ev_clientmsg(XEvent* e) {
-    value event = Val_unit;
     Atom wmDeleteMessage = XInternAtom(X.display, "WM_DELETE_WINDOW", False);
     if (e->xclient.data.l[0] == wmDeleteMessage)
-        event = mkrecord(TShutdown, 0);
-    return event;
+        return mkrecord(TShutdown, 1, 0);
+    return Val_unit;
 }
 
 static value ev_configure(XEvent* e) {

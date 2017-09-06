@@ -5,7 +5,7 @@ type xevent =
   | KeyPress of { mods: int; rune: int }
   | MouseClick of { mods: int; btn: int; x: int; y: int }
   | MouseRelease of { mods: int; btn: int; x: int; y: int }
-  | MouseDrag of { mods: int; x: int; y: int }
+  | MouseMove of { mods: int; x: int; y: int }
   | Paste of { text: string }
   | Command of { commands: string array }
   | PipeClosed of { fd: int }
