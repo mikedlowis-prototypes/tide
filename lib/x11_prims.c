@@ -14,7 +14,6 @@
    Each group's tags increment, starting at 0, in the order the appear in the
    type definition */
 enum {
-    TShutdown = 0,
     TFocus = 0,
     TKeyPress,
     TMouseClick,
@@ -25,7 +24,9 @@ enum {
     TPipeClosed,
     TPipeWriteReady,
     TPipeReadReady,
-    TUpdate
+    TUpdate,
+    TShutdown = 0,
+    TNone = -1
 };
 
 enum Keys {
@@ -170,14 +171,17 @@ CAMLprim value x11_event_loop(value ms, value cbfn) {
         XEvent e; XPeekEvent(X.display, &e);
         bool pending = false; //pollfds(Int_val(ms), cbfn);
         int nevents  = XEventsQueued(X.display, QueuedAfterFlush);
+
+        /* Update the mouse posistion and simulate a mosuemove event for it */
+        //Window xw; int _, x, y; unsigned int mods;
+        //XQueryPointer(X.display, X.self, &xw, &xw, &_, &_, &x, &y, &mods);
+        //caml_callback(cbfn, mkrecord(TMouseMove, 3, mods, x, y));
+
         if (pending || nevents) {
             /* pare down irrelevant mouse drag events to just the latest */
-            XTimeCoord* coords = XGetMotionEvents(X.display, X.self, CurrentTime, CurrentTime, &nevents);
+            XTimeCoord* coords = XGetMotionEvents(
+                X.display, X.self, CurrentTime, CurrentTime, &nevents);
             if (coords) XFree(coords);
-
-            /* Update the mouse posistion and simulate a mosuemove event for it */
-            // XQueryPointer
-            //caml_callback(cbfn, mkrecord(TMouseMove, 3, mods, x, y));
 
             /* now take the events, convert them, and call the callback */
             for (XEvent e; XPending(X.display);) {
@@ -185,7 +189,7 @@ CAMLprim value x11_event_loop(value ms, value cbfn) {
                 if (XFilterEvent(&e, None)) continue;
                 if (!EventHandlers[e.type]) continue;
                 event = EventHandlers[e.type](&e);
-                if (event != Val_unit)
+                if (event != Val_int(TNone))
                     caml_callback(cbfn, event);
             }
 
@@ -341,11 +345,11 @@ static value ev_mouse(XEvent* e) {
 }
 
 static value ev_selclear(XEvent* e) {
-    return Val_unit;
+    return Val_int(TNone);
 }
 
 static value ev_selnotify(XEvent* e) {
-    value event = Val_unit;
+    value event = Val_int(TNone);
     if (e->xselection.property == None) {
         char* propdata = readprop(X.self, e->xselection.selection);
         event = mkrecord(TPaste, 1, caml_copy_string(propdata));
@@ -355,22 +359,22 @@ static value ev_selnotify(XEvent* e) {
 }
 
 static value ev_selrequest(XEvent* e) {
-    return Val_unit;
+    return Val_int(TNone);
 }
 
 static value ev_propnotify(XEvent* e) {
-    return Val_unit;
+    return Val_int(TNone);
 }
 
 static value ev_clientmsg(XEvent* e) {
     Atom wmDeleteMessage = XInternAtom(X.display, "WM_DELETE_WINDOW", False);
     if (e->xclient.data.l[0] == wmDeleteMessage)
         return mkrecord(TShutdown, 0);
-    return Val_unit;
+    return Val_int(TNone);
 }
 
 static value ev_configure(XEvent* e) {
-    value event = Val_unit;
+    value event = Val_int(TNone);
     if (e->xconfigure.width != X.width || e->xconfigure.height != X.height) {
         X.width  = e->xconfigure.width;
         X.height = e->xconfigure.height;

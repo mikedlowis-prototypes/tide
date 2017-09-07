@@ -15,7 +15,7 @@ let onmousemove mods x y =
 let onupdate width height =
   print_endline "onupdate"
 
-let onshutdown =
+let onshutdown () =
   print_endline "onshutdown"
 
 let onevent = function
@@ -30,28 +30,13 @@ let onevent = function
   | PipeWriteReady e -> print_endline "pipewriteready"
   | PipeReadReady e  -> print_endline "pipereadready"
   | Update e         -> onupdate e.width e.height
-  | Shutdown         -> print_endline "shutdown"
+  | Shutdown         -> onshutdown ()
 
 let () =
   let win = make_window 640 480 in
   show_window win true;
   event_loop 50 onevent
-(*
-  event_loop 50 (function
-  | Focus state      -> onfocus state
-  | KeyPress e       -> onkeypress e.mods e.rune
-  | MouseClick e     -> onmousebtn e.mods e.btn e.x e.y true
-  | MouseRelease e   -> onmousebtn e.mods e.btn e.x e.y false
-  | MouseDrag e      -> onmousedrag e.mods e.x e.y
-  | Paste e          -> print_endline "paste"
-  | Command e        -> print_endline "command"
-  | PipeClosed e     -> print_endline "pipeclosed"
-  | PipeWriteReady e -> print_endline "pipewriteready"
-  | PipeReadReady e  -> print_endline "pipereadready"
-  | Update e         -> onupdate e.width e.height
-  | Shutdown         -> onshutdown
-  )
-*)
+
 (*
   let server = Tide.start_server () in
   let nargs = Array.length Sys.argv in
