@@ -5,7 +5,7 @@ LIBS = -L/usr/X11R6/lib -lX11 -lXft
 
 ifeq ($(NATIVE), 1)
     OC         = ocamlopt
-    OCFLAGS    =
+    OCFLAGS    = -g
     MKLIB      = ocamlmklib
     MKLIBFLAGS = -custom
     OBJEXT     = cmx

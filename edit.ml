@@ -23,7 +23,7 @@ let onevent = function
   | KeyPress e       -> onkeypress e.mods e.rune
   | MouseClick e     -> onmousebtn e.mods e.btn e.x e.y true
   | MouseRelease e   -> onmousebtn e.mods e.btn e.x e.y false
-  | MouseMove e      -> onmousedrag e.mods e.x e.y
+  | MouseMove e      -> onmousemove e.mods e.x e.y
   | Paste e          -> print_endline "paste"
   | Command e        -> print_endline "command"
   | PipeClosed e     -> print_endline "pipeclosed"

@@ -9,8 +9,12 @@
 #include <X11/Xatom.h>
 #include <X11/Xft/Xft.h>
 
-/* The order of this enum should match the type specified in x11.ml */
+/* The order of this enum should match the type specified in x11.ml. The
+   variants are divided into two groups, those with args and those without.
+   Each group's tags increment, starting at 0, in the order the appear in the
+   type definition */
 enum {
+    TShutdown = 0,
     TFocus = 0,
     TKeyPress,
     TMouseClick,
@@ -21,8 +25,7 @@ enum {
     TPipeClosed,
     TPipeWriteReady,
     TPipeReadReady,
-    TUpdate,
-    TShutdown
+    TUpdate
 };
 
 enum Keys {
@@ -182,18 +185,12 @@ CAMLprim value x11_event_loop(value ms, value cbfn) {
                 if (XFilterEvent(&e, None)) continue;
                 if (!EventHandlers[e.type]) continue;
                 event = EventHandlers[e.type](&e);
-                if (event != Val_unit) {
-                puts("B event");
-                printf("event: %#x\n", event);
+                if (event != Val_unit)
                     caml_callback(cbfn, event);
-                puts("A event");
-                }
             }
 
             if (X.running) {
-                puts("B event");
                 caml_callback(cbfn, mkrecord(TUpdate, 2, X.width, X.height));
-                puts("A event");
                 XCopyArea(X.display, X.pixmap, X.self, X.gc, 0, 0, X.width, X.height, 0, 0);
             }
         }
@@ -336,7 +333,7 @@ static value ev_mouse(XEvent* e) {
     int mods = e->xbutton.state, btn = e->xbutton.button,
         x = e->xbutton.x, y = e->xbutton.y;
     if (e->type == MotionNotify)
-        return mkrecord(TMouseDrag, 3, Val_int(mods), Val_int(x), Val_int(y));
+        return mkrecord(TMouseMove, 3, Val_int(mods), Val_int(x), Val_int(y));
     else if (e->type == ButtonPress)
         return mkrecord(TMouseClick, 4, Val_int(mods), Val_int(btn), Val_int(x), Val_int(y));
     else
@@ -368,7 +365,7 @@ static value ev_propnotify(XEvent* e) {
 static value ev_clientmsg(XEvent* e) {
     Atom wmDeleteMessage = XInternAtom(X.display, "WM_DELETE_WINDOW", False);
     if (e->xclient.data.l[0] == wmDeleteMessage)
-        return mkrecord(TShutdown, 1, 0);
+        return mkrecord(TShutdown, 0);
     return Val_unit;
 }
 
