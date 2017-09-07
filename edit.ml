@@ -13,7 +13,9 @@ let onmousemove mods x y =
   print_endline "onmousemove"
 
 let onupdate width height =
-  print_endline "onupdate"
+  print_endline "onupdate";
+  draw_rect { x = 0; y = 0; w = width; h = height; c = 0x55555555 };
+  flip ()
 
 let onshutdown () =
   print_endline "onshutdown"

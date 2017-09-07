@@ -1,5 +1,8 @@
-type xatom
-type xwin
+type xatom (* X interned atom *)
+
+type xwin (* X window identifier *)
+
+(* X event definitions *)
 type xevent =
   | Focus of bool
   | KeyPress of { mods: int; rune: int }
@@ -13,6 +16,9 @@ type xevent =
   | PipeReadReady of { fd: int }
   | Update of { width: int; height: int }
   | Shutdown
+
+(* rectangle description type *)
+type xrect = { x: int; y: int; w: int; h: int; c: int; }
 
 external connect : unit -> unit
                  = "x11_connect"
@@ -28,6 +34,12 @@ external make_dialog : int -> int -> xwin
 
 external show_window : xwin -> bool -> unit
                   = "x11_show_window"
+
+external flip : unit -> unit
+                  = "x11_flip"
+
+external draw_rect : xrect -> unit
+                   = "x11_draw_rect"
 
 external event_loop : int -> (xevent -> unit) -> unit
                    = "x11_event_loop"

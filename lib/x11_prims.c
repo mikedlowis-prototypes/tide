@@ -64,6 +64,7 @@ static char* readprop(Window win, Atom prop);
 static void create_window(int height, int width);
 static value mkrecord(int tag, int n, ...);
 static int32_t special_keys(int32_t key);
+static void xftcolor(XftColor* xc, int c);
 
 static value ev_focus(XEvent*);
 static value ev_keypress(XEvent*);
@@ -164,20 +165,40 @@ CAMLprim value x11_show_window(value win, value state) {
     CAMLreturn(Val_unit);
 }
 
+CAMLprim value x11_flip(void) {
+    CAMLparam0();
+    XCopyArea(X.display, X.pixmap, X.self, X.gc, 0, 0, X.width, X.height, 0, 0);
+    CAMLreturn(Val_unit);
+}
+
+CAMLprim value x11_draw_rect(value rect) {
+    CAMLparam1(rect);
+
+    XftColor clr;
+    xftcolor(&clr, Field(rect, 4));
+    XftDrawRect(X.xft, &clr, Field(rect, 0), Field(rect, 1),  /* x,y */
+                             Field(rect, 2), Field(rect, 3)); /* w,h */
+    XftColorFree(X.display, X.visual, X.colormap, &clr);
+
+    CAMLreturn(Val_unit);
+}
+
 CAMLprim value x11_event_loop(value ms, value cbfn) {
     CAMLparam2(ms, cbfn);
     CAMLlocal1( event );
     while (X.running) {
         XEvent e; XPeekEvent(X.display, &e);
-        bool pending = false; //pollfds(Int_val(ms), cbfn);
+        //bool pending = false; //pollfds(Int_val(ms), cbfn);
+
         int nevents  = XEventsQueued(X.display, QueuedAfterFlush);
 
         /* Update the mouse posistion and simulate a mosuemove event for it */
-        //Window xw; int _, x, y; unsigned int mods;
-        //XQueryPointer(X.display, X.self, &xw, &xw, &_, &_, &x, &y, &mods);
-        //caml_callback(cbfn, mkrecord(TMouseMove, 3, mods, x, y));
+        Window xw; int _, x, y; unsigned int mods;
+        XQueryPointer(X.display, X.self, &xw, &xw, &_, &_, &x, &y, &mods);
+        caml_callback(cbfn, mkrecord(TMouseMove, 3, mods, x, y));
 
-        if (pending || nevents) {
+        /* check if we have any pending xevents */
+        if (nevents) {
             /* pare down irrelevant mouse drag events to just the latest */
             XTimeCoord* coords = XGetMotionEvents(
                 X.display, X.self, CurrentTime, CurrentTime, &nevents);
@@ -192,12 +213,11 @@ CAMLprim value x11_event_loop(value ms, value cbfn) {
                 if (event != Val_int(TNone))
                     caml_callback(cbfn, event);
             }
-
-            if (X.running) {
-                caml_callback(cbfn, mkrecord(TUpdate, 2, X.width, X.height));
-                XCopyArea(X.display, X.pixmap, X.self, X.gc, 0, 0, X.width, X.height, 0, 0);
-            }
         }
+
+        /* generate an update event and flush any outgoing events */
+        if (X.running)
+            caml_callback(cbfn, mkrecord(TUpdate, 2, X.width, X.height));
         XFlush(X.display);
     }
     CAMLreturn(Val_unit);
@@ -437,4 +457,13 @@ static int32_t special_keys(int32_t key) {
         default:
             return key;
     }
+}
+
+static void xftcolor(XftColor* xc, int c) {
+    #define COLOR(c) ((c) | ((c) >> 8))
+    xc->color.alpha = COLOR((c & 0xFF000000) >> 16);
+    xc->color.red   = COLOR((c & 0x00FF0000) >> 8);
+    xc->color.green = COLOR((c & 0x0000FF00));
+    xc->color.blue  = COLOR((c & 0x000000FF) << 8);
+    XftColorAllocValue(X.display, X.visual, X.colormap, &(xc->color), xc);
 }
