@@ -177,11 +177,15 @@ CAMLprim value x11_flip(void) {
 
 CAMLprim value x11_draw_rect(value rect) {
     CAMLparam1(rect);
-
+    #define intfield(r,i) Int_val(Field(r,i))
     XftColor clr;
-    xftcolor(&clr, Field(rect, 4));
-    XftDrawRect(X.xft, &clr, Field(rect, 0), Field(rect, 1),  /* x,y */
-                             Field(rect, 2), Field(rect, 3)); /* w,h */
+    printf("x: %d y: %d w: %d h: %d: c: %#x\n",
+         intfield(rect, 0),  intfield(rect, 1),  intfield(rect, 2),
+         intfield(rect, 3),  intfield(rect, 4)
+    );
+    xftcolor(&clr, intfield(rect, 4));
+    XftDrawRect(X.xft, &clr, intfield(rect, 0), intfield(rect, 1),  /* x,y */
+                             intfield(rect, 2), intfield(rect, 3)); /* w,h */
     XftColorFree(X.display, X.visual, X.colormap, &clr);
 
     CAMLreturn(Val_unit);
@@ -220,8 +224,10 @@ CAMLprim value x11_event_loop(value ms, value cbfn) {
         }
 
         /* generate an update event and flush any outgoing events */
-        if (X.running)
-            caml_callback(cbfn, mkrecord(TUpdate, 2, X.width, X.height));
+        if (X.running) {
+        printf("update W: %d H: %d\n", X.width, X.height);
+            caml_callback(cbfn, mkrecord(TUpdate, 2, Val_int(X.width), Val_int(X.height)));
+        }
         XFlush(X.display);
     }
     CAMLreturn(Val_unit);
@@ -282,8 +288,7 @@ static void create_window(int height, int width) {
         (wa.height - X.height) / 2,
         X.width,
         X.height,
-        0, X.depth,
-        0xffffffff // config_get_int(Color00)
+        0, X.depth, 0
     );
 
     /* register interest in the delete window message */
@@ -409,6 +414,7 @@ static value ev_clientmsg(XEvent* e) {
 static value ev_configure(XEvent* e) {
     value event = Val_int(TNone);
     if (e->xconfigure.width != X.width || e->xconfigure.height != X.height) {
+        printf("W: %d H: %d\n", X.width, X.height);
         X.width  = e->xconfigure.width;
         X.height = e->xconfigure.height;
         X.pixmap = XCreatePixmap(X.display, X.self, X.width, X.height, X.depth);
