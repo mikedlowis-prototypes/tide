@@ -8,6 +8,7 @@
 #include <X11/Xlib.h>
 #include <X11/Xatom.h>
 #include <X11/Xft/Xft.h>
+#include <X11/Xresource.h>
 
 /* The order of this enum should match the type specified in x11.ml. The
    variants are divided into two groups, those with args and those without.
@@ -65,6 +66,8 @@ static void create_window(int height, int width);
 static value mkrecord(int tag, int n, ...);
 static int32_t special_keys(int32_t key);
 static void xftcolor(XftColor* xc, int c);
+static void init_db(void);
+static char* strmcat(char* first, ...);
 
 static value ev_focus(XEvent*);
 static value ev_keypress(XEvent*);
@@ -94,6 +97,7 @@ static struct {
     XIC xic;
     XIM xim;
     GC gc;
+    XrmDatabase db;
 } X = {0};
 
 static value (*EventHandlers[LASTEvent]) (XEvent*) = {
@@ -242,6 +246,15 @@ CAMLprim value x11_prop_get(value win, value atom) {
     CAMLparam2(win, atom);
     char* prop = readprop((Window)win, (Atom)atom);
     CAMLreturn(caml_copy_string(prop));
+}
+
+CAMLprim value x11_var_get(value name) {
+    CAMLparam1(name);
+    init_db();
+    char* type;
+    XrmValue val;
+    XrmGetResource(X.db, String_val(name), NULL, &type, &val);
+    CAMLreturn(mkrecord(0,0));
 }
 
 static char* readprop(Window win, Atom prop) {
@@ -467,3 +480,51 @@ static void xftcolor(XftColor* xc, int c) {
     xc->color.blue  = COLOR((c & 0x000000FF) << 8);
     XftColorAllocValue(X.display, X.visual, X.colormap, &(xc->color), xc);
 }
+
+static void init_db(void) {
+    static bool loaded = false;
+    if (loaded) return;
+    XrmDatabase db;
+    char *homedir  = getenv("HOME"),
+         *userfile = strmcat(homedir, "/.config/tiderc", 0),
+         *rootfile = strmcat(homedir, "/.Xdefaults", 0);
+    XrmInitialize();
+
+    /* load from xrdb or .Xdefaults */
+    if (XResourceManagerString(X.display) != NULL)
+        db = XrmGetStringDatabase(XResourceManagerString(X.display));
+    else
+        db = XrmGetFileDatabase(rootfile);
+    XrmMergeDatabases(db, &X.db);
+
+    /* load user settings from ~/.config/tiderc */
+    db = XrmGetFileDatabase(userfile);
+    (void)XrmMergeDatabases(db, &X.db);
+
+    /* cleanup */
+    free(userfile);
+    free(rootfile);
+    loaded = true;
+}
+
+static char* strmcat(char* first, ...) {
+    va_list args;
+    /* calculate the length of the final string */
+    size_t len = strlen(first);
+    va_start(args, first);
+    for (char* s = NULL; (s = va_arg(args, char*));)
+        len += strlen(s);
+    va_end(args);
+
+    /* allocate the final string and copy the args into it */
+    char *str  = malloc(len+1), *curr = str;
+    while (first && *first) *(curr++) = *(first++);
+    va_start(args, first);
+    for (char* s = NULL; (s = va_arg(args, char*));)
+        while (s && *s) *(curr++) = *(s++);
+    va_end(args);
+    /* null terminate and return */
+    *curr = '\0';
+    return str;
+}
+

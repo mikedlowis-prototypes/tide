@@ -20,6 +20,13 @@ type xevent =
 (* rectangle description type *)
 type xrect = { x: int; y: int; w: int; h: int; c: int; }
 
+(* configuration variable type *)
+type xcfgvar =
+  | Bool of bool
+  | Int of int
+  | String of string
+  | NotSet
+
 external connect : unit -> unit
                  = "x11_connect"
 
@@ -53,10 +60,10 @@ external prop_set : xwin -> xatom -> string -> unit
 external prop_get : xwin -> xatom -> string
                   = "x11_prop_get"
 
-(* to be implemented
+external var_get : string -> xcfgvar
+                 = "x11_var_get"
 
-void x11_draw_rect(int color, int x, int y, int width, int height)
-external draw_rect : int -> int -> int -> int -> int -> unit
+(* to be implemented
 
 external sel_set : xatom -> string -> unit
                  = "x11_sel_set"
