@@ -100,7 +100,7 @@ external sel_fetch : xatom -> unit
 external font_load : string -> font
                    = "x11_font_load"
 
-external font_glyph : string -> glyph
+external font_glyph : font -> int -> glyph
                     = "x11_font_glyph"
 
 (* Automatically connect and disconnect to the display server *)

@@ -11,7 +11,6 @@ static char* strmcat(char* first, ...);
 
 static void xftcolor(XftColor* xc, int c);
 static void xftdrawrect(int x, int y, int w, int h, int c);
-static void draw_text(void);
 
 static value ev_focus(XEvent*);
 static value ev_keypress(XEvent*);
@@ -455,10 +454,6 @@ static void xftdrawrect(int x, int y, int w, int h, int c) {
     xftcolor(&clr, c);
     XftDrawRect(X.xft, &clr, x, y, w, h);
     XftColorFree(X.display, X.visual, X.colormap, &clr);
-}
-
-static void draw_text(void) {
-
 }
 
 /* Miscellaneous Utilities
