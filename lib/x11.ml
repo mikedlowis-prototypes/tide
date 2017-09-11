@@ -101,10 +101,9 @@ external font_load : string -> font
                    = "x11_font_load"
 
 external font_glyph : string -> glyph
-                   = "x11_font_glyph"
+                    = "x11_font_glyph"
 
 (* Automatically connect and disconnect to the display server *)
 let () =
   connect ();
   at_exit disconnect
-

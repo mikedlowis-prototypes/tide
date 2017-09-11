@@ -143,11 +143,8 @@ CAMLprim value x11_event_loop(value ms, value cbfn) {
         }
 
         /* generate an update event and flush any outgoing events */
-        if (X.running) {
-            printf("update W: %d H: %d\n", X.width, X.height);
-            draw_text();
+        if (X.running)
             caml_callback(cbfn, mkvariant(TUpdate, 2, Val_int(X.width), Val_int(X.height)));
-        }
         XFlush(X.display);
     }
     CAMLreturn(Val_unit);
