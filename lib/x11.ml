@@ -1,6 +1,7 @@
 type xatom (* X interned atom *)
-
 type xwin (* X window identifier *)
+type xfont (* opaque type for xft font structure *)
+type xfontpatt (* opaque type for fontconfig font pattern structure *)
 
 (* X event definitions *)
 type xevent =
@@ -18,7 +19,13 @@ type xevent =
   | Shutdown
 
 (* rectangle description type *)
-type xrect = { x: int; y: int; w: int; h: int; c: int; }
+type xrect = {
+  x: int;
+  y: int;
+  w: int;
+  h: int;
+  c: int;
+}
 
 (* configuration variable type *)
 type xcfgvar =
@@ -26,6 +33,21 @@ type xcfgvar =
   | Int of int
   | String of string
   | NotSet
+
+type font =
+  | NoFont
+  | Font of {
+    font: xfont;
+    patt: xfontpatt;
+    height: int;
+    next: font;
+  }
+
+type glyph = {
+  rune: int;
+  width: int;
+  font: font;
+}
 
 external connect : unit -> unit
                  = "x11_connect"
@@ -47,6 +69,10 @@ external flip : unit -> unit
 
 external draw_rect : xrect -> unit
                    = "x11_draw_rect"
+(*
+external draw_glyphs : glyph array -> unit
+                   = "x11_draw_glyphs"
+*)
 
 external event_loop : int -> (xevent -> unit) -> unit
                    = "x11_event_loop"
@@ -70,6 +96,12 @@ external sel_set : xatom -> string -> unit
 external sel_fetch : xatom -> unit
                    = "x11_sel_get"
 *)
+
+external font_load : string -> font
+                   = "x11_font_load"
+
+external font_glyph : string -> glyph
+                   = "x11_font_glyph"
 
 (* Automatically connect and disconnect to the display server *)
 let () =

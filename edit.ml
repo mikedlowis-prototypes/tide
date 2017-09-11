@@ -14,7 +14,7 @@ let onmousemove mods x y =
 
 let onupdate width height =
   Printf.printf "onupdate: %d %d\n" width height;
-  draw_rect { x = 0; y = 0; w = width; h = height; c = Cfg.Color.palette.(0) };
+  (*draw_rect { x = 0; y = 0; w = width; h = height; c = Cfg.Color.palette.(0) };*)
   flip ()
 
 let onshutdown () =

@@ -1,73 +1,17 @@
-#include <stdbool.h>
-#include <caml/mlvalues.h>
-#include <caml/fail.h>
-#include <caml/memory.h>
-#include <caml/alloc.h>
-#include <caml/callback.h>
-
-#include <X11/Xlib.h>
-#include <X11/Xatom.h>
-#include <X11/Xft/Xft.h>
-#include <X11/Xresource.h>
-
-/* The order of this enum should match the type specified in x11.ml. The
-   variants are divided into two groups, those with args and those without.
-   Each group's tags increment, starting at 0, in the order the appear in the
-   type definition */
-enum {
-    TFocus = 0,
-    TKeyPress,
-    TMouseClick,
-    TMouseRelease,
-    TMouseMove,
-    TPaste,
-    TCommand,
-    TPipeClosed,
-    TPipeWriteReady,
-    TPipeReadReady,
-    TUpdate,
-    TShutdown = 0,
-    TNone = -1
-};
-
-enum Keys {
-    KEY_F1     = (0xE000+0),
-    KEY_F2     = (0xE000+1),
-    KEY_F3     = (0xE000+2),
-    KEY_F4     = (0xE000+3),
-    KEY_F5     = (0xE000+4),
-    KEY_F6     = (0xE000+5),
-    KEY_F7     = (0xE000+6),
-    KEY_F8     = (0xE000+7),
-    KEY_F9     = (0xE000+8),
-    KEY_F10    = (0xE000+9),
-    KEY_F11    = (0xE000+10),
-    KEY_F12    = (0xE000+11),
-    KEY_INSERT = (0xE000+12),
-    KEY_DELETE = (0xE000+13),
-    KEY_HOME   = (0xE000+14),
-    KEY_END    = (0xE000+15),
-    KEY_PGUP   = (0xE000+16),
-    KEY_PGDN   = (0xE000+17),
-    KEY_UP     = (0xE000+18),
-    KEY_DOWN   = (0xE000+19),
-    KEY_RIGHT  = (0xE000+20),
-    KEY_LEFT   = (0xE000+21),
-    KEY_ESCAPE = 0x1B,
-    RUNE_ERR   = 0xFFFD
-};
-
-extern size_t utf8encode(char str[6], int32_t rune);
-extern bool utf8decode(int32_t* rune, size_t* length, int byte);
+#include "internals.h"
+#include <errno.h>
 
 static int error_handler(Display* disp, XErrorEvent* ev);
 static char* readprop(Window win, Atom prop);
 static void create_window(int height, int width);
-static value mkrecord(int tag, int n, ...);
+static value mkvariant(int tag, int n, ...);
 static int32_t special_keys(int32_t key);
-static void xftcolor(XftColor* xc, int c);
 static void init_db(void);
 static char* strmcat(char* first, ...);
+
+static void xftcolor(XftColor* xc, int c);
+static void xftdrawrect(int x, int y, int w, int h, int c);
+static void draw_text(void);
 
 static value ev_focus(XEvent*);
 static value ev_keypress(XEvent*);
@@ -79,26 +23,7 @@ static value ev_propnotify(XEvent*);
 static value ev_clientmsg(XEvent*);
 static value ev_configure(XEvent*);
 
-static struct {
-    bool running;
-    Display* display;
-    Visual* visual;
-    Colormap colormap;
-    unsigned depth;
-    int screen;
-    Window root;
-    int errnum;
-    /* assume one window per process for now */
-    Window self;
-    XftDraw* xft;
-    Pixmap pixmap;
-    int width;
-    int height;
-    XIC xic;
-    XIM xim;
-    GC gc;
-    XrmDatabase db;
-} X = {0};
+static struct X X = {0};
 
 static value (*EventHandlers[LASTEvent]) (XEvent*) = {
     [FocusIn]          = ev_focus,
@@ -115,6 +40,8 @@ static value (*EventHandlers[LASTEvent]) (XEvent*) = {
     [ConfigureNotify]  = ev_configure
 };
 
+/* X11 Primitives
+ ******************************************************************************/
 CAMLprim value x11_connect(void) {
     CAMLparam0();
     if (!X.display) {
@@ -177,17 +104,9 @@ CAMLprim value x11_flip(void) {
 
 CAMLprim value x11_draw_rect(value rect) {
     CAMLparam1(rect);
-    #define intfield(r,i) Int_val(Field(r,i))
-    XftColor clr;
-    printf("x: %d y: %d w: %d h: %d: c: %#x\n",
-         intfield(rect, 0),  intfield(rect, 1),  intfield(rect, 2),
-         intfield(rect, 3),  intfield(rect, 4)
-    );
-    xftcolor(&clr, intfield(rect, 4));
-    XftDrawRect(X.xft, &clr, intfield(rect, 0), intfield(rect, 1),  /* x,y */
-                             intfield(rect, 2), intfield(rect, 3)); /* w,h */
-    XftColorFree(X.display, X.visual, X.colormap, &clr);
-
+    xftdrawrect(intfield(rect, 0), intfield(rect, 1), /* x,y */
+                intfield(rect, 2), intfield(rect, 3), /* w,h */
+                intfield(rect, 4));
     CAMLreturn(Val_unit);
 }
 
@@ -203,7 +122,7 @@ CAMLprim value x11_event_loop(value ms, value cbfn) {
         /* Update the mouse posistion and simulate a mosuemove event for it */
         Window xw; int _, x, y; unsigned int mods;
         XQueryPointer(X.display, X.self, &xw, &xw, &_, &_, &x, &y, &mods);
-        caml_callback(cbfn, mkrecord(TMouseMove, 3, mods, x, y));
+        caml_callback(cbfn, mkvariant(TMouseMove, 3, mods, x, y));
 
         /* check if we have any pending xevents */
         if (nevents) {
@@ -225,8 +144,9 @@ CAMLprim value x11_event_loop(value ms, value cbfn) {
 
         /* generate an update event and flush any outgoing events */
         if (X.running) {
-        printf("update W: %d H: %d\n", X.width, X.height);
-            caml_callback(cbfn, mkrecord(TUpdate, 2, Val_int(X.width), Val_int(X.height)));
+            printf("update W: %d H: %d\n", X.width, X.height);
+            draw_text();
+            caml_callback(cbfn, mkvariant(TUpdate, 2, Val_int(X.width), Val_int(X.height)));
         }
         XFlush(X.display);
     }
@@ -255,14 +175,72 @@ CAMLprim value x11_prop_get(value win, value atom) {
 }
 
 CAMLprim value x11_var_get(value name) {
+    static bool loaded = false;
     CAMLparam1(name);
-    init_db();
+    if (!loaded) {
+        XrmDatabase db;
+        char *homedir  = getenv("HOME"),
+             *userfile = strmcat(homedir, "/.config/tiderc", 0),
+             *rootfile = strmcat(homedir, "/.Xdefaults", 0);
+        XrmInitialize();
+
+        /* load from xrdb or .Xdefaults */
+        if (XResourceManagerString(X.display) != NULL)
+            db = XrmGetStringDatabase(XResourceManagerString(X.display));
+        else
+            db = XrmGetFileDatabase(rootfile);
+        XrmMergeDatabases(db, &X.db);
+
+        /* load user settings from ~/.config/tiderc */
+        db = XrmGetFileDatabase(userfile);
+        (void)XrmMergeDatabases(db, &X.db);
+
+        /* cleanup */
+        free(userfile);
+        free(rootfile);
+        loaded = true;
+    }
     char* type;
     XrmValue val;
     XrmGetResource(X.db, String_val(name), NULL, &type, &val);
-    CAMLreturn(mkrecord(0,0));
+    CAMLreturn(mkvariant(0,0));
 }
 
+CAMLprim value x11_font_load(value fontname) {
+    CAMLparam1(fontname);
+    /* init the fontconfig library */
+    static bool initialized = false;
+    if (!initialized) {
+        if (!FcInit())
+            caml_failwith("Could not init fontconfig");
+        initialized = true;
+    }
+
+    /* find and load the base font */
+    XftFont* xftfont;
+    FcResult result;
+    FcPattern* pattern = FcNameParse((FcChar8 *)String_val(fontname));
+    if (!pattern)
+        caml_failwith("cannot open font");
+    FcPattern* match = XftFontMatch(X.display, X.screen, pattern, &result);
+    if (!match || !(xftfont = XftFontOpenPattern(X.display, match)))
+        caml_failwith("could not load default font");
+
+    /* populate the stats and return the font */
+    value font = mkvariant(0, 4,
+        xftfont, FcPatternDuplicate(pattern), Val_int(xftfont->ascent + xftfont->descent),
+        mkvariant(0,0));
+    FcPatternDestroy(pattern);
+    CAMLreturn(font);
+}
+
+CAMLprim value x11_font_glyph(value name) {
+    CAMLparam1(name);
+    CAMLreturn(Val_unit);
+}
+
+/* X11 Event Handlers and Utilities
+ ******************************************************************************/
 static char* readprop(Window win, Atom prop) {
     Atom rtype;
     unsigned long format = 0, nitems = 0, nleft = 0, nread = 0;
@@ -327,26 +305,11 @@ static void create_window(int height, int width) {
     X.gc = XCreateGC(X.display, X.self, GCForeground|GCGraphicsExposures, &gcv);
 }
 
-static value mkrecord(int tag, int nargs, ...) {
-    value rec;
-    if (nargs == 0) {
-        rec = Val_long(tag);
-    } else {
-        rec = caml_alloc(nargs, tag);
-        va_list args;
-        va_start(args, nargs);
-        for (int i = 0; i < nargs; i++)
-            Store_field(rec, i, va_arg(args, value));
-        va_end(args);
-    }
-    return rec;
-}
-
 static value ev_focus(XEvent* e) {
     bool focused = (e->type = FocusIn);
     if (X.xic)
         (focused ? XSetICFocus : XUnsetICFocus)(X.xic);
-    return mkrecord(TFocus, 1, Val_true);
+    return mkvariant(TFocus, 1, Val_true);
 }
 
 static value ev_keypress(XEvent* e) {
@@ -362,24 +325,24 @@ static value ev_keypress(XEvent* e) {
         len = XLookupString(&(e->xkey), buf, sizeof(buf), &key, 0);
     /* if it's ascii, just return it */
     if (key >= 0x20 && key <= 0x7F)
-        return mkrecord(TKeyPress, 2, e->xkey.state, Val_int(key));
+        return mkvariant(TKeyPress, 2, e->xkey.state, Val_int(key));
     /* decode it */
     if (len > 0) {
         len = 0;
         for (int i = 0; i < 8 && !utf8decode(&rune, &len, buf[i]); i++);
     }
-    return mkrecord(TKeyPress, 2, e->xkey.state, Val_int(special_keys(key)));
+    return mkvariant(TKeyPress, 2, e->xkey.state, Val_int(special_keys(key)));
 }
 
 static value ev_mouse(XEvent* e) {
     int mods = e->xbutton.state, btn = e->xbutton.button,
         x = e->xbutton.x, y = e->xbutton.y;
     if (e->type == MotionNotify)
-        return mkrecord(TMouseMove, 3, Val_int(mods), Val_int(x), Val_int(y));
+        return mkvariant(TMouseMove, 3, Val_int(mods), Val_int(x), Val_int(y));
     else if (e->type == ButtonPress)
-        return mkrecord(TMouseClick, 4, Val_int(mods), Val_int(btn), Val_int(x), Val_int(y));
+        return mkvariant(TMouseClick, 4, Val_int(mods), Val_int(btn), Val_int(x), Val_int(y));
     else
-        return mkrecord(TMouseRelease, 4, Val_int(mods), Val_int(btn), Val_int(x), Val_int(y));
+        return mkvariant(TMouseRelease, 4, Val_int(mods), Val_int(btn), Val_int(x), Val_int(y));
 }
 
 static value ev_selclear(XEvent* e) {
@@ -390,7 +353,7 @@ static value ev_selnotify(XEvent* e) {
     value event = Val_int(TNone);
     if (e->xselection.property == None) {
         char* propdata = readprop(X.self, e->xselection.selection);
-        event = mkrecord(TPaste, 1, caml_copy_string(propdata));
+        event = mkvariant(TPaste, 1, caml_copy_string(propdata));
         XFree(propdata);
     }
     return event;
@@ -407,7 +370,7 @@ static value ev_propnotify(XEvent* e) {
 static value ev_clientmsg(XEvent* e) {
     Atom wmDeleteMessage = XInternAtom(X.display, "WM_DELETE_WINDOW", False);
     if (e->xclient.data.l[0] == wmDeleteMessage)
-        return mkrecord(TShutdown, 0);
+        return mkvariant(TShutdown, 0);
     return Val_int(TNone);
 }
 
@@ -419,6 +382,7 @@ static value ev_configure(XEvent* e) {
         X.height = e->xconfigure.height;
         X.pixmap = XCreatePixmap(X.display, X.self, X.width, X.height, X.depth);
         X.xft    = XftDrawCreate(X.display, X.pixmap, X.visual, X.colormap);
+        xftdrawrect(0,0,X.width,X.height,0xff002b36);
     }
     return event;
 }
@@ -478,6 +442,8 @@ static int32_t special_keys(int32_t key) {
     }
 }
 
+/* Xft Drawing Routines
+ ******************************************************************************/
 static void xftcolor(XftColor* xc, int c) {
     #define COLOR(c) ((c) | ((c) >> 8))
     xc->color.alpha = COLOR((c & 0xFF000000) >> 16);
@@ -487,30 +453,32 @@ static void xftcolor(XftColor* xc, int c) {
     XftColorAllocValue(X.display, X.visual, X.colormap, &(xc->color), xc);
 }
 
-static void init_db(void) {
-    static bool loaded = false;
-    if (loaded) return;
-    XrmDatabase db;
-    char *homedir  = getenv("HOME"),
-         *userfile = strmcat(homedir, "/.config/tiderc", 0),
-         *rootfile = strmcat(homedir, "/.Xdefaults", 0);
-    XrmInitialize();
+static void xftdrawrect(int x, int y, int w, int h, int c) {
+    XftColor clr;
+    xftcolor(&clr, c);
+    XftDrawRect(X.xft, &clr, x, y, w, h);
+    XftColorFree(X.display, X.visual, X.colormap, &clr);
+}
 
-    /* load from xrdb or .Xdefaults */
-    if (XResourceManagerString(X.display) != NULL)
-        db = XrmGetStringDatabase(XResourceManagerString(X.display));
-    else
-        db = XrmGetFileDatabase(rootfile);
-    XrmMergeDatabases(db, &X.db);
+static void draw_text(void) {
 
-    /* load user settings from ~/.config/tiderc */
-    db = XrmGetFileDatabase(userfile);
-    (void)XrmMergeDatabases(db, &X.db);
+}
 
-    /* cleanup */
-    free(userfile);
-    free(rootfile);
-    loaded = true;
+/* Miscellaneous Utilities
+ ******************************************************************************/
+static value mkvariant(int tag, int nargs, ...) {
+    value rec;
+    if (nargs == 0) {
+        rec = Val_long(tag);
+    } else {
+        rec = caml_alloc(nargs, tag);
+        va_list args;
+        va_start(args, nargs);
+        for (int i = 0; i < nargs; i++)
+            Store_field(rec, i, va_arg(args, value));
+        va_end(args);
+    }
+    return rec;
 }
 
 static char* strmcat(char* first, ...) {
