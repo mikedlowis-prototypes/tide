@@ -44,9 +44,14 @@ type font =
   }
 
 type glyph = {
+  font: xfont;
+  index: int;
   rune: int;
   width: int;
-  font: font;
+  x: int;
+  y: int;
+  xoff: int;
+  yoff: int;
 }
 
 external connect : unit -> unit

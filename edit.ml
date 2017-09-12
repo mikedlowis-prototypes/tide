@@ -34,8 +34,21 @@ let onevent = function
   | Update e         -> onupdate e.width e.height
   | Shutdown         -> onshutdown ()
 
+let test_glyph () =
+  let font = X11.font_load "Monaco:size=10" in
+  let glyph = X11.font_glyph font 0x30 in
+  Printf.printf "%d %d %d %d %d %d %d\n"
+    glyph.index
+    glyph.rune
+    glyph.width
+    glyph.x
+    glyph.y
+    glyph.xoff
+    glyph.yoff
+
 let () =
   let win = make_window 640 480 in
+  test_glyph ();
   show_window win true;
   event_loop 50 onevent
 

@@ -230,9 +230,26 @@ CAMLprim value x11_font_load(value fontname) {
     CAMLreturn(font);
 }
 
-CAMLprim value x11_font_glyph(value name) {
-    CAMLparam1(name);
-    CAMLreturn(Val_unit);
+CAMLprim value x11_font_glyph(value font, value rune) {
+    CAMLparam2(font, rune);
+    CAMLlocal1(glyph);
+    /* search for the rune in currently loaded fonts */
+    FcChar32 codept = Int_val(rune);
+    XftFont* xfont = (XftFont*)Field(font, 0);
+    FT_UInt glyphidx = XftCharIndex(X.display, xfont, codept);
+    XGlyphInfo extents;
+    XftTextExtents32 (X.display, xfont, &codept, 1, &extents);
+    /* create the glyph structure */
+    glyph = caml_alloc(8, 0);
+    Store_field(glyph, 0, (value)xfont);
+    Store_field(glyph, 1, Val_int(glyphidx));
+    Store_field(glyph, 2, rune);
+    Store_field(glyph, 3, Val_int(extents.width));
+    Store_field(glyph, 4, Val_int(extents.x));
+    Store_field(glyph, 5, Val_int(extents.y));
+    Store_field(glyph, 6, Val_int(extents.xOff));
+    Store_field(glyph, 7, Val_int(extents.yOff));
+    CAMLreturn(glyph);
 }
 
 /* X11 Event Handlers and Utilities
