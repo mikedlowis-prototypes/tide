@@ -1,6 +1,7 @@
 open X11
 
-let font = font_load "Times New Roman:size=12"
+(*let font = font_load "Times New Roman:pixelsize=14"*)
+let font = font_load "Liberation Mono:pixelsize=14"
 
 let onfocus focused =
   print_endline "onfocus"
@@ -16,8 +17,10 @@ let onmousemove mods x y =
 
 let onupdate width height =
   Printf.printf "onupdate: %d %d\n" width height;
-  draw_rect { x = 0; y = 0; w = width; h = height; c = Cfg.Color.palette.(0) };
-  draw_string font Cfg.Color.palette.(5) "FooBarBaz" (0,0);
+  draw_rect { x = 2; y = 2; w = width; h = height; c = Cfg.Color.palette.(0) };
+  draw_string font Cfg.Color.palette.(5) "FooBarBaz\tYay\r\n" (2,2);
+  draw_string font Cfg.Color.palette.(5) "FooBarBaz\tYay\r\n" (2,2+font.height);
+  draw_rect { x = 2; y = 2; w = 1; h = font.height; c = Cfg.Color.palette.(3) };
   flip ()
 
 let onshutdown () =

@@ -34,14 +34,12 @@ type xcfgvar =
   | String of string
   | NotSet
 
-type font =
-  | NoFont
-  | Font of {
-    font: xfont;
-    patt: xfontpatt;
-    height: int;
-    next: font;
-  }
+type font = {
+  font: xfont;
+  patt: xfontpatt;
+  height: int;
+  next: font;
+}
 
 type glyph = {
   font: xfont;
