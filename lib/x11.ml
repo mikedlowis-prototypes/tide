@@ -74,10 +74,6 @@ external flip : unit -> unit
 
 external draw_rect : xrect -> unit
                    = "x11_draw_rect"
-(*
-external draw_glyphs : glyph array -> unit
-                   = "x11_draw_glyphs"
-*)
 
 external event_loop : int -> (xevent -> unit) -> unit
                    = "x11_event_loop"
@@ -107,6 +103,25 @@ external font_load : string -> font
 
 external font_glyph : font -> int -> glyph
                     = "x11_font_glyph"
+
+external draw_glyph : int -> glyph -> (int * int) -> int
+                    = "x11_draw_glyph"
+
+let draw_rune font color rune coord =
+  draw_glyph color (font_glyph font rune) coord
+
+let draw_char font color ch coord =
+  draw_rune font color (Char.code ch) coord
+
+let rec draw_stringi font color str coord index =
+  if index < (String.length str) then
+    let x,y = coord in
+    let ch = String.get str index in
+    let xoff = draw_char font color ch coord in
+    draw_stringi font color str (x + xoff, y) (index + 1)
+
+let draw_string font color str coord =
+  draw_stringi font color str coord 0
 
 (* Automatically connect and disconnect to the display server *)
 let () =

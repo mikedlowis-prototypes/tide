@@ -1,5 +1,7 @@
 open X11
 
+let font = font_load "Times New Roman:size=12"
+
 let onfocus focused =
   print_endline "onfocus"
 
@@ -14,7 +16,8 @@ let onmousemove mods x y =
 
 let onupdate width height =
   Printf.printf "onupdate: %d %d\n" width height;
-  (*draw_rect { x = 0; y = 0; w = width; h = height; c = Cfg.Color.palette.(0) };*)
+  draw_rect { x = 0; y = 0; w = width; h = height; c = Cfg.Color.palette.(0) };
+  draw_string font Cfg.Color.palette.(5) "FooBarBaz" (0,0);
   flip ()
 
 let onshutdown () =
@@ -34,21 +37,8 @@ let onevent = function
   | Update e         -> onupdate e.width e.height
   | Shutdown         -> onshutdown ()
 
-let test_glyph () =
-  let font = X11.font_load "Monaco:size=10" in
-  let glyph = X11.font_glyph font 0x30 in
-  Printf.printf "%d %d %d %d %d %d %d\n"
-    glyph.index
-    glyph.rune
-    glyph.width
-    glyph.x
-    glyph.y
-    glyph.xoff
-    glyph.yoff
-
 let () =
   let win = make_window 640 480 in
-  test_glyph ();
   show_window win true;
   event_loop 50 onevent
 

@@ -252,6 +252,23 @@ CAMLprim value x11_font_glyph(value font, value rune) {
     CAMLreturn(glyph);
 }
 
+CAMLprim value x11_draw_glyph(value color, value glyph, value coord) {
+    CAMLparam3(color, glyph, coord);
+    XftFont* font = (XftFont*)Field(glyph,0);
+    XftGlyphFontSpec spec = {
+        .font  = font,
+        .glyph = intfield(glyph,1),
+        .x     = intfield(coord,0),
+        .y     = intfield(coord,1) + font->ascent
+    };
+    //printf("x: %d y: %d xoff: %d yoff: %d\n", spec.x, spec.y, intfield(glyph,6), intfield(glyph,7));
+    XftColor fgc;
+    xftcolor(&fgc, Int_val(color));
+    XftDrawGlyphFontSpec(X.xft, &fgc, &spec, 1);
+    XftColorFree(X.display, X.visual, X.colormap, &fgc);
+    CAMLreturn(Field(glyph,6)); // Return xOff so we can chain operations
+}
+
 /* X11 Event Handlers and Utilities
  ******************************************************************************/
 static char* readprop(Window win, Atom prop) {
