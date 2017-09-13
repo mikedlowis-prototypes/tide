@@ -258,10 +258,16 @@ CAMLprim value x11_draw_glyph(value color, value glyph, value coord) {
     XftGlyphFontSpec spec = {
         .font  = font,
         .glyph = intfield(glyph,1),
-        .x     = intfield(coord,0),
+        .x     = intfield(coord,0) + intfield(glyph,4),
         .y     = intfield(coord,1) + font->ascent
     };
-    //printf("x: %d y: %d xoff: %d yoff: %d\n", spec.x, spec.y, intfield(glyph,6), intfield(glyph,7));
+    printf("c: '%c' w: %d x: %d y: %d xoff: %d yoff: %d\n",
+        intfield(glyph,2),
+        intfield(glyph,3),
+        intfield(glyph,4),
+        intfield(glyph,5),
+        intfield(glyph,6),
+        intfield(glyph,7));
     XftColor fgc;
     xftcolor(&fgc, Int_val(color));
     XftDrawGlyphFontSpec(X.xft, &fgc, &spec, 1);
