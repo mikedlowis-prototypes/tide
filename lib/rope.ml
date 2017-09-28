@@ -44,7 +44,7 @@ let rec split rope i =
 let rec getc rope i =
   check_index rope i;
   match rope with
-  | Leaf (s,off,len) -> s.[off + i]
+  | Leaf (s,off,_) -> s.[off + i]
   | Node (l,r,len)   ->
       let left_len = (length l) in
       if i < left_len then
