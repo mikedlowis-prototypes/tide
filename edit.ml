@@ -7,32 +7,48 @@ let font = font_load "Liberation Mono:size=10"
  ******************************************************************************)
 type drawpos = { x: int; y: int }
 
-let draw_background width height =
-  draw_rect { x = 0; y = 0; w = width; h = height; c = Cfg.Color.palette.(0) }
+let draw_bkg color width height pos =
+  let clr = Cfg.Color.palette.(color) in
+  draw_rect { x = pos.x; y = pos.y; w = width; h = height; c = clr }
 
-let draw_hrule pos width =
-  draw_rect { x = 0; y = pos.y; w = width; h = 1; c = Cfg.Color.palette.(3) };
+(* curried helpers *)
+let draw_dark_bkg = draw_bkg 0
+let draw_light_bkg = draw_bkg 1
+let draw_gray_bkg = draw_bkg 3
+
+let draw_text text pos =
+  draw_string font Cfg.Color.palette.(5) text (pos.x + 2, pos.y + 2);
+  { pos with y = (pos.y + 2 + font.height) }
+
+let draw_hrule width pos =
+  draw_gray_bkg width 1 pos;
   { pos with y = pos.y + 1 }
 
-let draw_vrule pos height =
-  draw_rect { x = pos.x; y = pos.y; w = 1; h = height - pos.y; c = Cfg.Color.palette.(3) };
+let draw_vrule height pos =
+  draw_gray_bkg 1 (height - pos.y) pos;
   { pos with x = pos.x + 1 }
 
 let draw_status pos width text =
-  draw_string font Cfg.Color.palette.(5) text (pos.x + 2, pos.y + 2);
-  let pos = { pos with y = (4 + font.height) } in
-  draw_hrule pos width
+  let height = (4 + font.height) in
+  draw_dark_bkg width height pos;
+  let pos = draw_text text pos in
+  draw_hrule width pos
 
-let draw_tags pos width text =
-  draw_string font Cfg.Color.palette.(5) text (pos.x + 2, pos.y + 2);
-  let pos = { pos with y = (pos.y + 2 + font.height) } in
-  draw_hrule pos width
+let draw_tags pos width maxlns text =
+  let bkgheight = ((font.height * maxlns) + 4) in
+  draw_light_bkg width bkgheight pos;
+  let pos = draw_text text pos in
+  draw_hrule width pos
 
 let draw_scroll pos height =
-  let pos = { pos with x = 14 } in
-  draw_vrule pos height
+  let rulepos = { pos with x = 14 } in
+  draw_gray_bkg rulepos.x height pos;
+  draw_dark_bkg rulepos.x (height/2) pos;
+  draw_vrule height rulepos
 
 let draw_edit pos width height =
+  draw_dark_bkg (width - pos.x) (height - pos.y) pos;
+  draw_text "This is the edit region" pos;
   ()
 
 (* Event functions
@@ -50,10 +66,9 @@ let onmousemove mods x y =
   print_endline "onmousemove"
 
 let onupdate width height =
-  draw_background width height;
   let (pos : drawpos) = { x = 0; y = 0 } in
   let pos = draw_status pos width "UNSI> *scratch*" in
-  let pos = draw_tags pos width "Sample tags data" in
+  let pos = draw_tags pos width (height / font.height / 4) "Sample tags data" in
   let pos = draw_scroll pos height in
   draw_edit pos width height;
   flip ()
