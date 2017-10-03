@@ -1,7 +1,7 @@
 open X11
 
 (*let font = font_load "Times New Roman:pixelsize=14"*)
-let font = font_load "Liberation Mono:size=10"
+let font = font_load "Monospace:size=10"
 
 (* Drawing functions
  ******************************************************************************)
@@ -48,8 +48,7 @@ let draw_scroll pos height =
 
 let draw_edit pos width height =
   draw_dark_bkg (width - pos.x) (height - pos.y) pos;
-  draw_text "This is the edit region" pos;
-  ()
+  draw_text "This is the edit region" pos
 
 (* Event functions
  ******************************************************************************)
@@ -70,7 +69,7 @@ let onupdate width height =
   let pos = draw_status pos width "UNSI> *scratch*" in
   let pos = draw_tags pos width (height / font.height / 4) "Sample tags data" in
   let pos = draw_scroll pos height in
-  draw_edit pos width height;
+  let _ = draw_edit pos width height in
   flip ()
 
 let onshutdown () =
