@@ -28,9 +28,11 @@ LIBOBJS = \
     lib/tide.$(OBJEXT) \
     lib/x11.$(OBJEXT) \
     lib/cfg.$(OBJEXT) \
-    lib/x11_prims.o \
     lib/rope.$(OBJEXT) \
     lib/buf.$(OBJEXT) \
+    lib/misc.$(OBJEXT) \
+    lib/x11_prims.o \
+    lib/misc_prims.o \
     lib/utf8.o
 
 .PHONY: all clean

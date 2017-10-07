@@ -8,13 +8,12 @@ let font = font_load "Monospace:size=10"
 type drawpos = { x: int; y: int }
 
 let draw_bkg color width height pos =
-  let clr = Cfg.Color.palette.(color) in
-  draw_rect { x = pos.x; y = pos.y; w = width; h = height; c = clr }
+  draw_rect { x = pos.x; y = pos.y; w = width; h = height; c = color }
 
 (* curried helpers *)
-let draw_dark_bkg = draw_bkg 0
-let draw_light_bkg = draw_bkg 1
-let draw_gray_bkg = draw_bkg 3
+let draw_dark_bkg  = draw_bkg Cfg.Color.palette.(0)
+let draw_light_bkg = draw_bkg Cfg.Color.palette.(1)
+let draw_gray_bkg  = draw_bkg Cfg.Color.palette.(3)
 
 let draw_text text pos =
   draw_string font Cfg.Color.palette.(5) text (pos.x + 2, pos.y + 2);
@@ -69,7 +68,7 @@ let onupdate width height =
   let pos = draw_status pos width "UNSI> *scratch*" in
   let pos = draw_tags pos width (height / font.height / 4) "Sample tags data" in
   let pos = draw_scroll pos height in
-  let _ = draw_edit pos width height in
+  let _   = draw_edit pos width height in
   flip ()
 
 let onshutdown () =
