@@ -29,7 +29,10 @@ let create =
   { info = info; current = state; lastsave = state; undo = []; redo = [] }
 
 let load path =
-  create
+  let file  = Rope.from_string (Misc.load_file path) in
+  let state = { nlines = 0; outpoint = 0; rope = file }
+  and info  = { path = ""; modtime = 0; charset = Utf8; crlf = Unix } in
+  { info = info; current = state; lastsave = state; undo = []; redo = [] }
 
 let saveas buf path =
   ()
