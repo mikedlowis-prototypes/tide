@@ -52,6 +52,13 @@ type glyph = {
   yoff: int;
 }
 
+module Rune = struct
+  type t = int
+  let compare a b = (a - b)
+end
+
+module GlyphMap = Map.Make(Rune)
+
 external connect : unit -> unit
                  = "x11_connect"
 
@@ -105,8 +112,24 @@ external font_glyph : font -> int -> glyph
 external draw_glyph : int -> glyph -> (int * int) -> int
                     = "x11_draw_glyph"
 
+let glyph_cache = ref GlyphMap.empty
+
+let cache_update rune glyph =
+  glyph_cache := GlyphMap.add rune glyph !glyph_cache;
+  glyph
+
+let get_glyph (font : font) rune =
+  try
+    let glyph = GlyphMap.find rune !glyph_cache in
+    if (glyph.font != font.font) then
+      cache_update rune glyph
+    else
+      glyph
+  with Not_found ->
+    cache_update rune (font_glyph font rune)
+
 let draw_rune font color rune coord =
-  draw_glyph color (font_glyph font rune) coord
+  draw_glyph color (get_glyph font rune) coord
 
 let draw_char font color ch coord =
   draw_rune font color (Char.code ch) coord
