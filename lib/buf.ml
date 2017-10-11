@@ -23,6 +23,9 @@ type buf = {
   redo : bufstate list;
 }
 
+let iter_from fn buf i =
+  Rope.iter_from fn buf i
+
 let create =
   let state = { nlines = 0; outpoint = 0; rope = Rope.empty }
   and info  = { path = ""; modtime = 0; charset = Utf8; crlf = Unix } in

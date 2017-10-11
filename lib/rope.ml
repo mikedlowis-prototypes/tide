@@ -45,7 +45,7 @@ let rec getc rope i =
   check_index rope i;
   match rope with
   | Leaf (s,off,_) -> s.[off + i]
-  | Node (l,r,len)   ->
+  | Node (l,r,len) ->
       let left_len = (length l) in
       if i < left_len then
         getc l i
@@ -62,43 +62,19 @@ let del rope i j =
   let (r_left,r_right) = split l_right (j - i) in
   (join l_left r_right)
 
-module Iter = struct
-  type t = {
-    rope: rope;
-    length: int;
-    mutable pos: int;
-  }
+let rec iter_from fn rope pos =
+  if pos < (length rope) && (fn (getc rope pos)) then
+    iter_from fn rope (pos + 1)
 
-  let make rope index =
-    check_index rope index;
-    { rope = rope; length = (length rope); pos = index }
-
-  let pos itr = itr.pos
-
-  let incr itr = itr.pos <- (itr.pos + 1)
-
-  let decr itr = itr.pos <- (itr.pos - 1)
-
-  let goto itr pos= itr.pos <- pos
-
-  let move itr off = itr.pos <- (itr.pos + off)
-
-  let get itr = getc itr.rope itr.pos
-
-  let has_next itr = (itr.pos + 1) <= itr.length
-
-  let has_prev itr = (itr.pos - 1) > 0
-end
+let rec iteri_from fn rope pos =
+  if pos < (length rope) && (fn pos (getc rope pos)) then
+    iteri_from fn rope (pos + 1)
 
 let iteri fn rope =
-  let it = Iter.make rope 0 in
-  while (Iter.has_next it) do
-    fn (Iter.pos it) (Iter.get it);
-    Iter.incr it
-  done
+  iteri_from (fun i c -> (fn i c); true) rope 0
 
 let iter fn rope =
-  iteri (fun i c -> (fn c)) rope
+  iter_from (fun c -> (fn c); true) rope 0
 
 let map fn rope =
   let buf = Bytes.create (length rope) in
@@ -111,12 +87,12 @@ let mapi fn rope =
   from_string (Bytes.unsafe_to_string buf)
 
 let gets rope i j =
-  let buf = Bytes.create (j - i)
-  and it  = Iter.make rope 0 in
-  while (Iter.has_next it) && ((Iter.pos it) <= j) do
-    Bytes.set buf ((Iter.pos it) - i) (Iter.get it);
-    Iter.incr it;
-  done;
+  let buf = Bytes.create (j - i) in
+  iteri_from
+    (fun n c ->
+      Bytes.set buf (n - i) (getc rope i);
+      (n <= j))
+    rope i;
   Bytes.unsafe_to_string buf
 
 let to_string rope =

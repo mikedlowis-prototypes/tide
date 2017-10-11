@@ -2,6 +2,8 @@ open X11
 
 (*let font = font_load "Times New Roman:pixelsize=14"*)
 let font = font_load "Monospace:size=10"
+let tags_buf = ref Buf.create
+let edit_buf = ref Buf.create
 
 (* Drawing functions
  ******************************************************************************)
@@ -91,6 +93,8 @@ let onevent = function
 (* Main Routine
  ******************************************************************************)
 let () =
+  if Array.length Sys.argv > 1 then
+    edit_buf := Buf.load Sys.argv.(1);
   let win = make_window 640 480 in
   show_window win true;
   event_loop 50 onevent
