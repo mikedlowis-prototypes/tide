@@ -63,7 +63,7 @@ let del rope i j =
   (join l_left r_right)
 
 let rec iter_from fn rope pos =
-  if pos < (length rope) && (fn (getc rope pos)) then
+  if pos < (length rope) && (fn (Char.code (getc rope pos))) then
     iter_from fn rope (pos + 1)
 
 let rec iteri_from fn rope pos =

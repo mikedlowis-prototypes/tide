@@ -1,7 +1,7 @@
 open X11
 
-(*let font = font_load "Times New Roman:pixelsize=14"*)
-let font = font_load "Monospace:size=10"
+(*let font = font_load "Times New Roman:size=12"*)
+let font = font_load "Monaco:size=10::antialias=true:autohint=true"
 let tags_buf = ref Buf.create
 let edit_buf = ref Buf.create
 
@@ -47,9 +47,27 @@ let draw_scroll pos height =
   draw_dark_bkg rulepos.x (height/2) pos;
   draw_vrule height rulepos
 
+let draw_buffer pos width height =
+  let x = ref pos.x and y = ref pos.y in
+  let newline () = x := pos.x; y := !y + font.height in
+  let draw_char c =
+    let glyph = (X11.get_glyph font c) in
+    (match c with
+    | 0x0A -> newline ()
+    | 0x0D -> ()
+    | _    -> begin
+        if (!x + glyph.width) > width then (newline ());
+        let _ = X11.draw_glyph Cfg.Color.palette.(5) glyph (!x, !y) in
+        x := !x + glyph.xoff
+    end);
+    ((!y + font.height) < height)
+  in
+  Buf.iter_from draw_char !edit_buf 0;
+  pos
+
 let draw_edit pos width height =
   draw_dark_bkg (width - pos.x) (height - pos.y) pos;
-  draw_text "This is the edit region" pos
+  draw_buffer { pos with x = pos.x + 2 } width height
 
 (* Event functions
  ******************************************************************************)

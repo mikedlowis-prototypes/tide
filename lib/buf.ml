@@ -24,7 +24,7 @@ type buf = {
 }
 
 let iter_from fn buf i =
-  Rope.iter_from fn buf i
+  Rope.iter_from fn buf.current.rope i
 
 let create =
   let state = { nlines = 0; outpoint = 0; rope = Rope.empty }
