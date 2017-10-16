@@ -109,43 +109,77 @@ CAMLprim value x11_draw_rect(value rect) {
     CAMLreturn(Val_unit);
 }
 
+#define _XOPEN_SOURCE 700
+#include <time.h>
+#include <sys/time.h>
+
+uint64_t getmillis(void) {
+    struct timespec time;
+    clock_gettime(CLOCK_MONOTONIC, &time);
+    uint64_t ms = ((uint64_t)time.tv_sec * (uint64_t)1000);
+    ms += ((uint64_t)time.tv_nsec / (uint64_t)1000000);
+    return ms;
+}
+
 CAMLprim value x11_event_loop(value ms, value cbfn) {
     CAMLparam2(ms, cbfn);
     CAMLlocal1( event );
     while (X.running) {
         XEvent e; XPeekEvent(X.display, &e);
         //bool pending = false; //pollfds(Int_val(ms), cbfn);
+        uint64_t t0_, t0, t1_, t1, t2_, t2, t3_, t3, t4_, t4, t5_, t5;
 
+        t0 = getmillis();
+
+        t1 = getmillis();
         int nevents  = XEventsQueued(X.display, QueuedAfterFlush);
+        t1_ = getmillis();
 
-        /* Update the mouse posistion and simulate a mosuemove event for it */
-        Window xw; int _, x, y; unsigned int mods;
-        XQueryPointer(X.display, X.self, &xw, &xw, &_, &_, &x, &y, &mods);
-        caml_callback(cbfn, mkvariant(TMouseMove, 3, mods, x, y));
+        t2 = getmillis();
+        ///* Update the mouse position and simulate a mosuemove event for it */
+        //Window xw; int _, x, y; unsigned int mods;
+        //XQueryPointer(X.display, X.self, &xw, &xw, &_, &_, &x, &y, &mods);
+        //caml_callback(cbfn, mkvariant(TMouseMove, 3, mods, x, y));
+        t2_ = getmillis();
 
         /* check if we have any pending xevents */
         if (nevents) {
+            t3 = getmillis();
             /* pare down irrelevant mouse drag events to just the latest */
-            XTimeCoord* coords = XGetMotionEvents(
-                X.display, X.self, CurrentTime, CurrentTime, &nevents);
-            if (coords) XFree(coords);
+            //XTimeCoord* coords = XGetMotionEvents(
+            //    X.display, X.self, CurrentTime, CurrentTime, &nevents);
+            //if (coords) XFree(coords);
+            t3_ = getmillis();
 
+            t4 = getmillis();
             /* now take the events, convert them, and call the callback */
             for (XEvent e; XPending(X.display);) {
+                uint64_t t = getmillis();
                 XNextEvent(X.display, &e);
-                if (XFilterEvent(&e, None)) continue;
-                if (!EventHandlers[e.type]) continue;
-                event = EventHandlers[e.type](&e);
-                if (event != Val_int(TNone))
-                    caml_callback(cbfn, event);
+                if (!XFilterEvent(&e, None) && EventHandlers[e.type]) {
+                    event = EventHandlers[e.type](&e);
+                    if (event != Val_int(TNone))
+                        caml_callback(cbfn, event);
+                }
+                //printf("%lu ", getmillis()-t);
             }
+            //puts("");
+            t4_ = getmillis();
         }
 
+        t5 = getmillis();
         /* generate an update event and flush any outgoing events */
         if (X.running)
             caml_callback(cbfn, mkvariant(TUpdate, 2, Val_int(X.width), Val_int(X.height)));
+        t5_ = getmillis();
+
         XFlush(X.display);
+        t0_ = getmillis();
+
+        printf("time (ms): %lu %lu %lu %lu %lu (%lu)\n",
+            t1_ - t1, t2_ - t2, t3_ - t3, t4_ - t4, t5_ - t5, t0_ - t0);
     }
+
     CAMLreturn(Val_unit);
 }
 
@@ -259,7 +293,7 @@ CAMLprim value x11_draw_glyph(value color, value glyph, value coord) {
     XftGlyphFontSpec spec = {
         .font  = font,
         .glyph = intfield(glyph,1),
-        .x     = intfield(coord,0), // - intfield(glyph,4),
+        .x     = intfield(coord,0),
         .y     = intfield(coord,1) + font->ascent
     };
 //    printf("c: '%c' w: %d x: %d y: %d xoff: %d yoff: %d\n",

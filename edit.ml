@@ -1,9 +1,10 @@
 open X11
 
-let font = font_load "Times New Roman:size=12"
 (*
+let font = font_load "Times New Roman:size=12"
 let font = font_load "Monaco:size=10::antialias=true:autohint=true"
 *)
+let font = font_load "Sans Serif:size=11:antialias=true:autohint=true"
 
 let tags_buf = ref Buf.create
 let edit_buf = ref Buf.create
@@ -22,7 +23,7 @@ let draw_gray_bkg  = draw_bkg Cfg.Color.palette.(3)
 
 let draw_text text pos =
   draw_string font Cfg.Color.palette.(5) text (pos.x + 2, pos.y + 2);
-  { pos with y = (pos.y + 2 + font.height) }
+  { pos with y = (pos.y + 4 + font.height) }
 
 let draw_hrule width pos =
   draw_gray_bkg width 1 pos;
@@ -70,21 +71,22 @@ let draw_buffer pos width height =
 
 let draw_edit pos width height =
   draw_dark_bkg (width - pos.x) (height - pos.y) pos;
-  draw_buffer { pos with x = pos.x + 2 } width height
+  draw_buffer { x = pos.x + 4; y = pos.y + 2} width height
+  (* { pos with x = pos.x + 2  and} width height *)
 
 (* Event functions
  ******************************************************************************)
 let onfocus focused =
-  print_endline "onfocus"
+  () (*print_endline "onfocus"*)
 
 let onkeypress mods rune =
-  print_endline "onkeypress"
+  () (*print_endline "onkeypress"*)
 
 let onmousebtn mods btn x y pressed =
-  print_endline "onmousebtn"
+  () (*print_endline "onmousebtn"*)
 
 let onmousemove mods x y =
-  print_endline "onmousemove"
+  () (*print_endline "onmousemove"*)
 
 let onupdate width height =
   let (pos : drawpos) = { x = 0; y = 0 } in
@@ -103,11 +105,11 @@ let onevent = function
   | MouseClick e     -> onmousebtn e.mods e.btn e.x e.y true
   | MouseRelease e   -> onmousebtn e.mods e.btn e.x e.y false
   | MouseMove e      -> onmousemove e.mods e.x e.y
-  | Paste e          -> print_endline "paste"
-  | Command e        -> print_endline "command"
-  | PipeClosed e     -> print_endline "pipeclosed"
-  | PipeWriteReady e -> print_endline "pipewriteready"
-  | PipeReadReady e  -> print_endline "pipereadready"
+  | Paste e          -> () (*print_endline "paste"*)
+  | Command e        -> () (*print_endline "command"*)
+  | PipeClosed e     -> () (*print_endline "pipeclosed"*)
+  | PipeWriteReady e -> () (*print_endline "pipewriteready"*)
+  | PipeReadReady e  -> () (*print_endline "pipereadready"*)
   | Update e         -> onupdate e.width e.height
   | Shutdown         -> onshutdown ()
 
