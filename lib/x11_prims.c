@@ -252,13 +252,14 @@ CAMLprim value x11_font_glyph(value font, value rune) {
     CAMLreturn(glyph);
 }
 
+
 CAMLprim value x11_draw_glyph(value color, value glyph, value coord) {
     CAMLparam3(color, glyph, coord);
     XftFont* font = (XftFont*)Field(glyph,0);
     XftGlyphFontSpec spec = {
         .font  = font,
         .glyph = intfield(glyph,1),
-        .x     = intfield(coord,0) + intfield(glyph,4),
+        .x     = intfield(coord,0), // - intfield(glyph,4),
         .y     = intfield(coord,1) + font->ascent
     };
 //    printf("c: '%c' w: %d x: %d y: %d xoff: %d yoff: %d\n",

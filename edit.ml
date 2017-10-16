@@ -1,7 +1,10 @@
 open X11
 
-(*let font = font_load "Times New Roman:size=12"*)
+let font = font_load "Times New Roman:size=12"
+(*
 let font = font_load "Monaco:size=10::antialias=true:autohint=true"
+*)
+
 let tags_buf = ref Buf.create
 let edit_buf = ref Buf.create
 
@@ -56,9 +59,9 @@ let draw_buffer pos width height =
     | 0x0A -> newline ()
     | 0x0D -> ()
     | _    -> begin
-        if (!x + glyph.width) > width then (newline ());
-        let _ = X11.draw_glyph Cfg.Color.palette.(5) glyph (!x, !y) in
-        x := !x + glyph.xoff
+        if (!x + glyph.xoff) > width then (newline ());
+        let off = X11.draw_glyph Cfg.Color.palette.(5) glyph (!x, !y) in
+        x := !x + off
     end);
     ((!y + font.height) < height)
   in
