@@ -1,5 +1,10 @@
 #include "internals.h"
 #include <errno.h>
+#include <unistd.h>
+#include <poll.h>
+
+static size_t NumDescriptors = 0;
+static struct pollfd* Descriptors = NULL;
 
 static int error_handler(Display* disp, XErrorEvent* ev);
 static char* readprop(Window win, Atom prop);
@@ -38,6 +43,9 @@ static value (*EventHandlers[LASTEvent]) (XEvent*) = {
     [ClientMessage]    = ev_clientmsg,
     [ConfigureNotify]  = ev_configure
 };
+
+static bool fd_poll(int ms);
+static void fd_watch(int fd, int iodir);
 
 /* X11 Primitives
  ******************************************************************************/
@@ -124,15 +132,16 @@ uint64_t getmillis(void) {
 CAMLprim value x11_event_loop(value ms, value cbfn) {
     CAMLparam2(ms, cbfn);
     CAMLlocal1( event );
+    fd_watch(ConnectionNumber(X.display), POLLIN);
     while (X.running) {
-        XEvent e; XPeekEvent(X.display, &e);
-        //bool pending = false; //pollfds(Int_val(ms), cbfn);
+        XEvent e; //XPeekEvent(X.display, &e);
+        bool pending = fd_poll(Int_val(ms)); //false; //pollfds(Int_val(ms), cbfn);
         uint64_t t0_, t0, t1_, t1, t2_, t2, t3_, t3, t4_, t4, t5_, t5;
 
         t0 = getmillis();
 
         t1 = getmillis();
-        int nevents  = XEventsQueued(X.display, QueuedAfterFlush);
+        int nevents = XEventsQueued(X.display, QueuedAfterFlush);
         t1_ = getmillis();
 
         t2 = getmillis();
@@ -296,13 +305,6 @@ CAMLprim value x11_draw_glyph(value color, value glyph, value coord) {
         .x     = intfield(coord,0),
         .y     = intfield(coord,1) + font->ascent
     };
-//    printf("c: '%c' w: %d x: %d y: %d xoff: %d yoff: %d\n",
-//        intfield(glyph,2),
-//        intfield(glyph,3),
-//        intfield(glyph,4),
-//        intfield(glyph,5),
-//        intfield(glyph,6),
-//        intfield(glyph,7));
     XftColor fgc;
     xftcolor(&fgc, Int_val(color));
     XftDrawGlyphFontSpec(X.xft, &fgc, &spec, 1);
@@ -569,3 +571,46 @@ static char* strmcat(char* first, ...) {
     return str;
 }
 
+/* File Descriptor Polling
+ ******************************************************************************/
+static bool fd_poll(int ms) {
+    /* poll for new events */
+    long n = poll(Descriptors, NumDescriptors, ms);
+    if (n < 0) caml_failwith("fd_poll() syscall failed");
+    if (n == 0) return false;
+
+    /* Handle any events that occurred */
+    for (int i = 0; i < NumDescriptors; i++) {
+        /* skip any eventless entries */
+        if (!Descriptors[i].revents) continue;
+
+        /* if a requested event occurred, handle it */
+        if (Descriptors[i].revents & Descriptors[i].events)
+            Descriptors[i].revents = 0;
+
+        /* if the desriptor is done or errored, throw it out */
+        if (Descriptors[i].revents & (POLLNVAL|POLLERR|POLLHUP)) {
+            close(Descriptors[i].fd);
+            Descriptors[i].fd = -Descriptors[i].fd;
+        }
+    }
+
+    /* remove any closed or invalid descriptors */
+    size_t nfds = 0;
+    for (int i = 0; i < NumDescriptors; i++)
+        if (Descriptors[i].fd >= 0)
+            Descriptors[nfds] = Descriptors[i];
+    NumDescriptors = nfds;
+
+    return true;
+}
+
+static void fd_watch(int fd, int iodir) {
+    int idx = NumDescriptors++;
+    Descriptors = realloc(Descriptors, NumDescriptors * sizeof(struct pollfd));
+    if (!Descriptors)
+        caml_failwith("fd_watch() failed : out of memory");
+    Descriptors[idx].fd = fd;
+    Descriptors[idx].revents = 0;
+    Descriptors[idx].events = iodir; //(iodir == INPUT ? POLLIN : POLLOUT);
+}

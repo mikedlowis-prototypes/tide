@@ -72,7 +72,6 @@ let draw_buffer pos width height =
 let draw_edit pos width height =
   draw_dark_bkg (width - pos.x) (height - pos.y) pos;
   draw_buffer { x = pos.x + 4; y = pos.y + 2} width height
-  (* { pos with x = pos.x + 2  and} width height *)
 
 (* Event functions
  ******************************************************************************)
