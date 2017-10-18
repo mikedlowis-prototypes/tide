@@ -25,7 +25,7 @@ static value ev_clientmsg(XEvent*);
 static value ev_configure(XEvent*);
 
 static struct X X = {0};
-
+static XText* TextChunks = NULL;
 static value (*EventHandlers[LASTEvent]) (XEvent*) = {
     [FocusIn]          = ev_focus,
     [FocusOut]         = ev_focus,
@@ -97,12 +97,6 @@ CAMLprim value x11_show_window(value win, value state) {
     CAMLreturn(Val_unit);
 }
 
-CAMLprim value x11_flip(void) {
-    CAMLparam0();
-    XCopyArea(X.display, X.pixmap, X.self, X.gc, 0, 0, X.width, X.height, 0, 0);
-    CAMLreturn(Val_unit);
-}
-
 CAMLprim value x11_draw_rect(value rect) {
     CAMLparam1(rect);
     xftdrawrect(intfield(rect, 0), intfield(rect, 1), /* x,y */
@@ -130,14 +124,6 @@ CAMLprim value x11_event_loop(value ms, value cbfn) {
     while (X.running) {
         XPeekEvent(X.display, &e);
         uint64_t t = getmillis();
-
-//int nevents;
-//XTimeCoord* coords = XGetMotionEvents(X.display, X.self, CurrentTime, CurrentTime, &nevents);
-//if (coords) XFree(coords);
-
-Window xw; int x, ptrx, ptry; unsigned int ux;
-XQueryPointer(X.display, X.self, &xw, &xw, &x, &x, &ptrx, &ptry, &ux);
-
         while (XPending(X.display)) {
             XNextEvent(X.display, &e);
             printf("%d ", e.type);
@@ -148,12 +134,21 @@ XQueryPointer(X.display, X.self, &xw, &xw, &x, &x, &ptrx, &ptry, &ux);
             }
         }
         puts("");
-        printf("time %lu ", getmillis()-t);
+        printf("time 1 %lu ", getmillis()-t);
         t = getmillis();
-        if (X.running)
+        if (X.running) {
             caml_callback(cbfn, mkvariant(TUpdate, 2, Val_int(X.width), Val_int(X.height)));
-        printf("%lu\n", getmillis()-t);
-
+            while (TextChunks) {
+                XText* chunk = TextChunks;
+                TextChunks = chunk->next;
+                XftDrawGlyphFontSpec(X.xft, &(chunk->color), chunk->specs, chunk->nspecs);
+                XftColorFree(X.display, X.visual, X.colormap, &(chunk->color));
+                free(chunk->specs);
+                free(chunk);
+            }
+            XCopyArea(X.display, X.pixmap, X.self, X.gc, 0, 0, X.width, X.height, 0, 0);
+        }
+        printf("\ntime 2 %lu\n", getmillis()-t);
         XFlush(X.display);
     }
     CAMLreturn(Val_unit);
@@ -262,19 +257,35 @@ CAMLprim value x11_font_glyph(value font, value rune) {
     CAMLreturn(glyph);
 }
 
+/* X11 Text Glyph Drawing
+ ******************************************************************************/
+
+static XText* glyphs_by_color(uint64_t color) {
+    XText* curr = TextChunks;
+    for (; curr && curr->argb != color; curr = curr->next);
+    if (curr == NULL) {
+        curr = calloc(1, sizeof(XText));
+        curr->next = TextChunks;
+        curr->argb = color;
+        xftcolor(&(curr->color), color);
+        TextChunks = curr;
+    }
+    return curr;
+}
+
 CAMLprim value x11_draw_glyph(value color, value glyph, value coord) {
     CAMLparam3(color, glyph, coord);
+    XText* textchunk = glyphs_by_color(Int_val(color));
+    textchunk->nspecs++;
+    textchunk->specs = realloc(textchunk->specs, textchunk->nspecs * sizeof(XftGlyphFontSpec));
     XftFont* font = (XftFont*)Field(glyph,0);
     XftGlyphFontSpec spec = {
-        .font  = font,
+        .font  = (XftFont*)Field(glyph,0),
         .glyph = intfield(glyph,1),
         .x     = intfield(coord,0),
         .y     = intfield(coord,1) + font->ascent
     };
-    XftColor fgc;
-    xftcolor(&fgc, Int_val(color));
-    XftDrawGlyphFontSpec(X.xft, &fgc, &spec, 1);
-    XftColorFree(X.display, X.visual, X.colormap, &fgc);
+    textchunk->specs[textchunk->nspecs-1] = spec;
     CAMLreturn(Field(glyph,6)); // Return xOff so we can chain operations
 }
 
@@ -322,7 +333,7 @@ static void create_window(int height, int width) {
           StructureNotifyMask
         | ButtonPressMask
         | ButtonReleaseMask
-//        | ButtonMotionMask
+        | ButtonMotionMask
         | KeyPressMask
         | FocusChangeMask
         | PropertyChangeMask

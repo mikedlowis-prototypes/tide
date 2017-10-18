@@ -1,4 +1,6 @@
 #include <stdbool.h>
+#include <stddef.h>
+#include <stdlib.h>
 #include <caml/mlvalues.h>
 #include <caml/fail.h>
 #include <caml/memory.h>
@@ -89,3 +91,11 @@ typedef struct XFont {
     int height;
     struct XFont* next;
 } XFont;
+
+typedef struct XText {
+    struct XText* next;
+    uint64_t argb;
+    XftColor color;
+    XftGlyphFontSpec* specs;
+    size_t nspecs;
+} XText;

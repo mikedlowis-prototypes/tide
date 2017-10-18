@@ -91,8 +91,7 @@ let onupdate width height =
   let pos = draw_status pos width "UNSI> *scratch*" in
   let pos = draw_tags pos width (height / font.height / 4) "Sample tags data" in
   let pos = draw_scroll pos height in
-  let _   = draw_edit pos width height in
-  flip ()
+  let _   = draw_edit pos width height in ()
 
 let onshutdown () =
   print_endline "onshutdown"
