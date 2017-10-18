@@ -74,9 +74,6 @@ external make_dialog : int -> int -> xwin
 external show_window : xwin -> bool -> unit
                   = "x11_show_window"
 
-external flip : unit -> unit
-                  = "x11_flip"
-
 external draw_rect : xrect -> unit
                    = "x11_draw_rect"
 
