@@ -5,7 +5,6 @@ let font = font_load "Times New Roman:size=12"
 let font = font_load "Monaco:size=10::antialias=true:autohint=true"
 *)
 let font = font_load "Sans Serif:size=11:antialias=true:autohint=true"
-
 let tags_buf = ref Buf.create
 let edit_buf = ref Buf.create
 

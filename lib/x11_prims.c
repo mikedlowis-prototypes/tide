@@ -3,9 +3,6 @@
 #include <unistd.h>
 #include <poll.h>
 
-static size_t NumDescriptors = 0;
-static struct pollfd* Descriptors = NULL;
-
 static int error_handler(Display* disp, XErrorEvent* ev);
 static char* readprop(Window win, Atom prop);
 static void create_window(int height, int width);
@@ -43,9 +40,6 @@ static value (*EventHandlers[LASTEvent]) (XEvent*) = {
     [ClientMessage]    = ev_clientmsg,
     [ConfigureNotify]  = ev_configure
 };
-
-static bool fd_poll(int ms);
-static void fd_watch(int fd, int iodir);
 
 /* X11 Primitives
  ******************************************************************************/
@@ -132,63 +126,36 @@ uint64_t getmillis(void) {
 CAMLprim value x11_event_loop(value ms, value cbfn) {
     CAMLparam2(ms, cbfn);
     CAMLlocal1( event );
-    fd_watch(ConnectionNumber(X.display), POLLIN);
+    XEvent e;
     while (X.running) {
-        XEvent e; //XPeekEvent(X.display, &e);
-        bool pending = fd_poll(Int_val(ms)); //false; //pollfds(Int_val(ms), cbfn);
-        uint64_t t0_, t0, t1_, t1, t2_, t2, t3_, t3, t4_, t4, t5_, t5;
+        XPeekEvent(X.display, &e);
+        uint64_t t = getmillis();
 
-        t0 = getmillis();
+//int nevents;
+//XTimeCoord* coords = XGetMotionEvents(X.display, X.self, CurrentTime, CurrentTime, &nevents);
+//if (coords) XFree(coords);
 
-        t1 = getmillis();
-        int nevents = XEventsQueued(X.display, QueuedAfterFlush);
-        t1_ = getmillis();
+Window xw; int x, ptrx, ptry; unsigned int ux;
+XQueryPointer(X.display, X.self, &xw, &xw, &x, &x, &ptrx, &ptry, &ux);
 
-        t2 = getmillis();
-        ///* Update the mouse position and simulate a mosuemove event for it */
-        //Window xw; int _, x, y; unsigned int mods;
-        //XQueryPointer(X.display, X.self, &xw, &xw, &_, &_, &x, &y, &mods);
-        //caml_callback(cbfn, mkvariant(TMouseMove, 3, mods, x, y));
-        t2_ = getmillis();
-
-        /* check if we have any pending xevents */
-        if (nevents) {
-            t3 = getmillis();
-            /* pare down irrelevant mouse drag events to just the latest */
-            //XTimeCoord* coords = XGetMotionEvents(
-            //    X.display, X.self, CurrentTime, CurrentTime, &nevents);
-            //if (coords) XFree(coords);
-            t3_ = getmillis();
-
-            t4 = getmillis();
-            /* now take the events, convert them, and call the callback */
-            for (XEvent e; XPending(X.display);) {
-                uint64_t t = getmillis();
-                XNextEvent(X.display, &e);
-                if (!XFilterEvent(&e, None) && EventHandlers[e.type]) {
-                    event = EventHandlers[e.type](&e);
-                    if (event != Val_int(TNone))
-                        caml_callback(cbfn, event);
-                }
-                //printf("%lu ", getmillis()-t);
+        while (XPending(X.display)) {
+            XNextEvent(X.display, &e);
+            printf("%d ", e.type);
+            if (!XFilterEvent(&e, None) && EventHandlers[e.type]) {
+                event = EventHandlers[e.type](&e);
+                if (event != Val_int(TNone))
+                    caml_callback(cbfn, event);
             }
-            //puts("");
-            t4_ = getmillis();
         }
-
-        t5 = getmillis();
-        /* generate an update event and flush any outgoing events */
+        puts("");
+        printf("time %lu ", getmillis()-t);
+        t = getmillis();
         if (X.running)
             caml_callback(cbfn, mkvariant(TUpdate, 2, Val_int(X.width), Val_int(X.height)));
-        t5_ = getmillis();
+        printf("%lu\n", getmillis()-t);
 
         XFlush(X.display);
-        t0_ = getmillis();
-
-        printf("time (ms): %lu %lu %lu %lu %lu (%lu)\n",
-            t1_ - t1, t2_ - t2, t3_ - t3, t4_ - t4, t5_ - t5, t0_ - t0);
     }
-
     CAMLreturn(Val_unit);
 }
 
@@ -295,7 +262,6 @@ CAMLprim value x11_font_glyph(value font, value rune) {
     CAMLreturn(glyph);
 }
 
-
 CAMLprim value x11_draw_glyph(value color, value glyph, value coord) {
     CAMLparam3(color, glyph, coord);
     XftFont* font = (XftFont*)Field(glyph,0);
@@ -356,7 +322,7 @@ static void create_window(int height, int width) {
           StructureNotifyMask
         | ButtonPressMask
         | ButtonReleaseMask
-        | ButtonMotionMask
+//        | ButtonMotionMask
         | KeyPressMask
         | FocusChangeMask
         | PropertyChangeMask
@@ -569,48 +535,4 @@ static char* strmcat(char* first, ...) {
     /* null terminate and return */
     *curr = '\0';
     return str;
-}
-
-/* File Descriptor Polling
- ******************************************************************************/
-static bool fd_poll(int ms) {
-    /* poll for new events */
-    long n = poll(Descriptors, NumDescriptors, ms);
-    if (n < 0) caml_failwith("fd_poll() syscall failed");
-    if (n == 0) return false;
-
-    /* Handle any events that occurred */
-    for (int i = 0; i < NumDescriptors; i++) {
-        /* skip any eventless entries */
-        if (!Descriptors[i].revents) continue;
-
-        /* if a requested event occurred, handle it */
-        if (Descriptors[i].revents & Descriptors[i].events)
-            Descriptors[i].revents = 0;
-
-        /* if the desriptor is done or errored, throw it out */
-        if (Descriptors[i].revents & (POLLNVAL|POLLERR|POLLHUP)) {
-            close(Descriptors[i].fd);
-            Descriptors[i].fd = -Descriptors[i].fd;
-        }
-    }
-
-    /* remove any closed or invalid descriptors */
-    size_t nfds = 0;
-    for (int i = 0; i < NumDescriptors; i++)
-        if (Descriptors[i].fd >= 0)
-            Descriptors[nfds] = Descriptors[i];
-    NumDescriptors = nfds;
-
-    return true;
-}
-
-static void fd_watch(int fd, int iodir) {
-    int idx = NumDescriptors++;
-    Descriptors = realloc(Descriptors, NumDescriptors * sizeof(struct pollfd));
-    if (!Descriptors)
-        caml_failwith("fd_watch() failed : out of memory");
-    Descriptors[idx].fd = fd;
-    Descriptors[idx].revents = 0;
-    Descriptors[idx].events = iodir; //(iodir == INPUT ? POLLIN : POLLOUT);
 }
