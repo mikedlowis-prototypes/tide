@@ -97,3 +97,106 @@ let gets rope i j =
 
 let to_string rope =
   gets rope 0 (length rope)
+
+(* Unit Tests *****************************************************************)
+
+let run_unit_tests () =
+  let open Test in
+  (* length() tests *)
+  test "length : 0 for empty string" (fun () ->
+    let rope = Leaf("", 0, 0) in
+    assert( length rope == 0 )
+  );
+  test "length : equal to length of leaf" (fun () ->
+    let rope = Leaf("a", 0, 1) in
+    assert( length rope == 1 )
+  );
+  test "length : equal to sum of leaf lengths" (fun () ->
+    let rope = (join (Leaf("a", 0, 1)) (Leaf("a", 0, 1))) in
+    assert( length rope == 2 )
+  );
+
+  (* join() tests *)
+  test "join : join two leaves into rope" (fun () ->
+    let left  = Leaf("a", 0, 1) in
+    let right =  Leaf("a", 0, 1) in
+    let rope  = (join left right) in
+    assert( match rope with
+    | Node (l,r,2) -> (l == left && r == right)
+    | _ -> false)
+  );
+  test "join : join a rope with a leaf (l to r)" (fun () ->
+    let left  = join (Leaf("a", 0, 1)) (Leaf("a", 0, 1)) in
+    let right =  Leaf("a", 0, 1) in
+    let rope  = (join left right) in
+    assert( match rope with
+    | Node (l,r,3) -> (l == left && r == right)
+    | _ -> false)
+  );
+  test "join : join a rope with a leaf (r to l)" (fun () ->
+    let left  =  Leaf("a", 0, 1) in
+    let right = join (Leaf("a", 0, 1)) (Leaf("a", 0, 1)) in
+    let rope  = (join left right) in
+    assert( match rope with
+    | Node (l,r,3) -> (l == left && r == right)
+    | _ -> false)
+  );
+
+  (* getc() tests *)
+  test "getc : raise Out_of_bounds on negative index" (fun () ->
+    let rope = Leaf("a", 0, 1) in
+    try getc rope (-1); assert false
+    with Out_of_bounds _ -> assert true
+  );
+  test "getc : raise Out_of_bounds on out of bounds index" (fun () ->
+    let rope = Leaf("a", 0, 1) in
+    try getc rope (2); assert false
+    with Out_of_bounds _ -> assert true
+  );
+  test "getc : return index 0 of leaf" (fun () ->
+    let rope = Leaf("abc", 0, 3) in
+    assert( (getc rope (0)) == 'a' );
+  );
+  test "getc : return index 1 of leaf" (fun () ->
+    let rope = Leaf("abc", 0, 3) in
+    assert( (getc rope (1)) == 'b' );
+  );
+  test "getc : return index 2 of leaf" (fun () ->
+    let rope = Leaf("abc", 0, 3) in
+    assert( (getc rope (2)) == 'c' );
+  );
+  test "getc : return index 0 of rope" (fun () ->
+    let rope = Node((Leaf("a", 0, 1)), (Leaf("b", 0, 1)), 2) in
+    assert( (getc rope (0)) == 'a' );
+  );
+  test "getc : return index 1 of rope" (fun () ->
+    let rope = Node((Leaf("a", 0, 1)), (Leaf("b", 0, 1)), 2) in
+    assert( (getc rope (1)) == 'b' );
+  );
+
+  (* puts() tests *)
+  test "puts : insert at index 0" (fun () ->
+    let rope = Leaf("bc", 0, 2) in
+    let rope = (puts rope "a" 0) in
+    assert( (length rope) == 3 );
+    assert( (getc rope (0)) == 'a' );
+    assert( (getc rope (1)) == 'b' );
+    assert( (getc rope (2)) == 'c' );
+  );
+  test "puts : insert at index 1" (fun () ->
+    let rope = Leaf("ac", 0, 2) in
+    let rope = (puts rope "b" 1) in
+    assert( (length rope) == 3 );
+    assert( (getc rope (0)) == 'a' );
+    assert( (getc rope (1)) == 'b' );
+    assert( (getc rope (2)) == 'c' );
+  );
+  test "puts : insert index at 2" (fun () ->
+    let rope = Leaf("ab", 0, 2) in
+    let rope = (puts rope "c" 2) in
+    assert( (length rope) == 3 );
+    assert( (getc rope (0)) == 'a' );
+    assert( (getc rope (1)) == 'b' );
+    assert( (getc rope (2)) == 'c' );
+  );
+  ()

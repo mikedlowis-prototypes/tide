@@ -1,3 +1,5 @@
+type item = Ch | Word | Line
+
 type buf = {
   path : string;
   rope : Rope.t
@@ -17,3 +19,10 @@ let saveas buf path =
 
 let save buf =
   saveas buf buf.path
+
+let move item count buf pos =
+  match item with
+  | Ch   -> pos + count
+  | Word -> pos + count
+  | Line -> pos + count
+

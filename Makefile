@@ -23,8 +23,9 @@ endif
 
 # Target Definitions
 #-------------------------------------------------------------------------------
-BINS = edit
+BINS = edit tests
 LIBOBJS = \
+    lib/test.$(OBJEXT) \
     lib/misc.$(OBJEXT) \
     lib/tide.$(OBJEXT) \
     lib/x11.$(OBJEXT) \
@@ -38,12 +39,14 @@ LIBOBJS = \
 .PHONY: all clean
 
 all: $(BINS)
+	./tests
 
 clean:
 	$(RM) deps.mk $(BINS) *.cm* *.o *.a *.so lib/*.cm* lib/*.o
 
 # Executable targets
 edit: tide.$(LIBEXT) edit.$(OBJEXT)
+tests: tide.$(LIBEXT) tests.$(OBJEXT)
 
 # Library targets
 tide.$(LIBEXT): $(LIBOBJS)
