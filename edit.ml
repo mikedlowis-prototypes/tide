@@ -1,12 +1,12 @@
 open X11
 
-(*
-let font = font_load "Times New Roman:size=12"
-let font = font_load "Monaco:size=10::antialias=true:autohint=true"
-*)
-let font = font_load "Verdana:size=11:antialias=true:autohint=true"
-let tags_buf = ref Buf.create
-let edit_buf = ref Buf.create
+let font_times = font_load "Times New Roman:size=12"
+let font_monaco = font_load "Monaco:size=10::antialias=true:autohint=true"
+let font_verdana = font_load "Verdana:size=11:antialias=true:autohint=true"
+
+let font = font_verdana
+let tags_buf = ref Buf.empty
+let edit_buf = ref Buf.empty
 
 (* Drawing functions
  ******************************************************************************)

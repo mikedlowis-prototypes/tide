@@ -19,6 +19,12 @@ let check_index rope i =
   if i < 0 || i >= (length rope) then
     raise (Out_of_bounds "Rope.check_index")
 
+let limit_index rope i =
+  if i < 0 then 0
+  else if i > 0 && i >= (length rope) then
+    ((length rope) - 1)
+  else i
+
 let join left right =
   let left_len = (length left) in
   let right_len = (length right) in
