@@ -13,3 +13,8 @@ val rule_bkg : int -> int -> Cursor.t -> unit
 val string : string -> Cursor.t -> unit
 val hrule : int -> Cursor.t -> unit
 val vrule : int -> Cursor.t -> unit
+
+val status : Cursor.t -> string -> unit
+val tags : Cursor.t -> Buf.t -> unit
+val scroll : Cursor.t -> unit
+val edit : Cursor.t -> Buf.t -> unit

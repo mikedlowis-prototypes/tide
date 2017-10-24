@@ -38,8 +38,12 @@ let vrule height csr =
   rule_bkg 1 (height - csr.y) csr;
   csr.x <- csr.x + 1
 
+let status csr str = ()
+let tags csr buf = ()
+let scroll csr = ()
+let edit csr buf = ()
+
 (*
-type drawpos = { x: int; y: int }
 
 let draw_status pos width text =
   let height = (4 + font.height) in

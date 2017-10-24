@@ -29,9 +29,9 @@ LIBOBJS = \
     lib/misc.$(OBJEXT) \
     lib/x11.$(OBJEXT) \
     lib/cfg.$(OBJEXT) \
-    lib/draw.$(OBJEXT) \
     lib/rope.$(OBJEXT) \
     lib/buf.$(OBJEXT) \
+    lib/draw.$(OBJEXT) \
     lib/scrollmap.$(OBJEXT) \
     lib/x11_prims.o \
     lib/misc_prims.o \
