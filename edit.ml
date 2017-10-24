@@ -1,8 +1,8 @@
 open X11
 
 let font_times = font_load "Times New Roman:size=12"
-let font_monaco = font_load "Monaco:size=10::antialias=true:autohint=true"
-let font_verdana = font_load "Verdana:size=11:antialias=true:autohint=true"
+let font_monaco = font_load "Monaco:size=10"
+let font_verdana = font_load "Verdana:size=11"
 
 let font = font_verdana
 let tabglyph = 0x30
@@ -72,13 +72,12 @@ let draw_buffer pos width height =
     end);
     ((!y + font.height) < height)
   in
-  Buf.iter_from draw_char !edit_buf 0;
+  Buf.iter_from draw_char !edit_buf !edit_buf.start;
   pos
 
 let draw_edit pos width height =
   draw_dark_bkg (width - pos.x) (height - pos.y) pos;
   let pos = { x = pos.x + 2; y = pos.y + 2 } in
-  Buf.redraw !edit_buf pos.x pos.y width height;
   draw_buffer pos width height
 
 (* Event functions
@@ -87,10 +86,11 @@ let onfocus focused =
   () (*print_endline "onfocus"*)
 
 let onkeypress mods rune =
-  () (*print_endline "onkeypress"*)
+  print_endline "scroll up"
 
 let onmousebtn mods btn x y pressed =
-  () (*print_endline "onmousebtn"*)
+  print_endline "scroll down";
+  edit_buf := { !edit_buf with start = !edit_buf.start + 1}
 
 let onmousemove mods x y =
   () (*print_endline "onmousemove"*)
@@ -127,15 +127,3 @@ let () =
   let win = make_window 640 480 in
   show_window win true;
   event_loop 50 onevent
-
-(*
-  let server = Tide.start_server () in
-  let nargs = Array.length Sys.argv in
-  for i = 1 to (nargs - 1) do
-    let arg = Sys.argv.(i) in
-    if (String.equal "--" arg) then
-      Tide.start_pty server (Array.sub Sys.argv i (nargs - i))
-    else
-      Tide.edit_file server arg
-  done;
-*)

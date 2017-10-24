@@ -1,24 +1,24 @@
 type cursor = { start : int; stop : int }
 
-type buf = { path : string; rope : Rope.t }
+type t = {
+  start : int;
+  path : string;
+  rope : Rope.t
+}
 
 let font = X11.font_load "Verdana:size=11:antialias=true:autohint=true"
 
 let empty =
-  { path = ""; rope = Rope.empty }
+  { start = 0; path = ""; rope = Rope.empty }
 
 let load path =
-  { path = path; rope = Rope.from_string (Misc.load_file path) }
+  { start = 0; path = path; rope = Rope.from_string (Misc.load_file path) }
 
-let redraw buf x y width height =
-  (*let width = (width - x) in*)
-  let nlines = ((height - y) / font.height) in
-  ()
+let rope buf =
+  buf.rope
 
 let iter_from fn buf i =
   Rope.iter_from fn buf.rope i
-
-
 
 
 
@@ -38,6 +38,7 @@ let move_word count csr buf ext =
 
 let move_line count csr buf ext =
   ()
+
 *)
 (* Unit Tests *****************************************************************)
 

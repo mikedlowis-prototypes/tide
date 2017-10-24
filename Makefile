@@ -4,7 +4,7 @@ INCS = -I . -I lib -I /usr/X11R6/include -I /usr/include/freetype2 -I /usr/X11R6
 LIBS = -L/usr/X11R6/lib -lX11 -lXft -lfontconfig
 
 ifeq ($(NATIVE), 1)
-    OC         = ocamlopt
+	OC         = ocamlopt
     OCFLAGS    = -g
     MKLIB      = ocamlmklib
     MKLIBFLAGS = -custom
@@ -27,11 +27,11 @@ BINS = edit tests
 LIBOBJS = \
     lib/test.$(OBJEXT) \
     lib/misc.$(OBJEXT) \
-    lib/tide.$(OBJEXT) \
     lib/x11.$(OBJEXT) \
     lib/cfg.$(OBJEXT) \
     lib/rope.$(OBJEXT) \
     lib/buf.$(OBJEXT) \
+    lib/scrollmap.$(OBJEXT) \
     lib/x11_prims.o \
     lib/misc_prims.o \
     lib/utf8.o

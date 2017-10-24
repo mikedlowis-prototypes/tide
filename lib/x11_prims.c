@@ -126,15 +126,15 @@ CAMLprim value x11_event_loop(value ms, value cbfn) {
         uint64_t t = getmillis();
         while (XPending(X.display)) {
             XNextEvent(X.display, &e);
-            printf("%d ", e.type);
+            //printf("%d ", e.type);
             if (!XFilterEvent(&e, None) && EventHandlers[e.type]) {
                 event = EventHandlers[e.type](&e);
                 if (event != Val_int(TNone))
                     caml_callback(cbfn, event);
             }
         }
-        puts("");
-        printf("time 1 %lu ", getmillis()-t);
+        //puts("");
+        //printf("time 1 %lu ", getmillis()-t);
         t = getmillis();
         if (X.running) {
             caml_callback(cbfn, mkvariant(TUpdate, 2, Val_int(X.width), Val_int(X.height)));
@@ -148,7 +148,7 @@ CAMLprim value x11_event_loop(value ms, value cbfn) {
             }
             XCopyArea(X.display, X.pixmap, X.self, X.gc, 0, 0, X.width, X.height, 0, 0);
         }
-        printf("\ntime 2 %lu\n", getmillis()-t);
+        //printf("\ntime 2 %lu\n", getmillis()-t);
         XFlush(X.display);
     }
     CAMLreturn(Val_unit);
