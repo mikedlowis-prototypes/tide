@@ -1,0 +1,197 @@
+# clear whole window -- usefull with +Errors
+Edit ,d
+
+# decrease TAB indentation of selection
+Edit s,^TAB,,g
+
+# increase TAB indentation of selection
+# the ^. part ensures we indent only lines with content
+# and leave empty lines undisturbed
+Edit s,^.,TAB&,g
+
+## Latin
+äëïñöüÿÄÅËÏÖÜ
+
+## Greek
+αβγδεζηθλμνξπρστφψωΓΔΘΛΞΠΣΦΨΩ
+
+:;                   # select all text
+:;25                 # select from start to line 25 (inclusive)
+:25;                 # select from line 25 (inclusive) to EOF
+Edit /;[     ]*\/\// # select from ; to // comments
+
+## edit text
+Edit s/^/    /g  # increase indentation
+Edit s,^    ,,g  # decrease indentation
+Edit s/^/\/\/ /g # comment out using //
+
+Edit s/\n\n\n+/\n\n/g  # remove redundant newlines, keep max two
+Edit s/^[     ]+//g    # remove leading whitespace
+Edit s/[     ]+$//g    # remove trailing whitespace
+Edit s/ +/ /g          # remove multiple spaces
+Edit s/;$//g           # remove trailing semicolon
+Edit s/\*+\///g        # comments
+Edit s/\/\*+/\/\//g
+Edit s/[\(\)]/ /g      # remove ()
+Edit s/.*/(&)/g        # add ()
+Edit s/.*/float64(&)/g # float64()
+Edit s/.*/} & {/g      # add }  {
+Edit s/^/\/\/ /g       # // comment out
+
+# find and remove semicolon before // comments
+Edit /;[     ]*\/\// Edit s/;//
+
+# struct pointer
+Edit s/->/./g
+
+| 9 sed 's/\(//; s/(.*)\)/\1/' # remove outermost pair of parentheses
+Edit s:\((.*)\):\1:g           # remove outermost pair of parentheses
+
+1) re-format PHP's strange error mesages into standard
+FILE_PATHNAME:LINE_NUMBER
+
+# ... called in FILE_PATHNAME on line LINE_NUMBER and defined in FILE_PATHNAME
+on line LINE_NUMBER
+
+data matchesmultiline '.*rror.*called in ([^ ]+) on line ([0-9]+) and defined
+in ([^ ]+) on line ([0-9]+).*'
+arg isfile $1
+data set $file
+attr add addr=$2
+type is text
+plumb to edit
+
+#file / line in PHP format
+data matchesmultiline '(.+) on line ([0-9]+).*'
+arg isfile $1
+data set $file
+attr add addr=$2
+type is text
+plumb to edit
+
+2) display php's function prototypes on right-click on a function name with an
+opening parenthesis. the `W' script greps a flat text file list of functions
+(with arguments and return types) and outputs to +Errors window.
+
+type is text
+data matches '[a-zA-Z_][a-zA-Z_0-9]*[(]'
+plumb start W --wdir $wdir $data
+
+a half-hearted support for displaying SQL table schema; again, `Wtable' is a
+script outputting definition of indicated table.
+
+type is text
+data matches '.*(FROM|JOIN)[ ]+([^ ]+).*'
+data set $2
+plumb start Wtable --wdir $wdir $data
+
+# indent
+Edit ,x/^./ y/./ c/        /
+
+# outdent
+Edit ,x/^        / c//
+
+There is also Jason Catena's list of Edit idioms at
+https://raw.github.com/catenate/acme-fonts/master/test/1/acme/Edit/sam
+
+$-/text/	search for the last occurrence of text in file
++/here/	search for text forwards
+,> wc	push file into wc, count appears in +Errors window
+,>grep /myProject	print lines matching pattern
+,d	delete all lines in file
+,x/ +/ v/^/ c/ /	compress runs of spaces, leaving indentation
+,x/\/myProject/+-p	grep for text, print line for each occurrence
+,x/this/ < echo -n `{date}	replace this with the output of date
+,x/this/|tr a-z A-Z	replace all instances of this with upper case
+,|sort |uniq	sort current file and remove duplicate lines
+-/text/	search for text backwards
+-/{/,-/}/	highlight current brace block
+-0+,+0-	round dot down to whole lines only
+.x/here/ c/there/	search selection here and replace there
+/here/	search for text forwards
+0 < date	insert date at start of file
+0,$	select all lines in file
+1 < date	replace first line with today’s date
+< echo -n `{unicode 0041}	insert utf8 code at current pos
+B < echo *.c	load all C files in current dir into buffers
+B < grep -l her *	load all files containing her to buffers
+X D	remove out all up-to-date files
+X/'/w	write all modified files
+X/.*/,x/
+/d	strip <cr> from all lines
+Y/Edit/D	remove all non Edit files from file list
+d	delete selection
+e file	replace current file by content of external file
+f 	set current file-name to null
+r file	replace selection by external file
+s,//[^\n]*\n,,g	strip C // comments from selection
+s,/\*.*\*/\n,,g	strip C /* */ 1-line comments from selection
+s/"([^"]*)"/‘‘\1’’/	replace "hello" with ‘‘hello’’ in selection
+t "scratch" 0	copy selection to scratch file
+w file	write selected Lineno range to file (default 0,$)
+x/[a-zA-Z0-9]+/ -#0;+#1 | tr a-z A-Z	capitalise every word (slow)
+x/^	/d	remove 1 tab of indent from selection
+x/^/ a/	/	indent selection 1 tab
+| fmt	format selection as a paragraph
+
+When editing and re-editing latex, I regularly pipe selections
+through a simple-minded script called `chunk' which does most of
+the work for obtaining semantic linebreaks. That goes back to a
+recommendation by Kernighan in his paper `Unix for beginners' of
+1974; see the quotation, comments and link at [1].
+
+#!/usr/local/plan9/bin/rc
+# chunk up (to prepare) for semantic linebreaks
+# do  not break within \cite
+# do not break within $$ math
+# break after closing parentheses ),]
+# break before an opening parentheses (,[
+ssam -e 'x/(^[^%].+\n)+/  y/\\cite[^{]*{(\n|.)*}/ y/\$.*\$/
+x/(([^A-Z]\.)|[,;:!?]|\)|\]) | (\(|\[)/ s/ /\n/' \ | 9 fmt -w 60
+-j
+
+For batch processing probably something more sophisticated would
+be needed to leave various environments unchunked. But I don't use
+it that way, and just apply it to selections where I know its use
+makes sense. Usually these are areas where I have just been doing
+a lot of rewriting.
+
+There's no point in chunking up commented material, and sometimes
+it is actually convenient to have a place where I can keep things
+unchunked for reference.
+
+The original chunk command in Writer's Workbench [2], for troff not
+latex, was  based on a parser for English, I think. I find I don't
+want that (because I write in other languages as well), and that
+even in English I don't need it (because the chunking based on
+interpunction is always fine with me, and where I care about the
+remaining cases, I prefer to do it myself; but see [3]).
+
+term% cat /bin/uncase
+#!/bin/rc
+
+exec awk '{
+	lower = tolower($0)
+	upper = toupper($0)
+	len = length($0)
+
+	for( i = 1 ; i <= len ; i++ )
+		printf "[" substr(upper, i, 1) substr(lower, i, 1) "]"
+	printf "\n"
+}'
+
+https://9fans.github.io/plan9port/man/man1/acmeevent.html
+https://lbolla.info/blog/2012/11/02/useful-scripts-aa
+https://github.com/lbolla/cmd
+
+case "$filename" in
+    *.tar.bz2) bunzip_then_untar ;;
+    *.bz2)     bunzip_only ;;
+    *.tar.gz)  untar_with -z ;;
+    *.tgz)     untar_with -z ;;
+    *.gz)      gunzip_only ;;
+    *.zip)     unzip ;;
+    *.7z)      do something ;;
+    *)         do nothing ;;
+esac
+
