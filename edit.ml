@@ -19,9 +19,9 @@ let draw_bkg color width height pos =
   draw_rect { x = pos.x; y = pos.y; w = width; h = height; c = color }
 
 (* curried helpers *)
-let draw_dark_bkg  = draw_bkg Cfg.Color.palette.(0)
+let draw_dark_bkg = draw_bkg Cfg.Color.palette.(0)
 let draw_light_bkg = draw_bkg Cfg.Color.palette.(1)
-let draw_gray_bkg  = draw_bkg Cfg.Color.palette.(3)
+let draw_gray_bkg = draw_bkg Cfg.Color.palette.(3)
 
 let draw_text text pos =
   draw_string font Cfg.Color.palette.(5) text (pos.x + 2, pos.y + 2);
@@ -63,7 +63,6 @@ let draw_buffer pos width height =
     | 0x0D -> ()
     | 0x09 ->
         let tabsz = ((X11.get_glyph font tabglyph).xoff * tabwidth) in
-        let ntabs = (width - pos.x) / tabsz in
         x := pos.x + (((!x - pos.x) + tabsz) / tabsz * tabsz)
     | _    -> begin
         if (!x + glyph.xoff) > width then (newline ());
@@ -72,7 +71,7 @@ let draw_buffer pos width height =
     end);
     ((!y + font.height) < height)
   in
-  Buf.iter_from draw_char !edit_buf !edit_buf.start;
+  Buf.iter_from draw_char !edit_buf (Buf.start !edit_buf);
   pos
 
 let draw_edit pos width height =
@@ -86,11 +85,10 @@ let onfocus focused =
   () (*print_endline "onfocus"*)
 
 let onkeypress mods rune =
-  print_endline "scroll up"
+  ()
 
 let onmousebtn mods btn x y pressed =
-  print_endline "scroll down";
-  edit_buf := { !edit_buf with start = !edit_buf.start + 1}
+  ()
 
 let onmousemove mods x y =
   () (*print_endline "onmousemove"*)
