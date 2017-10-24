@@ -273,13 +273,6 @@ let run_unit_tests () =
     let rope = Leaf("abcd\n", 0, 5) in
     assert( (is_eol rope 2) == false );
   );
-
-  (* to_bol() tests *)
-  test "to_bol : should return index of first char on the line" (fun () ->
-    let rope = Leaf("\nabc\n", 0, 5) in
-    assert( (to_bol rope 2) == 1 );
-  );
-
   ()
 
 (*

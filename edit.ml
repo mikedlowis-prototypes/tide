@@ -5,6 +5,9 @@ let font_monaco = font_load "Monaco:size=10::antialias=true:autohint=true"
 let font_verdana = font_load "Verdana:size=11:antialias=true:autohint=true"
 
 let font = font_verdana
+let tabglyph = 0x30
+let tabwidth = 4
+
 let tags_buf = ref Buf.empty
 let edit_buf = ref Buf.empty
 
@@ -58,6 +61,10 @@ let draw_buffer pos width height =
     (match c with
     | 0x0A -> newline ()
     | 0x0D -> ()
+    | 0x09 ->
+        let tabsz = ((X11.get_glyph font tabglyph).xoff * tabwidth) in
+        let ntabs = (width - pos.x) / tabsz in
+        x := pos.x + (((!x - pos.x) + tabsz) / tabsz * tabsz)
     | _    -> begin
         if (!x + glyph.xoff) > width then (newline ());
         let off = X11.draw_glyph Cfg.Color.palette.(5) glyph (!x, !y) in
@@ -70,7 +77,9 @@ let draw_buffer pos width height =
 
 let draw_edit pos width height =
   draw_dark_bkg (width - pos.x) (height - pos.y) pos;
-  draw_buffer { x = pos.x + 4; y = pos.y + 2} width height
+  let pos = { x = pos.x + 2; y = pos.y + 2 } in
+  Buf.redraw !edit_buf pos.x pos.y width height;
+  draw_buffer pos width height
 
 (* Event functions
  ******************************************************************************)
