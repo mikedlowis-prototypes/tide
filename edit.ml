@@ -1,10 +1,6 @@
 open X11
 
-let font_times = font_load "Times New Roman:size=12"
-let font_monaco = font_load "Monaco:size=10"
-let font_verdana = font_load "Verdana:size=11"
-
-let font = font_verdana
+let font = Draw.font
 let tabglyph = 0x30
 let tabwidth = 4
 
@@ -18,7 +14,6 @@ type drawpos = { x: int; y: int }
 let draw_bkg color width height pos =
   draw_rect { x = pos.x; y = pos.y; w = width; h = height; c = color }
 
-(* curried helpers *)
 let draw_dark_bkg = draw_bkg Cfg.Color.palette.(0)
 let draw_light_bkg = draw_bkg Cfg.Color.palette.(1)
 let draw_gray_bkg = draw_bkg Cfg.Color.palette.(3)
@@ -81,17 +76,13 @@ let draw_edit pos width height =
 
 (* Event functions
  ******************************************************************************)
-let onfocus focused =
-  () (*print_endline "onfocus"*)
+let onfocus focused = ()
 
-let onkeypress mods rune =
-  ()
+let onkeypress mods rune = ()
 
-let onmousebtn mods btn x y pressed =
-  ()
+let onmousebtn mods btn x y pressed = ()
 
-let onmousemove mods x y =
-  () (*print_endline "onmousemove"*)
+let onmousemove mods x y = ()
 
 let onupdate width height =
   let (pos : drawpos) = { x = 0; y = 0 } in
@@ -100,8 +91,7 @@ let onupdate width height =
   let pos = draw_scroll pos height in
   let _   = draw_edit pos width height in ()
 
-let onshutdown () =
-  print_endline "onshutdown"
+let onshutdown () = ()
 
 let onevent = function
   | Focus state      -> onfocus state

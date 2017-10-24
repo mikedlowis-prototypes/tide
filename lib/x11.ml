@@ -141,6 +141,9 @@ let rec draw_stringi font color str coord index =
 let draw_string font color str coord =
   draw_stringi font color str coord 0
 
+let make_rect x y w h c =
+  { x = x; y = y; w = w; h = h; c = c }
+
 (* Automatically connect and disconnect to the display server *)
 let () =
   connect ();
