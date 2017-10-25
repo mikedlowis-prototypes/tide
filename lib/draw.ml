@@ -1,3 +1,9 @@
+(* config settings. eventually move to Cfg module *)
+let font = X11.font_load "Verdana:size=11"
+let font_height = let open X11 in font.height
+let tabglyph = 0x30
+let tabwidth = 4
+
 module Cursor = struct
   type t = {
     height : int;
@@ -12,10 +18,37 @@ module Cursor = struct
     let width, height = dim in
     { height = height; width = width;
       startx = x; starty = y; x = x; y = y }
-end
 
-let font = X11.font_load "Verdana:size=11"
-let font_height = let open X11 in font.height
+  let restart csr x y =
+    let csr = { csr with startx = csr.x + x; starty = csr.y + y } in
+    csr.x <- csr.startx;
+    csr.y <- csr.starty;
+    csr
+
+  let place_glyph csr glyph =
+    let _ = X11.draw_glyph Cfg.Color.palette.(5) glyph (csr.x, csr.y) in ()
+
+  let next_line csr =
+    csr.x <- csr.startx;
+    csr.y <- csr.y + font_height
+
+  let has_next_line csr =
+    ((csr.y + font_height) < csr.height)
+
+  let next_glyph csr c draw =
+    let glyph = (X11.get_glyph font c) in
+    match c with
+    | 0x0A -> next_line csr
+    | 0x0D -> ()
+    | 0x09 ->
+        let tabsz = ((X11.get_glyph font tabglyph).xoff * tabwidth) in
+        csr.x <- (csr.startx + ((csr.x - csr.startx + tabsz) / tabsz * tabsz))
+    | _    -> begin
+        if (csr.x + glyph.xoff) > csr.width then (next_line csr);
+        if draw then place_glyph csr glyph;
+        csr.x <- csr.x + glyph.xoff
+    end
+end
 
 open Cursor
 
@@ -28,8 +61,8 @@ let light_bkg = rectangle Cfg.Color.palette.(1)
 let rule_bkg = rectangle Cfg.Color.palette.(3)
 
 let string text csr =
-  X11.draw_string font Cfg.Color.palette.(5) text (csr.x + 2, csr.y + 2);
-  csr.y <- csr.y + 4 + font_height
+  X11.draw_string font Cfg.Color.palette.(5) text (csr.x + 2, csr.y);
+  csr.y <- csr.y + 2 + font_height
 
 let hrule width csr =
   rule_bkg width 1 csr;
@@ -39,14 +72,22 @@ let vrule height csr =
   rule_bkg 1 (height - csr.y) csr;
   csr.x <- csr.x + 1
 
+let buffer csr buf =
+  let csr = (restart csr 2 0) in
+  let draw_rune c =
+    next_glyph csr c true;
+    has_next_line csr
+  in
+  Buf.iter_from draw_rune buf (Buf.start buf)
+
 let status csr str =
-  let height = (4 + font_height) in
-  dark_bkg csr.width height csr;
+  dark_bkg csr.width (4 + font_height) csr;
   string str csr;
   hrule csr.width csr
 
 let tags csr buf =
-  let height = (4 + font_height) in
+  let maxlns = (csr.height / font_height / 4) in
+  let height = ((font_height * maxlns) + 4) in
   light_bkg csr.width height csr;
   string "Quit Save Undo Redo Cut Copy Paste | Find " csr;
   hrule csr.width csr
@@ -57,33 +98,6 @@ let scroll csr =
   csr.x <- csr.x + 14;
   vrule csr.height csr
 
-let edit csr buf = ()
-
-(*
-
-let draw_buffer pos width height =
-  let x = ref pos.x and y = ref pos.y in
-  let newline () = x := pos.x; y := !y + font.height in
-  let draw_char c =
-    let glyph = (X11.get_glyph font c) in
-    (match c with
-    | 0x0A -> newline ()
-    | 0x0D -> ()
-    | 0x09 ->
-        let tabsz = ((X11.get_glyph font tabglyph).xoff * tabwidth) in
-        x := pos.x + (((!x - pos.x) + tabsz) / tabsz * tabsz)
-    | _    -> begin
-        if (!x + glyph.xoff) > width then (newline ());
-        let off = X11.draw_glyph Cfg.Color.palette.(5) glyph (!x, !y) in
-        x := !x + off
-    end);
-    ((!y + font.height) < height)
-  in
-  Buf.iter_from draw_char !edit_buf (Buf.start !edit_buf);
-  pos
-
-let draw_edit pos width height =
-  draw_dark_bkg (width - pos.x) (height - pos.y) pos;
-  let pos = { x = pos.x + 2; y = pos.y + 2 } in
-  draw_buffer pos width height
-*)
+let edit csr buf =
+  dark_bkg (csr.width - csr.x) (csr.height - csr.y) csr;
+  buffer csr buf
