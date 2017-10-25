@@ -86,17 +86,17 @@ let onmousemove mods x y = ()
 
 let onupdate width height =
   let csr = Draw.Cursor.make (width, height) 0 0 in
-  (*
   Draw.status csr "UNSI> *scratch*";
   Draw.tags csr !tags_buf;
   Draw.scroll csr;
   Draw.edit csr !edit_buf
-  *)
+  (*
   let (pos : drawpos) = { x = 0; y = 0 } in
   let pos = draw_status pos width "UNSI> *scratch*" in
   let pos = draw_tags pos width (height / font.height / 4) "Sample tags data" in
   let pos = draw_scroll pos height in
   let _   = draw_edit pos width height in ()
+  *)
 
 let onshutdown () = ()
 

@@ -9,14 +9,14 @@ module Cursor = struct
   }
 
   let make dim x y =
-    let height, width = dim in
+    let width, height = dim in
     { height = height; width = width;
       startx = x; starty = y; x = x; y = y }
 end
 
-open Cursor
-
 let font = X11.font_load "Verdana:size=11"
+
+open Cursor
 
 let rectangle color width height csr =
   X11.draw_rect (X11.make_rect csr.x csr.y width height color)
@@ -38,30 +38,27 @@ let vrule height csr =
   rule_bkg 1 (height - csr.y) csr;
   csr.x <- csr.x + 1
 
-let status csr str = ()
-let tags csr buf = ()
-let scroll csr = ()
+let status csr str =
+  let height = (4 + font.height) in
+  dark_bkg csr.width height csr;
+  string str csr;
+  hrule csr.width csr
+
+let tags csr buf =
+  let height = (4 + font.height) in
+  light_bkg csr.width height csr;
+  string "Quit Save Undo Redo Cut Copy Paste | Find " csr;
+  hrule csr.width csr
+
+let scroll csr =
+  rule_bkg 14 csr.height csr;
+  dark_bkg 14 (csr.height / 2) csr;
+  csr.x <- csr.x + 14;
+  vrule csr.height csr
+
 let edit csr buf = ()
 
 (*
-
-let draw_status pos width text =
-  let height = (4 + font.height) in
-  draw_dark_bkg width height pos;
-  let pos = draw_text text pos in
-  draw_hrule width pos
-
-let draw_tags pos width maxlns text =
-  let bkgheight = ((font.height * maxlns) + 4) in
-  draw_light_bkg width bkgheight pos;
-  let pos = draw_text text pos in
-  draw_hrule width pos
-
-let draw_scroll pos height =
-  let rulepos = { pos with x = 14 } in
-  draw_gray_bkg rulepos.x height pos;
-  draw_dark_bkg rulepos.x (height/2) pos;
-  draw_vrule height rulepos
 
 let draw_buffer pos width height =
   let x = ref pos.x and y = ref pos.y in

@@ -4,7 +4,7 @@ INCS = -I . -I lib -I /usr/X11R6/include -I /usr/include/freetype2 -I /usr/X11R6
 LIBS = -L/usr/X11R6/lib -lX11 -lXft -lfontconfig
 
 ifeq ($(NATIVE), 1)
-	OC         = ocamlopt
+    OC         = ocamlopt
     OCFLAGS    = -g
     MKLIB      = ocamlmklib
     MKLIBFLAGS = -custom
