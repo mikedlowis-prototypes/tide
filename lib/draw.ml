@@ -15,6 +15,7 @@ module Cursor = struct
 end
 
 let font = X11.font_load "Verdana:size=11"
+let font_height = let open X11 in font.height
 
 open Cursor
 
@@ -28,7 +29,7 @@ let rule_bkg = rectangle Cfg.Color.palette.(3)
 
 let string text csr =
   X11.draw_string font Cfg.Color.palette.(5) text (csr.x + 2, csr.y + 2);
-  csr.y <- csr.y + 4 + font.height
+  csr.y <- csr.y + 4 + font_height
 
 let hrule width csr =
   rule_bkg width 1 csr;
@@ -39,13 +40,13 @@ let vrule height csr =
   csr.x <- csr.x + 1
 
 let status csr str =
-  let height = (4 + font.height) in
+  let height = (4 + font_height) in
   dark_bkg csr.width height csr;
   string str csr;
   hrule csr.width csr
 
 let tags csr buf =
-  let height = (4 + font.height) in
+  let height = (4 + font_height) in
   light_bkg csr.width height csr;
   string "Quit Save Undo Redo Cut Copy Paste | Find " csr;
   hrule csr.width csr
