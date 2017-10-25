@@ -18,7 +18,8 @@ let onupdate width height =
   Draw.status csr "UNSI> *scratch*";
   Draw.tags csr !tags_buf;
   Draw.scroll csr;
-  Draw.edit csr !edit_buf
+  Draw.edit csr !edit_buf;
+  let _ = Scrollmap.make !edit_buf width height 0 in ()
 
 let onshutdown () = ()
 
