@@ -4,14 +4,13 @@ type t = {
 }
 
 let make buf width height off =
+  print_endline "\nfoo:";
   let bol = (Rope.to_bol (Buf.rope buf) off) in
   let lines = ref [bol] in
   let csr = Draw.Cursor.make (width, 0) 0 0 in
   let process_glyph i c =
-    let open Draw.Cursor in
-    next_glyph csr c false;
-    (*if csr.startx == csr.x then
-      lines := i :: !lines;*)
+    if (Draw.Cursor.next_glyph csr c) then
+      lines := i :: !lines;
     ((Rope.is_eol (Buf.rope buf) i) == false)
   in
   Buf.iteri_from process_glyph buf off;

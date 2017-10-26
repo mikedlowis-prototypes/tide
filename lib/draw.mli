@@ -2,10 +2,10 @@ module Cursor : sig
   type t
   val make : (int * int) -> int -> int -> t
   val restart : t -> int -> int -> t
-  val place_glyph : t -> X11.glyph -> unit
   val next_line : t -> unit
   val has_next_line : t -> bool
-  val next_glyph : t -> int -> bool -> unit
+  val draw_glyph : t -> int -> unit
+  val next_glyph : t -> int -> bool
 end
 
 val font : X11.font
