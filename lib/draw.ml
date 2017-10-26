@@ -19,6 +19,9 @@ module Cursor = struct
     { height = height; width = width;
       startx = x; starty = y; x = x; y = y }
 
+  let max_width csr =
+    (csr.width - csr.x)
+
   let restart csr x y =
     let csr = { csr with startx = csr.x + x; starty = csr.y + y } in
     csr.x <- csr.startx;
@@ -82,13 +85,14 @@ let vrule height csr =
   rule_bkg 1 (height - csr.y) csr;
   csr.x <- csr.x + 1
 
-let buffer csr buf =
+let buffer csr buf off =
+  dark_bkg (csr.width - csr.x) (csr.height - csr.y) csr;
   let csr = (restart csr 2 0) in
   let draw_rune c =
     draw_glyph csr c;
     has_next_line csr
   in
-  Buf.iter_from draw_rune buf (Buf.start buf)
+  Buf.iter_from draw_rune buf off
 
 let status csr str =
   dark_bkg csr.width (4 + font_height) csr;
@@ -108,6 +112,6 @@ let scroll csr =
   csr.x <- csr.x + 14;
   vrule csr.height csr
 
-let edit csr buf =
+let edit csr buf off =
   dark_bkg (csr.width - csr.x) (csr.height - csr.y) csr;
-  buffer csr buf
+  buffer csr buf off
