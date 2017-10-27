@@ -52,7 +52,3 @@ let scroll_dn map buf =
 let resize map buf width =
   if map.width == width then map
   else (make buf width (first map))
-
-(* Unit Tests *****************************************************************)
-
-let run_unit_tests () = ()
