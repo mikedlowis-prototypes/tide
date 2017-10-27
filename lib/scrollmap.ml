@@ -14,7 +14,6 @@ let make buf width off =
   let csr = Draw.Cursor.make (width, 0) 0 0 in
   let bol = (Rope.to_bol (Buf.rope buf) off) in
   let lines = ref [bol] in
-  let csr = Draw.Cursor.make (width, 0) 0 0 in
   let process_glyph i c =
     if (Draw.Cursor.next_glyph csr c) then
       lines := i :: !lines;
@@ -26,10 +25,6 @@ let make buf width off =
   { width = width; lines = lines; index = index }
 
 let first map =
-  (*
-  Printf.printf "%d: %d" map.index map.lines.(map.index);
-  print_endline "";
-  *)
   map.lines.(map.index)
 
 let bopl buf off =

@@ -1,6 +1,6 @@
 # Toolchain Configuration
 #-------------------------------------------------------------------------------
-INCS = -I . -I lib -I /usr/X11R6/include -I /usr/include/freetype2 -I /usr/X11R6/include/freetype2
+INCS = -I . -I lib -I tests -I /usr/X11R6/include -I /usr/include/freetype2 -I /usr/X11R6/include/freetype2
 LIBS = -L/usr/X11R6/lib -lX11 -lXft -lfontconfig
 
 ifeq ($(NATIVE), 1)
@@ -23,9 +23,8 @@ endif
 
 # Target Definitions
 #-------------------------------------------------------------------------------
-BINS = edit tests
+BINS = edit unittests
 LIBOBJS = \
-    lib/test.$(OBJEXT) \
     lib/misc.$(OBJEXT) \
     lib/x11.$(OBJEXT) \
     lib/cfg.$(OBJEXT) \
@@ -37,17 +36,22 @@ LIBOBJS = \
     lib/misc_prims.o \
     lib/utf8.o
 
+TESTOBJS = \
+    tests/test.$(OBJEXT) \
+    tests/rope_tests.$(OBJEXT) \
+    tests/scrollmap_tests.$(OBJEXT)
+
 .PHONY: all clean
 
 all: $(BINS)
-	./tests
+	./unittests
 
 clean:
 	$(RM) deps.mk $(BINS) *.cm* *.o *.a *.so lib/*.cm* lib/*.o
 
 # Executable targets
 edit: tide.$(LIBEXT) edit.$(OBJEXT)
-tests: tide.$(LIBEXT) tests.$(OBJEXT)
+unittests: tide.$(LIBEXT) $(TESTOBJS) unittests.$(OBJEXT)
 
 # Library targets
 tide.$(LIBEXT): $(LIBOBJS)

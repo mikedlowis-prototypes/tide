@@ -17,9 +17,3 @@ let iter_from fn buf i =
 
 let iteri_from fn buf i =
   Rope.iteri_from fn buf.rope i
-
-(* Unit Tests *****************************************************************)
-
-let run_unit_tests () =
-  let open Test in
-  ()
