@@ -4,6 +4,9 @@ let font_height = let open X11 in font.height
 let tabglyph = 0x30
 let tabwidth = 4
 
+let glyph_width g =
+  let open X11 in g.xoff
+
 module Cursor = struct
   type t = {
     height : int;
@@ -36,11 +39,12 @@ module Cursor = struct
     ((csr.y + font_height) < csr.height)
 
   let draw_tab csr =
-    let tabsz = ((X11.get_glyph font tabglyph).xoff * tabwidth) in
+    let xoff = (glyph_width (X11.get_glyph font tabglyph)) in
+    let tabsz = (xoff * tabwidth) in
     csr.x <- (csr.startx + ((csr.x - csr.startx + tabsz) / tabsz * tabsz))
 
   let place_glyph csr glyph =
-    let xoff = (let open X11 in glyph.xoff) in
+    let xoff = (glyph_width glyph) in
     if (csr.x + xoff) > csr.width then (next_line csr);
     let _ = X11.draw_glyph Cfg.Color.palette.(5) glyph (csr.x, csr.y) in
     csr.x <- csr.x + xoff
@@ -54,13 +58,14 @@ module Cursor = struct
 
   let next_glyph csr c =
     let glyph = (X11.get_glyph font c) in
+    let xoff = (glyph_width glyph) in
     match c with
     | 0x0A -> next_line csr; true
     | 0x0D -> false
     | 0x09 -> draw_tab csr; false
-    | _    -> let nl = (if (csr.x + glyph.xoff) > csr.width then
+    | _    -> let nl = (if (csr.x + xoff) > csr.width then
                         (next_line csr; true) else false) in
-              csr.x <- csr.x + glyph.xoff; nl
+              csr.x <- csr.x + xoff; nl
 end
 
 open Cursor

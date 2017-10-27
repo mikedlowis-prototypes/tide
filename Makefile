@@ -47,7 +47,7 @@ all: $(BINS)
 	./unittests
 
 clean:
-	$(RM) deps.mk $(BINS) *.cm* *.o *.a *.so lib/*.cm* lib/*.o
+	$(RM) deps.mk $(BINS) *.cm* *.o *.a *.so lib/*.cm* lib/*.o tests/*.cm* tests/*.o
 
 # Executable targets
 edit: tide.$(LIBEXT) edit.$(OBJEXT)

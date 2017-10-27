@@ -45,12 +45,12 @@ let  () =
   (* getc() tests *)
   test "getc : raise Out_of_bounds on negative index" (fun () ->
     let rope = Leaf("a", 0, 1) in
-    try getc rope (-1); assert false
+    try let _ = getc rope (-1) in assert false
     with Out_of_bounds _ -> assert true
   );
   test "getc : raise Out_of_bounds on out of bounds index" (fun () ->
     let rope = Leaf("a", 0, 1) in
-    try getc rope (2); assert false
+    try let _ = getc rope (2) in assert false
     with Out_of_bounds _ -> assert true
   );
   test "getc : return index 0 of leaf" (fun () ->
