@@ -112,6 +112,6 @@ let scroll csr =
   csr.x <- csr.x + 14;
   vrule csr.height csr
 
-let edit csr buf off =
+let edit csr buf =
   dark_bkg (csr.width - csr.x) (csr.height - csr.y) csr;
-  buffer csr buf off
+  buffer csr buf

@@ -17,7 +17,6 @@ module View = struct
 
   let draw view csr =
     let view = (resize view (Draw.Cursor.max_width csr)) in
-    (*Draw.dark_bkg (csr.width - csr.x) (csr.height - csr.y) csr;*)
     Draw.buffer csr view.buf (Scrollmap.first view.map);
     view
 
@@ -35,15 +34,16 @@ let edit_view = ref (View.empty 640 480)
  ******************************************************************************)
 let onfocus focused = ()
 
-let onkeypress mods rune = ()
+let onkeypress mods rune =
+  edit_view := View.scroll_dn !edit_view
 
 let onmousebtn mods btn x y pressed =
   match btn with
   | 1 -> ()
   | 2 -> ()
   | 3 -> ()
-  | 4 -> (if pressed then edit_view := View.scroll_up !edit_view)
-  | 5 -> (if pressed then edit_view := View.scroll_dn !edit_view)
+  | 4 -> (edit_view := View.scroll_up !edit_view)
+  | 5 -> (edit_view := View.scroll_dn !edit_view)
   | _ -> ()
 
 let onmousemove mods x y = ()

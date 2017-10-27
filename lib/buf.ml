@@ -1,20 +1,16 @@
 type t = {
-  start : int;
   path : string;
   rope : Rope.t
 }
 
 let empty =
-  { start = 0; path = ""; rope = Rope.empty }
+  { path = ""; rope = Rope.empty }
 
 let load path =
-  { start = 0; path = path; rope = Rope.from_string (Misc.load_file path) }
+  { path = path; rope = Rope.from_string (Misc.load_file path) }
 
 let rope buf =
   buf.rope
-
-let start buf =
-  buf.start
 
 let iter_from fn buf i =
   Rope.iter_from fn buf.rope i
@@ -27,4 +23,3 @@ let iteri_from fn buf i =
 let run_unit_tests () =
   let open Test in
   ()
-

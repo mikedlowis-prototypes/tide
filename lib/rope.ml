@@ -67,8 +67,7 @@ let is_bol rope pos =
 
 let is_eol rope pos =
   if pos >= (last rope) then true
-  else let c = (getc rope (pos+1)) in
-    (c == 0x0A || c == 0x0D)
+  else ((getc rope (pos+1)) == 0x0A)
 
 let is_bow rope pos = false
 
@@ -267,7 +266,7 @@ let run_unit_tests () =
   );
   test "is_eol : should return true if pos is last char of line with \r\n ending" (fun () ->
     let rope = Leaf("abc\r\n", 0, 5) in
-    assert( is_eol rope 2 );
+    assert( is_eol rope 3 );
   );
   test "is_eol : should return false if pos is not last char of line" (fun () ->
     let rope = Leaf("abcd\n", 0, 5) in
@@ -279,7 +278,6 @@ let run_unit_tests () =
     let rope = Leaf("\nabc\n", 0, 5) in
     assert( (to_bol rope 2) == 1 );
   );
-
   ()
 
 (*
