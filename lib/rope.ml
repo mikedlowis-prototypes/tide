@@ -1,29 +1,32 @@
 exception Out_of_bounds of string
 
-type rope =
+type t =
   | Leaf of string * int * int
-  | Node of rope * rope * int
-
-type t = rope
+  | Node of t * t * int
+type rope = t
+type rune = int
 
 let empty = Leaf ("", 0, 0)
-
-let length = function
-  | Leaf (_,_,l) -> l
-  | Node (_,_,l) -> l
 
 let from_string s =
   Leaf (s, 0, (String.length s))
 
-let check_index rope i =
-  if i < 0 || i >= (length rope) then
-    raise (Out_of_bounds "Rope.check_index")
+let length = function
+  | Leaf (_,_,l) -> l
+  | Node (_,_,l) -> l
 
 let limit_index rope i =
   if i < 0 then 0
   else if i > 0 && i >= (length rope) then
     ((length rope) - 1)
   else i
+
+let last rope =
+  limit_index rope ((length rope) - 1)
+
+let check_index rope i =
+  if i < 0 || i >= (length rope) then
+    raise (Out_of_bounds "Rope.check_index")
 
 let join left right =
   let left_len = (length left) in
@@ -47,6 +50,11 @@ let rec split rope i =
         let (sl,sr) = (split r i) in
         ((join l sl), sr)
 
+let del rope i j =
+  let (l_left,l_right) = split rope i in
+  let (r_left,r_right) = split l_right (j - i) in
+  (join l_left r_right)
+
 let rec getc rope i =
   check_index rope i;
   match rope with
@@ -58,46 +66,7 @@ let rec getc rope i =
       else
         getc r (i - left_len)
 
-let last rope =
-  limit_index rope ((length rope) - 1)
-
-let is_bol rope pos =
-  if pos == 0 then true
-  else ((getc rope (pos-1)) == 0x0A)
-
-let is_eol rope pos =
-  if pos >= (last rope) then true
-  else ((getc rope (pos+1)) == 0x0A)
-
-let is_bow rope pos = false
-
-let is_eow rope pos = false
-
-let rec move_till step testfn rope pos =
-  if (testfn rope pos) then pos
-  else (move_till step testfn rope (pos + step))
-
-let to_bol rope pos =
-  move_till (-1) is_bol rope pos
-
-let to_eol rope pos =
-  move_till (+1) is_eol rope pos
-
-let to_bow rope pos =
-  move_till (-1) is_bow rope pos
-
-let to_eow rope pos =
-  move_till (+1) is_eow rope pos
-
-let rec puts rope s i =
-  let (left,right) = split rope i in
-  let middle = from_string s in
-  (join (join left middle) right)
-
-let del rope i j =
-  let (l_left,l_right) = split rope i in
-  let (r_left,r_right) = split l_right (j - i) in
-  (join l_left r_right)
+let putc rope i c = rope
 
 let rec iter_from fn rope pos =
   if pos < (length rope) && (fn (getc rope pos)) then
@@ -106,22 +75,6 @@ let rec iter_from fn rope pos =
 let rec iteri_from fn rope pos =
   if pos < (length rope) && (fn pos (getc rope pos)) then
     iteri_from fn rope (pos + 1)
-
-let iteri fn rope =
-  iteri_from (fun i c -> (fn i c); true) rope 0
-
-let iter fn rope =
-  iter_from (fun c -> (fn c); true) rope 0
-
-let map fn rope =
-  let buf = Bytes.create (length rope) in
-  iteri (fun i c -> Bytes.set buf i (fn c)) rope;
-  from_string (Bytes.unsafe_to_string buf)
-
-let mapi fn rope =
-  let buf = Bytes.create (length rope) in
-  iteri (fun i c -> Bytes.set buf i (fn i c)) rope;
-  from_string (Bytes.unsafe_to_string buf)
 
 let gets rope i j =
   let buf = Bytes.create (j - i) in
@@ -132,23 +85,25 @@ let gets rope i j =
     rope i;
   Bytes.unsafe_to_string buf
 
-let to_string rope =
-  gets rope 0 (length rope)
+let rec puts rope s i =
+  let (left,right) = split rope i in
+  let middle = from_string s in
+  (join (join left middle) right)
 
-(*
+let is_bol rope pos =
+  if pos == 0 then true
+  else ((getc rope (pos-1)) == 0x0A)
 
-size_t buf_lscan(Buf* buf, size_t pos, Rune r);
-size_t buf_rscan(Buf* buf, size_t pos, Rune r);
-void buf_getword(Buf* buf, bool ( *isword)(Rune), Sel* sel);
-void buf_getblock(Buf* buf, Rune beg, Rune end, Sel* sel);
-size_t buf_byrune(Buf* buf, size_t pos, int count);
-size_t buf_byword(Buf* buf, size_t pos, int count);
-size_t buf_byline(Buf* buf, size_t pos, int count);
-void buf_find(Buf* buf, int dir, size_t* beg, size_t* end);
-void buf_findstr(Buf* buf, int dir, char* str, size_t* beg, size_t* end);
-void buf_lastins(Buf* buf, size_t* beg, size_t* end);
-size_t buf_setln(Buf* buf, size_t line);
-size_t buf_getcol(Buf* buf, size_t pos);
-size_t buf_setcol(Buf* buf, size_t pos, size_t col);
+let is_eol rope pos =
+  if pos >= (last rope) then true
+  else ((getc rope (pos+1)) == 0x0A)
 
-*)
+let rec move_till step testfn rope pos =
+  if (testfn rope pos) then pos
+  else (move_till step testfn rope (pos + step))
+
+let to_bol rope pos =
+  move_till (-1) is_bol rope pos
+
+let to_eol rope pos =
+  move_till (+1) is_eol rope pos

@@ -1,3 +1,17 @@
+module Cursor = struct
+  type t = {
+    start : int;
+    stop : int;
+    column : int;
+  }
+
+  let make start stop =
+    { start = start; stop = stop; column = 0 }
+
+  let clone csr =
+    { start = csr.start; stop = csr.stop; column = csr.column }
+end
+
 type t = {
   path : string;
   rope : Rope.t
