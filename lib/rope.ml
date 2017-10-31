@@ -58,7 +58,14 @@ let del rope i j =
 let rec getc rope i =
   check_index rope i;
   match rope with
-  | Leaf (s,off,_) -> (Char.code s.[off + i])
+  | Leaf (s,off,_) ->
+      let c = (Char.code s.[off + i]) in
+      let len = (length rope) in
+      let next = (i + 1) in
+      if (c == 0x0D && next < len && (getc rope next) == 0x0A) then
+        0x0A
+      else
+        c
   | Node (l,r,len) ->
       let left_len = (length l) in
       if i < left_len then

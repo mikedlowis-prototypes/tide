@@ -73,6 +73,18 @@ let  () =
     let rope = Node((Leaf("a", 0, 1)), (Leaf("b", 0, 1)), 2) in
     assert( (getc rope (1)) == Char.code 'b' );
   );
+  test "getc : return \\n for \\r\\n" (fun () ->
+    let rope = from_string "\r\n" in
+    assert( (getc rope (0)) == Char.code '\n' );
+  );
+  test "getc : return \\r for \\r at end of string" (fun () ->
+    let rope = from_string "\r" in
+    assert( (getc rope (0)) == Char.code '\r' );
+  );
+  test "getc : return \\r for \\r with no \\n" (fun () ->
+    let rope = from_string "\ra" in
+    assert( (getc rope (0)) == Char.code '\r' );
+  );
 
   (* puts() tests *)
   test "puts : insert at index 0" (fun () ->
