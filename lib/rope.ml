@@ -1,8 +1,9 @@
 exception Out_of_bounds of string
+exception Bad_rotation
 
 type t =
   | Leaf of string * int * int
-  | Node of t * t * int
+  | Node of t * t * int * int
 type rope = t
 type rune = int
 
@@ -12,8 +13,12 @@ let from_string s =
   Leaf (s, 0, (String.length s))
 
 let length = function
-  | Leaf (_,_,l) -> l
-  | Node (_,_,l) -> l
+  | Leaf (_,_,l)   -> l
+  | Node (_,_,_,l) -> l
+
+let height = function
+  | Leaf (_,_,_)   -> 0
+  | Node (_,_,h,_) -> h
 
 let limit_index rope i =
   if i < 0 then 0
@@ -29,11 +34,17 @@ let check_index rope i =
     raise (Out_of_bounds "Rope.check_index")
 
 let join left right =
-  let left_len = (length left) in
-  let right_len = (length right) in
-  if left_len == 0 then right
-  else if right_len == 0 then left
-  else Node (left, right, (length left) + (length right))
+  let llen = (length left) and rlen = (length right) in
+  if llen == 0 then right
+  else if rlen == 0 then left
+  else
+    let lh = (height left) and rh = (height right) in
+    let nh = 1 + lh + rh in
+    let n = Node (left, right, nh, llen + rlen) in
+    match (lh - rh) with
+    | 0  -> n
+    | 1  -> n
+    | -1 -> n
 
 let rec split rope i =
   if i < 0 || i > (length rope) then
@@ -41,7 +52,7 @@ let rec split rope i =
   match rope with
   | Leaf (s,off,len) ->
       (Leaf (s, off,  i), Leaf (s, (off + i), len - (i)))
-  | Node (l,r,len) ->
+  | Node (l,r,h,len) ->
       let left_len = (length l) in
       if i < left_len then
         let (sl,sr) = (split l i) in
@@ -55,6 +66,18 @@ let del rope i j =
   let (r_left,r_right) = split l_right (j - i) in
   (join l_left r_right)
 
+let rec getb rope i =
+  check_index rope i;
+  match rope with
+  | Leaf (s,off,_) ->
+      s.[off + i]
+  | Node (l,r,h,len) ->
+      let left_len = (length l) in
+      if i < left_len then
+        getb l i
+      else
+        getb r (i - left_len)
+
 let rec getc rope i =
   check_index rope i;
   match rope with
@@ -66,7 +89,7 @@ let rec getc rope i =
         0x0A
       else
         c
-  | Node (l,r,len) ->
+  | Node (l,r,h,len) ->
       let left_len = (length l) in
       if i < left_len then
         getc l i
@@ -87,7 +110,7 @@ let gets rope i j =
   let buf = Bytes.create (j - i) in
   iteri_from
     (fun n c ->
-      Bytes.set buf (n - i) (Char.chr (getc rope i));
+      Bytes.set buf (n - i) (getb rope i);
       (n <= j))
     rope i;
   Bytes.unsafe_to_string buf

@@ -22,7 +22,7 @@ let  () =
     let right =  Leaf("a", 0, 1) in
     let rope  = (join left right) in
     assert( match rope with
-    | Node (l,r,2) -> (l == left && r == right)
+    | Node (l,r,h,2) -> (l == left && r == right)
     | _ -> false)
   );
   test "join : join a rope with a leaf (l to r)" (fun () ->
@@ -30,7 +30,7 @@ let  () =
     let right =  Leaf("a", 0, 1) in
     let rope  = (join left right) in
     assert( match rope with
-    | Node (l,r,3) -> (l == left && r == right)
+    | Node (l,r,h,3) -> (l == left && r == right)
     | _ -> false)
   );
   test "join : join a rope with a leaf (r to l)" (fun () ->
@@ -38,7 +38,7 @@ let  () =
     let right = join (Leaf("a", 0, 1)) (Leaf("a", 0, 1)) in
     let rope  = (join left right) in
     assert( match rope with
-    | Node (l,r,3) -> (l == left && r == right)
+    | Node (l,r,h,3) -> (l == left && r == right)
     | _ -> false)
   );
 
@@ -66,11 +66,11 @@ let  () =
     assert( (getc rope (2)) == Char.code 'c' );
   );
   test "getc : return index 0 of rope" (fun () ->
-    let rope = Node((Leaf("a", 0, 1)), (Leaf("b", 0, 1)), 2) in
+    let rope = Node((Leaf("a", 0, 1)), (Leaf("b", 0, 1)), 0, 2) in
     assert( (getc rope (0)) == Char.code 'a' );
   );
   test "getc : return index 1 of rope" (fun () ->
-    let rope = Node((Leaf("a", 0, 1)), (Leaf("b", 0, 1)), 2) in
+    let rope = Node((Leaf("a", 0, 1)), (Leaf("b", 0, 1)), 0, 2) in
     assert( (getc rope (1)) == Char.code 'b' );
   );
   test "getc : return \\n for \\r\\n" (fun () ->
