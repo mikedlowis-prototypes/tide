@@ -28,12 +28,12 @@ let first map =
   map.lines.(map.index)
 
 let bopl buf off =
-  let next = ((Rope.to_bol (Buf.rope buf) off) - 2) in
-  Rope.limit_index (Buf.rope buf) next
+  let rope = (Buf.rope buf) in
+  Rope.prevc rope (Rope.to_bol rope off)
 
 let bonl buf off =
-  let next = ((Rope.to_eol (Buf.rope buf) off) + 2) in
-  Rope.limit_index (Buf.rope buf) next
+  let rope = (Buf.rope buf) in
+  Rope.nextc rope (Rope.to_eol rope off)
 
 let scroll_up map buf =
   let next = map.index - 1 in

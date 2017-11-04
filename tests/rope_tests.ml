@@ -112,6 +112,34 @@ let  () =
     assert( (getc rope (2)) == Char.code 'c' );
   );
 
+  (* nextc() tests *)
+  test "nextc : should return pos if at end of buffer" (fun () ->
+    let rope = Leaf("abc", 0, 3) in
+    assert( 2 == (nextc rope 2) );
+  );
+  test "nextc : should return pos of next char" (fun () ->
+    let rope = Leaf("a\na", 0, 3) in
+    assert( 2 == (nextc rope 1) );
+  );
+  test "nextc : should return pos of next char" (fun () ->
+    let rope = Leaf("a\r\na", 0, 4) in
+    assert( 3 == (nextc rope 1) );
+  );
+
+  (* prevc() tests *)
+  test "prevc : should return pos if at start of buffer" (fun () ->
+    let rope = Leaf("abc", 0, 3) in
+    assert( 0 == (prevc rope 0) );
+  );
+  test "prevc : should return pos of prev char" (fun () ->
+    let rope = Leaf("a\na", 0, 3) in
+    assert( 1 == (prevc rope 2) );
+  );
+  test "prevc : should return pos of prev char" (fun () ->
+    let rope = Leaf("a\r\na", 0, 4) in
+    assert( 1 == (prevc rope 3) );
+  );
+
   (* is_bol() tests *)
   test "is_bol : should return true if pos is 0" (fun () ->
     let rope = Leaf("abc", 0, 3) in
@@ -137,7 +165,7 @@ let  () =
   );
   test "is_eol : should return true if pos is last char of line with \n ending" (fun () ->
     let rope = Leaf("abc\n", 0, 4) in
-    assert( is_eol rope 2 );
+    assert( is_eol rope 3 );
   );
   test "is_eol : should return true if pos is last char of line with \r\n ending" (fun () ->
     let rope = Leaf("abc\r\n", 0, 5) in

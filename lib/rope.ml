@@ -12,6 +12,8 @@ let empty = Leaf ("", 0, 0)
 let from_string s =
   Leaf (s, 0, (String.length s))
 
+(******************************************************************************)
+
 let length = function
   | Leaf (_,_,l)   -> l
   | Node (_,_,_,l) -> l
@@ -33,6 +35,8 @@ let check_index rope i =
   if i < 0 || i >= (length rope) then
     raise (Out_of_bounds "Rope.check_index")
 
+(******************************************************************************)
+
 let join left right =
   let llen = (length left) and rlen = (length right) in
   if llen == 0 then right
@@ -40,11 +44,15 @@ let join left right =
   else
     let lh = (height left) and rh = (height right) in
     let nh = 1 + lh + rh in
+    Node (left, right, nh, llen + rlen)
+
+(*
     let n = Node (left, right, nh, llen + rlen) in
     match (lh - rh) with
     | 0  -> n
     | 1  -> n
     | -1 -> n
+*)
 
 let rec split rope i =
   if i < 0 || i > (length rope) then
@@ -65,6 +73,8 @@ let del rope i j =
   let (l_left,l_right) = split rope i in
   let (r_left,r_right) = split l_right (j - i) in
   (join l_left r_right)
+
+(******************************************************************************)
 
 let rec getb rope i =
   check_index rope i;
@@ -98,6 +108,8 @@ let rec getc rope i =
 
 let putc rope i c = rope
 
+(******************************************************************************)
+
 let rec iter_from fn rope pos =
   if pos < (length rope) && (fn (getc rope pos)) then
     iter_from fn rope (pos + 1)
@@ -105,6 +117,8 @@ let rec iter_from fn rope pos =
 let rec iteri_from fn rope pos =
   if pos < (length rope) && (fn pos (getc rope pos)) then
     iteri_from fn rope (pos + 1)
+
+(******************************************************************************)
 
 let gets rope i j =
   let buf = Bytes.create (j - i) in
@@ -120,17 +134,38 @@ let rec puts rope s i =
   let middle = from_string s in
   (join (join left middle) right)
 
+(******************************************************************************)
+
+let nextc rope pos =
+  let next = limit_index rope (pos + 1) in
+  if (getb rope pos) == '\r' && (getb rope next) == '\n' then
+    limit_index rope (pos + 2)
+  else
+    next
+
+let prevc rope pos =
+  let prev1 = limit_index rope (pos - 1) in
+  let prev2 = limit_index rope (pos - 2) in
+  if (getb rope prev2) == '\r' && (getb rope prev1) == '\n' then
+    prev2
+  else
+    prev1
+
+(******************************************************************************)
+
 let is_bol rope pos =
   if pos == 0 then true
-  else ((getc rope (pos-1)) == 0x0A)
+  else let prev = (prevc rope pos) in
+  ((getc rope prev) == 0x0A)
 
 let is_eol rope pos =
   if pos >= (last rope) then true
-  else ((getc rope (pos+1)) == 0x0A)
+  else ((getc rope pos) == 0x0A)
 
 let rec move_till step testfn rope pos =
+  let adjust_pos = if step < 0 then prevc else nextc in
   if (testfn rope pos) then pos
-  else (move_till step testfn rope (pos + step))
+  else (move_till step testfn rope (adjust_pos rope pos))
 
 let to_bol rope pos =
   move_till (-1) is_bol rope pos
