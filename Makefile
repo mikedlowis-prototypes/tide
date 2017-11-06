@@ -24,14 +24,17 @@ endif
 # Target Definitions
 #-------------------------------------------------------------------------------
 BINS = edit unittests
+LIBSRCS = \
+	lib/misc.ml \
+	lib/x11.ml \
+	lib/cfg.ml \
+	lib/rope.ml \
+	lib/buf.ml \
+	lib/draw.ml \
+	lib/scrollmap.ml
+
 LIBOBJS = \
-    lib/misc.$(OBJEXT) \
-    lib/x11.$(OBJEXT) \
-    lib/cfg.$(OBJEXT) \
-    lib/rope.$(OBJEXT) \
-    lib/buf.$(OBJEXT) \
-    lib/draw.$(OBJEXT) \
-    lib/scrollmap.$(OBJEXT) \
+	$(LIBSRCS:.ml=.$(OBJEXT)) \
     lib/x11_prims.o \
     lib/misc_prims.o \
     lib/utf8.o
@@ -41,9 +44,9 @@ TESTOBJS = \
     tests/rope_tests.$(OBJEXT) \
     tests/scrollmap_tests.$(OBJEXT)
 
-.PHONY: all clean
+.PHONY: all clean docs
 
-all: $(BINS)
+all: docs/index.html $(BINS)
 	./unittests
 
 clean:
@@ -55,10 +58,11 @@ unittests: tide.$(LIBEXT) $(TESTOBJS) unittests.$(OBJEXT)
 
 # Library targets
 tide.$(LIBEXT): $(LIBOBJS)
+docs/index.html: tide.$(LIBEXT)
+	ocamldoc -d docs -html -I lib $(LIBSRCS)
 
-deps.mk:
-	ocamldep *.ml* lib/*.ml* > deps.mk
-
+deps.mk: $(LIBSRCS)
+	ocamldep -all *.ml* lib/*.ml* > deps.mk
 -include deps.mk
 
 # Implicit Rule Definitions

@@ -1,0 +1,481 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<link rel="stylesheet" href="style.css" type="text/css">
+<meta content="text/html; charset=iso-8859-1" http-equiv="Content-Type">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="Start" href="index.html">
+<link rel="previous" href="Misc.html">
+<link rel="next" href="Cfg.html">
+<link rel="Up" href="index.html">
+<link title="Index of types" rel=Appendix href="index_types.html">
+<link title="Index of exceptions" rel=Appendix href="index_exceptions.html">
+<link title="Index of values" rel=Appendix href="index_values.html">
+<link title="Index of modules" rel=Appendix href="index_modules.html">
+<link title="Misc" rel="Chapter" href="Misc.html">
+<link title="X11" rel="Chapter" href="X11.html">
+<link title="Cfg" rel="Chapter" href="Cfg.html">
+<link title="Rope" rel="Chapter" href="Rope.html">
+<link title="Buf" rel="Chapter" href="Buf.html">
+<link title="Draw" rel="Chapter" href="Draw.html">
+<link title="Scrollmap" rel="Chapter" href="Scrollmap.html"><title>X11</title>
+</head>
+<body>
+<div class="navbar"><a class="pre" href="Misc.html" title="Misc">Previous</a>
+&nbsp;<a class="up" href="index.html" title="Index">Up</a>
+&nbsp;<a class="post" href="Cfg.html" title="Cfg">Next</a>
+</div>
+<h1>Module <a href="type_X11.html">X11</a></h1>
+
+<pre><span class="keyword">module</span> X11: <code class="code">sig</code> <a href="X11.html">..</a> <code class="code">end</code></pre><hr width="100%">
+
+<pre><span id="TYPExatom"><span class="keyword">type</span> <code class="type"></code>xatom</span> </pre>
+
+
+<pre><span id="TYPExwin"><span class="keyword">type</span> <code class="type"></code>xwin</span> </pre>
+
+
+<pre><span id="TYPExfont"><span class="keyword">type</span> <code class="type"></code>xfont</span> </pre>
+
+
+<pre><span id="TYPExfontpatt"><span class="keyword">type</span> <code class="type"></code>xfontpatt</span> </pre>
+
+
+<pre><code><span id="TYPExevent"><span class="keyword">type</span> <code class="type"></code>xevent</span> = </code></pre><table class="typetable">
+<tr>
+<td align="left" valign="top" >
+<code><span class="keyword">|</span></code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTxevent.Focus"><span class="constructor">Focus</span></span> <span class="keyword">of</span> <code class="type">bool</code></code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code><span class="keyword">|</span></code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTxevent.KeyPress"><span class="constructor">KeyPress</span></span> <span class="keyword">of</span> <code>{</code><table class="typetable">
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTX11.KeyPress.mods">mods</span>&nbsp;: <code class="type">int</code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTX11.KeyPress.rune">rune</span>&nbsp;: <code class="type">int</code>;</code></td>
+
+</tr></table>
+}
+</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code><span class="keyword">|</span></code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTxevent.MouseClick"><span class="constructor">MouseClick</span></span> <span class="keyword">of</span> <code>{</code><table class="typetable">
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTX11.MouseClick.mods">mods</span>&nbsp;: <code class="type">int</code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTX11.MouseClick.btn">btn</span>&nbsp;: <code class="type">int</code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTX11.MouseClick.x">x</span>&nbsp;: <code class="type">int</code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTX11.MouseClick.y">y</span>&nbsp;: <code class="type">int</code>;</code></td>
+
+</tr></table>
+}
+</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code><span class="keyword">|</span></code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTxevent.MouseRelease"><span class="constructor">MouseRelease</span></span> <span class="keyword">of</span> <code>{</code><table class="typetable">
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTX11.MouseRelease.mods">mods</span>&nbsp;: <code class="type">int</code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTX11.MouseRelease.btn">btn</span>&nbsp;: <code class="type">int</code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTX11.MouseRelease.x">x</span>&nbsp;: <code class="type">int</code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTX11.MouseRelease.y">y</span>&nbsp;: <code class="type">int</code>;</code></td>
+
+</tr></table>
+}
+</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code><span class="keyword">|</span></code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTxevent.MouseMove"><span class="constructor">MouseMove</span></span> <span class="keyword">of</span> <code>{</code><table class="typetable">
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTX11.MouseMove.mods">mods</span>&nbsp;: <code class="type">int</code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTX11.MouseMove.x">x</span>&nbsp;: <code class="type">int</code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTX11.MouseMove.y">y</span>&nbsp;: <code class="type">int</code>;</code></td>
+
+</tr></table>
+}
+</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code><span class="keyword">|</span></code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTxevent.Paste"><span class="constructor">Paste</span></span> <span class="keyword">of</span> <code>{</code><table class="typetable">
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTX11.Paste.text">text</span>&nbsp;: <code class="type">string</code>;</code></td>
+
+</tr></table>
+}
+</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code><span class="keyword">|</span></code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTxevent.Command"><span class="constructor">Command</span></span> <span class="keyword">of</span> <code>{</code><table class="typetable">
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTX11.Command.commands">commands</span>&nbsp;: <code class="type">string array</code>;</code></td>
+
+</tr></table>
+}
+</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code><span class="keyword">|</span></code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTxevent.PipeClosed"><span class="constructor">PipeClosed</span></span> <span class="keyword">of</span> <code>{</code><table class="typetable">
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTX11.PipeClosed.fd">fd</span>&nbsp;: <code class="type">int</code>;</code></td>
+
+</tr></table>
+}
+</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code><span class="keyword">|</span></code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTxevent.PipeWriteReady"><span class="constructor">PipeWriteReady</span></span> <span class="keyword">of</span> <code>{</code><table class="typetable">
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTX11.PipeWriteReady.fd">fd</span>&nbsp;: <code class="type">int</code>;</code></td>
+
+</tr></table>
+}
+</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code><span class="keyword">|</span></code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTxevent.PipeReadReady"><span class="constructor">PipeReadReady</span></span> <span class="keyword">of</span> <code>{</code><table class="typetable">
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTX11.PipeReadReady.fd">fd</span>&nbsp;: <code class="type">int</code>;</code></td>
+
+</tr></table>
+}
+</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code><span class="keyword">|</span></code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTxevent.Update"><span class="constructor">Update</span></span> <span class="keyword">of</span> <code>{</code><table class="typetable">
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTX11.Update.width">width</span>&nbsp;: <code class="type">int</code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTX11.Update.height">height</span>&nbsp;: <code class="type">int</code>;</code></td>
+
+</tr></table>
+}
+</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code><span class="keyword">|</span></code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTxevent.Shutdown"><span class="constructor">Shutdown</span></span></code></td>
+
+</tr></table>
+
+
+
+<pre><code><span id="TYPExrect"><span class="keyword">type</span> <code class="type"></code>xrect</span> = {</code></pre><table class="typetable">
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTxrect.x">x</span>&nbsp;: <code class="type">int</code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTxrect.y">y</span>&nbsp;: <code class="type">int</code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTxrect.w">w</span>&nbsp;: <code class="type">int</code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTxrect.h">h</span>&nbsp;: <code class="type">int</code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTxrect.c">c</span>&nbsp;: <code class="type">int</code>;</code></td>
+
+</tr></table>
+}
+
+
+
+<pre><code><span id="TYPExcfgvar"><span class="keyword">type</span> <code class="type"></code>xcfgvar</span> = </code></pre><table class="typetable">
+<tr>
+<td align="left" valign="top" >
+<code><span class="keyword">|</span></code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTxcfgvar.Bool"><span class="constructor">Bool</span></span> <span class="keyword">of</span> <code class="type">bool</code></code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code><span class="keyword">|</span></code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTxcfgvar.Int"><span class="constructor">Int</span></span> <span class="keyword">of</span> <code class="type">int</code></code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code><span class="keyword">|</span></code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTxcfgvar.String"><span class="constructor">String</span></span> <span class="keyword">of</span> <code class="type">string</code></code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code><span class="keyword">|</span></code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTxcfgvar.NotSet"><span class="constructor">NotSet</span></span></code></td>
+
+</tr></table>
+
+
+
+<pre><code><span id="TYPEfont"><span class="keyword">type</span> <code class="type"></code>font</span> = {</code></pre><table class="typetable">
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTfont.font">font</span>&nbsp;: <code class="type"><a href="X11.html#TYPExfont">xfont</a></code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTfont.patt">patt</span>&nbsp;: <code class="type"><a href="X11.html#TYPExfontpatt">xfontpatt</a></code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTfont.height">height</span>&nbsp;: <code class="type">int</code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTfont.next">next</span>&nbsp;: <code class="type"><a href="X11.html#TYPEfont">font</a></code>;</code></td>
+
+</tr></table>
+}
+
+
+
+<pre><code><span id="TYPEglyph"><span class="keyword">type</span> <code class="type"></code>glyph</span> = {</code></pre><table class="typetable">
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTglyph.font">font</span>&nbsp;: <code class="type"><a href="X11.html#TYPExfont">xfont</a></code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTglyph.index">index</span>&nbsp;: <code class="type">int</code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTglyph.rune">rune</span>&nbsp;: <code class="type">int</code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTglyph.width">width</span>&nbsp;: <code class="type">int</code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTglyph.x">x</span>&nbsp;: <code class="type">int</code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTglyph.y">y</span>&nbsp;: <code class="type">int</code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTglyph.xoff">xoff</span>&nbsp;: <code class="type">int</code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTglyph.yoff">yoff</span>&nbsp;: <code class="type">int</code>;</code></td>
+
+</tr></table>
+}
+
+
+
+<pre><span class="keyword">module</span> <a href="X11.Rune.html">Rune</a>: <code class="code">sig</code> <a href="X11.Rune.html">..</a> <code class="code">end</code></pre>
+<pre><span class="keyword">module</span> <a href="X11.GlyphMap.html">GlyphMap</a>: <code class="type">Map.Make</code><code class="code">(</code><code class="type"><a href="X11.Rune.html">Rune</a></code><code class="code">)</code></pre>
+<pre><span id="VALconnect"><span class="keyword">val</span> connect</span> : <code class="type">unit -> unit</code></pre>
+<pre><span id="VALdisconnect"><span class="keyword">val</span> disconnect</span> : <code class="type">unit -> unit</code></pre>
+<pre><span id="VALmake_window"><span class="keyword">val</span> make_window</span> : <code class="type">int -> int -> <a href="X11.html#TYPExwin">xwin</a></code></pre>
+<pre><span id="VALmake_dialog"><span class="keyword">val</span> make_dialog</span> : <code class="type">int -> int -> <a href="X11.html#TYPExwin">xwin</a></code></pre>
+<pre><span id="VALshow_window"><span class="keyword">val</span> show_window</span> : <code class="type"><a href="X11.html#TYPExwin">xwin</a> -> bool -> unit</code></pre>
+<pre><span id="VALdraw_rect"><span class="keyword">val</span> draw_rect</span> : <code class="type"><a href="X11.html#TYPExrect">xrect</a> -> unit</code></pre>
+<pre><span id="VALevent_loop"><span class="keyword">val</span> event_loop</span> : <code class="type">int -> (<a href="X11.html#TYPExevent">xevent</a> -> unit) -> unit</code></pre>
+<pre><span id="VALintern"><span class="keyword">val</span> intern</span> : <code class="type">string -> <a href="X11.html#TYPExatom">xatom</a></code></pre>
+<pre><span id="VALprop_set"><span class="keyword">val</span> prop_set</span> : <code class="type"><a href="X11.html#TYPExwin">xwin</a> -> <a href="X11.html#TYPExatom">xatom</a> -> string -> unit</code></pre>
+<pre><span id="VALprop_get"><span class="keyword">val</span> prop_get</span> : <code class="type"><a href="X11.html#TYPExwin">xwin</a> -> <a href="X11.html#TYPExatom">xatom</a> -> string</code></pre>
+<pre><span id="VALvar_get"><span class="keyword">val</span> var_get</span> : <code class="type">string -> <a href="X11.html#TYPExcfgvar">xcfgvar</a></code></pre>
+<pre><span id="VALfont_load"><span class="keyword">val</span> font_load</span> : <code class="type">string -> <a href="X11.html#TYPEfont">font</a></code></pre>
+<pre><span id="VALfont_glyph"><span class="keyword">val</span> font_glyph</span> : <code class="type"><a href="X11.html#TYPEfont">font</a> -> int -> <a href="X11.html#TYPEglyph">glyph</a></code></pre>
+<pre><span id="VALdraw_glyph"><span class="keyword">val</span> draw_glyph</span> : <code class="type">int -> <a href="X11.html#TYPEglyph">glyph</a> -> int * int -> int</code></pre>
+<pre><span id="VALglyph_cache"><span class="keyword">val</span> glyph_cache</span> : <code class="type"><a href="X11.html#TYPEglyph">glyph</a> GlyphMap.t Pervasives.ref</code></pre>
+<pre><span id="VALcache_update"><span class="keyword">val</span> cache_update</span> : <code class="type">GlyphMap.key -> <a href="X11.html#TYPEglyph">glyph</a> -> <a href="X11.html#TYPEglyph">glyph</a></code></pre>
+<pre><span id="VALget_glyph"><span class="keyword">val</span> get_glyph</span> : <code class="type"><a href="X11.html#TYPEfont">font</a> -> GlyphMap.key -> <a href="X11.html#TYPEglyph">glyph</a></code></pre>
+<pre><span id="VALdraw_rune"><span class="keyword">val</span> draw_rune</span> : <code class="type"><a href="X11.html#TYPEfont">font</a> -> int -> GlyphMap.key -> int * int -> int</code></pre>
+<pre><span id="VALdraw_char"><span class="keyword">val</span> draw_char</span> : <code class="type"><a href="X11.html#TYPEfont">font</a> -> int -> char -> int * int -> int</code></pre>
+<pre><span id="VALdraw_stringi"><span class="keyword">val</span> draw_stringi</span> : <code class="type"><a href="X11.html#TYPEfont">font</a> -> int -> string -> int * int -> int -> unit</code></pre>
+<pre><span id="VALdraw_string"><span class="keyword">val</span> draw_string</span> : <code class="type"><a href="X11.html#TYPEfont">font</a> -> int -> string -> int * int -> unit</code></pre>
+<pre><span id="VALmake_rect"><span class="keyword">val</span> make_rect</span> : <code class="type">int -> int -> int -> int -> int -> <a href="X11.html#TYPExrect">xrect</a></code></pre></body></html>

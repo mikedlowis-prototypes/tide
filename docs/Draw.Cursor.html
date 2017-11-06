@@ -1,0 +1,83 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<link rel="stylesheet" href="style.css" type="text/css">
+<meta content="text/html; charset=iso-8859-1" http-equiv="Content-Type">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="Start" href="index.html">
+<link rel="Up" href="Draw.html">
+<link title="Index of types" rel=Appendix href="index_types.html">
+<link title="Index of exceptions" rel=Appendix href="index_exceptions.html">
+<link title="Index of values" rel=Appendix href="index_values.html">
+<link title="Index of modules" rel=Appendix href="index_modules.html">
+<link title="Misc" rel="Chapter" href="Misc.html">
+<link title="X11" rel="Chapter" href="X11.html">
+<link title="Cfg" rel="Chapter" href="Cfg.html">
+<link title="Rope" rel="Chapter" href="Rope.html">
+<link title="Buf" rel="Chapter" href="Buf.html">
+<link title="Draw" rel="Chapter" href="Draw.html">
+<link title="Scrollmap" rel="Chapter" href="Scrollmap.html"><title>Draw.Cursor</title>
+</head>
+<body>
+<div class="navbar">&nbsp;<a class="up" href="Draw.html" title="Draw">Up</a>
+&nbsp;</div>
+<h1>Module <a href="type_Draw.Cursor.html">Draw.Cursor</a></h1>
+
+<pre><span class="keyword">module</span> Cursor: <code class="code">sig</code> <a href="Draw.Cursor.html">..</a> <code class="code">end</code></pre><hr width="100%">
+
+<pre><code><span id="TYPEt"><span class="keyword">type</span> <code class="type"></code>t</span> = {</code></pre><table class="typetable">
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTt.height">height</span>&nbsp;: <code class="type">int</code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTt.width">width</span>&nbsp;: <code class="type">int</code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTt.startx">startx</span>&nbsp;: <code class="type">int</code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTt.starty">starty</span>&nbsp;: <code class="type">int</code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span class="keyword">mutable&nbsp;</span><span id="TYPEELTt.x">x</span>&nbsp;: <code class="type">int</code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span class="keyword">mutable&nbsp;</span><span id="TYPEELTt.y">y</span>&nbsp;: <code class="type">int</code>;</code></td>
+
+</tr></table>
+}
+
+
+
+<pre><span id="VALmake"><span class="keyword">val</span> make</span> : <code class="type">int * int -> int -> int -> <a href="Draw.Cursor.html#TYPEt">t</a></code></pre>
+<pre><span id="VALmax_width"><span class="keyword">val</span> max_width</span> : <code class="type"><a href="Draw.Cursor.html#TYPEt">t</a> -> int</code></pre>
+<pre><span id="VALrestart"><span class="keyword">val</span> restart</span> : <code class="type"><a href="Draw.Cursor.html#TYPEt">t</a> -> int -> int -> <a href="Draw.Cursor.html#TYPEt">t</a></code></pre>
+<pre><span id="VALnext_line"><span class="keyword">val</span> next_line</span> : <code class="type"><a href="Draw.Cursor.html#TYPEt">t</a> -> unit</code></pre>
+<pre><span id="VALhas_next_line"><span class="keyword">val</span> has_next_line</span> : <code class="type"><a href="Draw.Cursor.html#TYPEt">t</a> -> bool</code></pre>
+<pre><span id="VALdraw_tab"><span class="keyword">val</span> draw_tab</span> : <code class="type"><a href="Draw.Cursor.html#TYPEt">t</a> -> unit</code></pre>
+<pre><span id="VALplace_glyph"><span class="keyword">val</span> place_glyph</span> : <code class="type"><a href="Draw.Cursor.html#TYPEt">t</a> -> <a href="X11.html#TYPEglyph">X11.glyph</a> -> unit</code></pre>
+<pre><span id="VALdraw_glyph"><span class="keyword">val</span> draw_glyph</span> : <code class="type"><a href="Draw.Cursor.html#TYPEt">t</a> -> X11.GlyphMap.key -> unit</code></pre>
+<pre><span id="VALnext_glyph"><span class="keyword">val</span> next_glyph</span> : <code class="type"><a href="Draw.Cursor.html#TYPEt">t</a> -> X11.GlyphMap.key -> bool</code></pre></body></html>
