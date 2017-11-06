@@ -35,10 +35,10 @@ let edit_view = ref (View.empty 640 480)
 let onfocus focused = ()
 
 let onkeypress mods rune =
-  edit_view := View.scroll_dn !edit_view
+  edit_view := View.scroll_up !edit_view
 
 let onmousebtn mods btn x y pressed =
-  match btn with
+  if pressed then match btn with
   | 1 -> ()
   | 2 -> ()
   | 3 -> ()

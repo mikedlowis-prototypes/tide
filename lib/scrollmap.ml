@@ -15,9 +15,10 @@ let make buf width off =
   let bol = (Rope.to_bol (Buf.rope buf) off) in
   let lines = ref [bol] in
   let process_glyph i c =
-    if (Draw.Cursor.next_glyph csr c) then
+    let is_eol = (Rope.is_eol (Buf.rope buf) i) in
+    if (Draw.Cursor.next_glyph csr c) && is_eol == false then
       lines := i :: !lines;
-      ((Rope.is_eol (Buf.rope buf) i) == false)
+    (is_eol == false)
   in
   Buf.iteri_from process_glyph buf off;
   let lines = (Array.of_list (List.rev !lines)) in
