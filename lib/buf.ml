@@ -31,6 +31,9 @@ module Cursor = struct
   let make buf idx =
     { start = 0; stop = (Rope.limit_index buf.rope idx) }
 
+  let offset buf csr =
+    csr.stop
+
   let goto buf csr idx =
     csr.stop <- (Rope.limit_index buf.rope idx)
 
@@ -38,15 +41,15 @@ module Cursor = struct
     Rope.getc buf.rope csr.stop
 
   let nextc buf csr =
-    csr.stop <- (Rope.nextc buf.rope csr.stop)
+    csr.stop <- (Rope.nextc buf.rope csr.stop); csr.stop
 
   let prevc buf csr =
-    csr.stop <- (Rope.prevc buf.rope csr.stop)
+    csr.stop <- (Rope.prevc buf.rope csr.stop); csr.stop
 
   let nextln buf csr =
-    csr.stop <- (Rope.nextln buf.rope csr.stop)
+    csr.stop <- (Rope.nextln buf.rope csr.stop); csr.stop
 
   let prevln buf csr =
-    csr.stop <- (Rope.prevln buf.rope csr.stop)
+    csr.stop <- (Rope.prevln buf.rope csr.stop); csr.stop
 end
 

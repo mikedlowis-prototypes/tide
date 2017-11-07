@@ -28,9 +28,11 @@ let make buf width off =
 let first map =
   map.lines.(map.index)
 
-let bopl buf off = (Rope.prevln (Buf.rope buf) off)
+let bopl buf off =
+  Buf.Cursor.prevln buf (Buf.Cursor.make buf off)
 
-let bonl buf off = (Rope.nextln (Buf.rope buf) off)
+let bonl buf off =
+  Buf.Cursor.nextln buf (Buf.Cursor.make buf off)
 
 let scroll_up map buf =
   let next = map.index - 1 in

@@ -16,8 +16,8 @@ module Cursor : sig
   val gets : buf -> t -> string
   val puts : buf -> t -> string -> unit
   *)
-  val nextc : buf -> t -> unit
-  val prevc : buf -> t -> unit
-  val nextln : buf -> t -> unit
-  val prevln : buf -> t -> unit
+  val nextc : buf -> t -> int
+  val prevc : buf -> t -> int
+  val nextln : buf -> t -> int
+  val prevln : buf -> t -> int
 end

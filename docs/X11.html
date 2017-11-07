@@ -27,9 +27,7 @@
 </div>
 <h1>Module <a href="type_X11.html">X11</a></h1>
 
-<pre><span class="keyword">module</span> X11: <code class="code">sig</code> <a href="X11.html">..</a> <code class="code">end</code></pre><div class="info module top">
-</div>
-<hr width="100%">
+<pre><span class="keyword">module</span> X11: <code class="code">sig</code> <a href="X11.html">..</a> <code class="code">end</code></pre><hr width="100%">
 
 <pre><span id="TYPExatom"><span class="keyword">type</span> <code class="type"></code>xatom</span> </pre>
 
@@ -473,9 +471,7 @@
 <pre><span id="VALfont_load"><span class="keyword">val</span> font_load</span> : <code class="type">string -> <a href="X11.html#TYPEfont">font</a></code></pre>
 <pre><span id="VALfont_glyph"><span class="keyword">val</span> font_glyph</span> : <code class="type"><a href="X11.html#TYPEfont">font</a> -> int -> <a href="X11.html#TYPEglyph">glyph</a></code></pre>
 <pre><span id="VALdraw_glyph"><span class="keyword">val</span> draw_glyph</span> : <code class="type">int -> <a href="X11.html#TYPEglyph">glyph</a> -> int * int -> int</code></pre>
-<pre><span id="VALglyph_cache"><span class="keyword">val</span> glyph_cache</span> : <code class="type">(int, <a href="X11.html#TYPEglyph">glyph</a>) Hashtbl.t</code></pre><div class="info ">
-</div>
-
+<pre><span id="VALglyph_cache"><span class="keyword">val</span> glyph_cache</span> : <code class="type">(int, <a href="X11.html#TYPEglyph">glyph</a>) Hashtbl.t</code></pre>
 <pre><span id="VALcache_update"><span class="keyword">val</span> cache_update</span> : <code class="type">int -> <a href="X11.html#TYPEglyph">glyph</a> -> <a href="X11.html#TYPEglyph">glyph</a></code></pre>
 <pre><span id="VALget_glyph"><span class="keyword">val</span> get_glyph</span> : <code class="type"><a href="X11.html#TYPEfont">font</a> -> int -> <a href="X11.html#TYPEglyph">glyph</a></code></pre>
 <pre><span id="VALdraw_rune"><span class="keyword">val</span> draw_rune</span> : <code class="type"><a href="X11.html#TYPEfont">font</a> -> int -> int -> int * int -> int</code></pre>
