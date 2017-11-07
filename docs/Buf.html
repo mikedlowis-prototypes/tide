@@ -29,28 +29,31 @@
 
 <pre><span class="keyword">module</span> Buf: <code class="code">sig</code> <a href="Buf.html">..</a> <code class="code">end</code></pre><hr width="100%">
 
-<pre><span class="keyword">module</span> <a href="Buf.Cursor.html">Cursor</a>: <code class="code">sig</code> <a href="Buf.Cursor.html">..</a> <code class="code">end</code></pre>
-<pre><code><span id="TYPEt"><span class="keyword">type</span> <code class="type"></code>t</span> = {</code></pre><table class="typetable">
+<pre><code><span id="TYPEbuf"><span class="keyword">type</span> <code class="type"></code>buf</span> = {</code></pre><table class="typetable">
 <tr>
 <td align="left" valign="top" >
 <code>&nbsp;&nbsp;</code></td>
 <td align="left" valign="top" >
-<code><span id="TYPEELTt.path">path</span>&nbsp;: <code class="type">string</code>;</code></td>
+<code><span id="TYPEELTbuf.path">path</span>&nbsp;: <code class="type">string</code>;</code></td>
 
 </tr>
 <tr>
 <td align="left" valign="top" >
 <code>&nbsp;&nbsp;</code></td>
 <td align="left" valign="top" >
-<code><span id="TYPEELTt.rope">rope</span>&nbsp;: <code class="type"><a href="Rope.html#TYPEt">Rope.t</a></code>;</code></td>
+<code><span id="TYPEELTbuf.rope">rope</span>&nbsp;: <code class="type"><a href="Rope.html#TYPEt">Rope.t</a></code>;</code></td>
 
 </tr></table>
 }
 
 
 
-<pre><span id="VALempty"><span class="keyword">val</span> empty</span> : <code class="type"><a href="Buf.html#TYPEt">t</a></code></pre>
-<pre><span id="VALload"><span class="keyword">val</span> load</span> : <code class="type">string -> <a href="Buf.html#TYPEt">t</a></code></pre>
-<pre><span id="VALrope"><span class="keyword">val</span> rope</span> : <code class="type"><a href="Buf.html#TYPEt">t</a> -> <a href="Rope.html#TYPEt">Rope.t</a></code></pre>
-<pre><span id="VALiter_from"><span class="keyword">val</span> iter_from</span> : <code class="type">(<a href="Rope.html#TYPErune">Rope.rune</a> -> bool) -> <a href="Buf.html#TYPEt">t</a> -> int -> unit</code></pre>
-<pre><span id="VALiteri_from"><span class="keyword">val</span> iteri_from</span> : <code class="type">(int -> <a href="Rope.html#TYPErune">Rope.rune</a> -> bool) -> <a href="Buf.html#TYPEt">t</a> -> int -> unit</code></pre></body></html>
+<pre><span id="TYPEt"><span class="keyword">type</span> <code class="type"></code>t</span> = <code class="type"><a href="Buf.html#TYPEbuf">buf</a></code> </pre>
+
+
+<pre><span id="VALempty"><span class="keyword">val</span> empty</span> : <code class="type"><a href="Buf.html#TYPEbuf">buf</a></code></pre>
+<pre><span id="VALload"><span class="keyword">val</span> load</span> : <code class="type">string -> <a href="Buf.html#TYPEbuf">buf</a></code></pre>
+<pre><span id="VALrope"><span class="keyword">val</span> rope</span> : <code class="type"><a href="Buf.html#TYPEbuf">buf</a> -> <a href="Rope.html#TYPEt">Rope.t</a></code></pre>
+<pre><span id="VALiter_from"><span class="keyword">val</span> iter_from</span> : <code class="type">(<a href="Rope.html#TYPErune">Rope.rune</a> -> bool) -> <a href="Buf.html#TYPEbuf">buf</a> -> int -> unit</code></pre>
+<pre><span id="VALiteri_from"><span class="keyword">val</span> iteri_from</span> : <code class="type">(int -> <a href="Rope.html#TYPErune">Rope.rune</a> -> bool) -> <a href="Buf.html#TYPEbuf">buf</a> -> int -> unit</code></pre>
+<pre><span class="keyword">module</span> <a href="Buf.Cursor.html">Cursor</a>: <code class="code">sig</code> <a href="Buf.Cursor.html">..</a> <code class="code">end</code></pre></body></html>

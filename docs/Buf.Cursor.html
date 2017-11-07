@@ -25,31 +25,31 @@
 
 <pre><span class="keyword">module</span> Cursor: <code class="code">sig</code> <a href="Buf.Cursor.html">..</a> <code class="code">end</code></pre><hr width="100%">
 
-<pre><code><span id="TYPEt"><span class="keyword">type</span> <code class="type"></code>t</span> = {</code></pre><table class="typetable">
+<pre><code><span id="TYPEcsr"><span class="keyword">type</span> <code class="type"></code>csr</span> = {</code></pre><table class="typetable">
 <tr>
 <td align="left" valign="top" >
 <code>&nbsp;&nbsp;</code></td>
 <td align="left" valign="top" >
-<code><span id="TYPEELTt.start">start</span>&nbsp;: <code class="type">int</code>;</code></td>
+<code><span class="keyword">mutable&nbsp;</span><span id="TYPEELTcsr.start">start</span>&nbsp;: <code class="type">int</code>;</code></td>
 
 </tr>
 <tr>
 <td align="left" valign="top" >
 <code>&nbsp;&nbsp;</code></td>
 <td align="left" valign="top" >
-<code><span id="TYPEELTt.stop">stop</span>&nbsp;: <code class="type">int</code>;</code></td>
-
-</tr>
-<tr>
-<td align="left" valign="top" >
-<code>&nbsp;&nbsp;</code></td>
-<td align="left" valign="top" >
-<code><span id="TYPEELTt.column">column</span>&nbsp;: <code class="type">int</code>;</code></td>
+<code><span class="keyword">mutable&nbsp;</span><span id="TYPEELTcsr.stop">stop</span>&nbsp;: <code class="type">int</code>;</code></td>
 
 </tr></table>
 }
 
 
 
-<pre><span id="VALmake"><span class="keyword">val</span> make</span> : <code class="type">int -> int -> <a href="Buf.Cursor.html#TYPEt">t</a></code></pre>
-<pre><span id="VALclone"><span class="keyword">val</span> clone</span> : <code class="type"><a href="Buf.Cursor.html#TYPEt">t</a> -> <a href="Buf.Cursor.html#TYPEt">t</a></code></pre></body></html>
+<pre><span id="TYPEt"><span class="keyword">type</span> <code class="type"></code>t</span> = <code class="type"><a href="Buf.Cursor.html#TYPEcsr">csr</a></code> </pre>
+
+
+<pre><span id="VALmake"><span class="keyword">val</span> make</span> : <code class="type"><a href="Buf.html#TYPEbuf">Buf.buf</a> -> int -> <a href="Buf.Cursor.html#TYPEcsr">csr</a></code></pre>
+<pre><span id="VALgoto"><span class="keyword">val</span> goto</span> : <code class="type"><a href="Buf.html#TYPEbuf">Buf.buf</a> -> <a href="Buf.Cursor.html#TYPEcsr">csr</a> -> int -> unit</code></pre>
+<pre><span id="VALnextc"><span class="keyword">val</span> nextc</span> : <code class="type"><a href="Buf.html#TYPEbuf">Buf.buf</a> -> <a href="Buf.Cursor.html#TYPEcsr">csr</a> -> unit</code></pre>
+<pre><span id="VALprevc"><span class="keyword">val</span> prevc</span> : <code class="type"><a href="Buf.html#TYPEbuf">Buf.buf</a> -> <a href="Buf.Cursor.html#TYPEcsr">csr</a> -> unit</code></pre>
+<pre><span id="VALnextln"><span class="keyword">val</span> nextln</span> : <code class="type"><a href="Buf.html#TYPEbuf">Buf.buf</a> -> <a href="Buf.Cursor.html#TYPEcsr">csr</a> -> unit</code></pre>
+<pre><span id="VALprevln"><span class="keyword">val</span> prevln</span> : <code class="type"><a href="Buf.html#TYPEbuf">Buf.buf</a> -> <a href="Buf.Cursor.html#TYPEcsr">csr</a> -> unit</code></pre></body></html>
