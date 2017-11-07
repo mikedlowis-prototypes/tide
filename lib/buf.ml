@@ -2,6 +2,7 @@ type buf = {
   path : string;
   rope : Rope.t
 }
+
 type t = buf
 
 let empty =
@@ -10,7 +11,7 @@ let empty =
 let load path =
   { path = path; rope = Rope.from_string (Misc.load_file path) }
 
-let rope buf =
+let rope buf = (* DELETEME *)
   buf.rope
 
 let iter_from fn buf i =

@@ -11,6 +11,11 @@ module Cursor : sig
   val make : buf -> int -> t
   val goto : buf -> t -> int -> unit
   val getc : buf -> t -> int
+  (*
+  val putc : buf -> t -> int -> unit
+  val gets : buf -> t -> string
+  val puts : buf -> t -> string -> unit
+  *)
   val nextc : buf -> t -> unit
   val prevc : buf -> t -> unit
   val nextln : buf -> t -> unit
