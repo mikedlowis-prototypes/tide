@@ -109,15 +109,15 @@ external font_glyph : font -> int -> glyph
 external draw_glyph : int -> glyph -> (int * int) -> int
                     = "x11_draw_glyph"
 
-let glyph_cache = ref GlyphMap.empty
+let glyph_cache = Hashtbl.create 127
 
 let cache_update rune glyph =
-  glyph_cache := GlyphMap.add rune glyph !glyph_cache;
+  Hashtbl.replace glyph_cache rune glyph;
   glyph
 
 let get_glyph (font : font) rune =
   try
-    let glyph = GlyphMap.find rune !glyph_cache in
+    let glyph = Hashtbl.find glyph_cache rune in
     if (glyph.font != font.font) then
       cache_update rune glyph
     else
