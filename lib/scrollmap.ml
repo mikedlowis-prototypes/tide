@@ -15,10 +15,10 @@ let make buf width off =
   let bol = (Rope.to_bol (Buf.rope buf) off) in
   let lines = ref [bol] in
   let process_glyph i c =
-    let is_eol = (Rope.is_eol (Buf.rope buf) i) in
-    if (Draw.Cursor.next_glyph csr c) && is_eol == false then
+    let not_eol = ((Rope.is_eol (Buf.rope buf) i) == false) in
+    if (Draw.Cursor.next_glyph csr c) && not_eol then
       lines := i :: !lines;
-    (is_eol == false)
+    not_eol
   in
   Buf.iteri_from process_glyph buf off;
   let lines = (Array.of_list (List.rev !lines)) in
@@ -28,13 +28,9 @@ let make buf width off =
 let first map =
   map.lines.(map.index)
 
-let bopl buf off =
-  let rope = (Buf.rope buf) in
-  Rope.prevc rope (Rope.to_bol rope off)
+let bopl buf off = (Rope.prevln (Buf.rope buf) off)
 
-let bonl buf off =
-  let rope = (Buf.rope buf) in
-  Rope.nextc rope (Rope.to_eol rope off)
+let bonl buf off = (Rope.nextln (Buf.rope buf) off)
 
 let scroll_up map buf =
   let next = map.index - 1 in

@@ -46,14 +46,6 @@ let join left right =
     let nh = 1 + lh + rh in
     Node (left, right, nh, llen + rlen)
 
-(*
-    let n = Node (left, right, nh, llen + rlen) in
-    match (lh - rh) with
-    | 0  -> n
-    | 1  -> n
-    | -1 -> n
-*)
-
 let rec split rope i =
   if i < 0 || i > (length rope) then
     raise (Out_of_bounds "Rope.split");
@@ -172,3 +164,11 @@ let to_bol rope pos =
 
 let to_eol rope pos =
   move_till (+1) is_eol rope pos
+
+(******************************************************************************)
+
+let nextln rope pos =
+  nextc rope (to_eol rope pos)
+
+let prevln rope pos =
+  prevc rope (to_bol rope pos)

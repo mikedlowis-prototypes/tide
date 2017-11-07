@@ -30,6 +30,8 @@ val puts : rope -> string -> int -> rope
 
 val nextc : rope -> int -> int
 val prevc : rope -> int -> int
+val nextln : rope -> int -> int
+val prevln : rope -> int -> int
 
 val is_bol : rope -> int -> bool
 val is_eol : rope -> int -> bool
