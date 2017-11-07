@@ -11,14 +11,14 @@ let empty =
 let load path =
   { path = path; rope = Rope.from_string (Misc.load_file path) }
 
-let rope buf = (* DELETEME *)
-  buf.rope
-
 let iter_from fn buf i =
   Rope.iter_from fn buf.rope i
 
 let iteri_from fn buf i =
   Rope.iteri_from fn buf.rope i
+
+let is_eol buf off =
+  Rope.is_eol buf.rope off
 
 module Cursor = struct
   type csr = {
@@ -51,5 +51,11 @@ module Cursor = struct
 
   let prevln buf csr =
     csr.stop <- (Rope.prevln buf.rope csr.stop); csr.stop
+
+  let is_eol buf csr =
+    Rope.is_eol buf.rope csr.stop
+
+  let to_bol buf csr =
+    csr.stop <- (Rope.to_bol buf.rope csr.stop); csr.stop
 end
 

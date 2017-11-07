@@ -11,12 +11,12 @@ let rec find_line lines off idx =
     idx
 
 let make buf width off =
-  let csr = Draw.Cursor.make (width, 0) 0 0 in
-  let bol = (Rope.to_bol (Buf.rope buf) off) in
-  let lines = ref [bol] in
+  let bcsr = Buf.Cursor.make buf off in
+  let dcsr = Draw.Cursor.make (width, 0) 0 0 in
+  let lines = ref [Buf.Cursor.to_bol buf bcsr] in
   let process_glyph i c =
-    let not_eol = ((Rope.is_eol (Buf.rope buf) i) == false) in
-    if (Draw.Cursor.next_glyph csr c) && not_eol then
+    let not_eol = ((Buf.is_eol buf i) == false) in
+    if (Draw.Cursor.next_glyph dcsr c) && not_eol then
       lines := i :: !lines;
     not_eol
   in
