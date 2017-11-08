@@ -11,25 +11,22 @@ let rec find_line lines off idx =
     idx
 
 let make buf width off =
-  let bcsr = Buf.Cursor.make buf off in
-  let dcsr = Draw.Cursor.make (width, 0) 0 0 in
-  let lines = ref [Buf.Cursor.to_bol buf bcsr] in
+  let csr = Draw.Cursor.make (width, 0) 0 0 in
+  (*let bol = Buf.goto StartOfLine buf off in*)
+  let bol = Buf.Cursor.to_bol buf (Buf.Cursor.make buf off) in
+  let lines = ref [bol] in
   let process_glyph i c =
-    let not_eol = ((Buf.is_eol buf i) == false) in
-    if (Draw.Cursor.next_glyph dcsr c) && not_eol then
+    let not_eol = (c != 0x0A) in
+    if (Draw.Cursor.next_glyph csr c) && not_eol then
       lines := i :: !lines;
     not_eol
   in
-  Buf.iteri process_glyph buf off;
+  Buf.iteri process_glyph buf bol;
   let lines = (Array.of_list (List.rev !lines)) in
-  print_string "map: ";
-  Array.iter (fun x -> Printf.printf "%d " x) lines;
-  print_endline "";
   let index = (find_line lines off ((Array.length lines) - 1)) in
   { width = width; lines = lines; index = index }
 
 let first map =
-  Printf.printf "first: %d\n" map.lines.(map.index);
   map.lines.(map.index)
 
 let bopl buf off =

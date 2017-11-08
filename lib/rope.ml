@@ -102,11 +102,17 @@ let putc rope i c = rope
 
 (******************************************************************************)
 
+(* inefficient form of iteri *)
+let rec iteri fn rope pos =
+  if pos < (length rope) && (fn pos (getc rope pos)) then
+    iteri fn rope (pos + 1)
+
+(* More efficient form of iteri?
 exception Break_loop
 
 let iteri_leaf fn pos str off len =
   let offset = pos - off in
-  for i = off to off + len - 1 do (* break loop when fn returns false *)
+  for i = off to off + len - 1 do
     if (fn (i + offset) (Char.code str.[i])) == false then
       raise Break_loop
   done
@@ -119,15 +125,6 @@ let rec iteri fn rope pos =
   | Node (l,r,_,_) ->
       iteri fn l pos;
       iteri fn r (pos + (length l))
-
-(*
-let rec iter_from fn rope pos =
-  if pos < (length rope) && (fn (getc rope pos)) then
-    iter_from fn rope (pos + 1)
-
-let rec iteri_from fn rope pos =
-  if pos < (length rope) && (fn pos (getc rope pos)) then
-    iteri_from fn rope (pos + 1)
 *)
 
 (******************************************************************************)
