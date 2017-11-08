@@ -12,8 +12,7 @@ let rec find_line lines off idx =
 
 let make buf width off =
   let csr = Draw.Cursor.make (width, 0) 0 0 in
-  (*let bol = Buf.goto StartOfLine buf off in*)
-  let bol = Buf.Cursor.to_bol buf (Buf.Cursor.make buf off) in
+  let bol = Buf.bol buf off in
   let lines = ref [bol] in
   let process_glyph i c =
     let not_eol = (c != 0x0A) in
@@ -29,25 +28,21 @@ let make buf width off =
 let first map =
   map.lines.(map.index)
 
-let bopl buf off =
-  Buf.Cursor.prevln buf (Buf.Cursor.make buf off)
-
-let bonl buf off =
-  Buf.Cursor.nextln buf (Buf.Cursor.make buf off)
-
 let scroll_up map buf =
   let next = map.index - 1 in
   if (next >= 0) then
     { map with index = next }
   else
-    make buf map.width (bopl buf map.lines.(0))
+    let off = map.lines.(0) in
+    make buf map.width (Buf.prevln buf off)
 
 let scroll_dn map buf =
   let next = map.index + 1 in
   if (next < (Array.length map.lines)) then
     { map with index = next }
   else
-    make buf map.width (bonl buf map.lines.((Array.length map.lines) - 1))
+    let off = map.lines.((Array.length map.lines) - 1) in
+    make buf map.width (Buf.nextln buf off)
 
 let resize map buf width =
   if map.width == width then map

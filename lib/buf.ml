@@ -5,6 +5,11 @@ type buf = {
 
 type t = buf
 
+type dest =
+  | StartOfLine | EndOfLine
+  | NextChar | PrevChar
+  | NextLine | PrevLine
+
 let empty =
   { path = ""; rope = Rope.empty }
 
@@ -43,22 +48,45 @@ module Cursor = struct
   let getc buf csr =
     Rope.getc buf.rope csr.stop
 
-  let nextc buf csr =
-    csr.stop <- (Rope.nextc buf.rope csr.stop); csr.stop
+  let move_to dest buf csr =
+    csr.stop <- (match dest with
+      | StartOfLine -> Rope.to_bol buf.rope csr.stop
+      | EndOfLine   -> Rope.to_eol buf.rope csr.stop
+      | NextChar    -> Rope.nextc buf.rope csr.stop
+      | PrevChar    -> Rope.prevc buf.rope csr.stop
+      | NextLine    -> Rope.nextln buf.rope csr.stop
+      | PrevLine    -> Rope.prevln buf.rope csr.stop
+    );
+    csr.stop
 
-  let prevc buf csr =
-    csr.stop <- (Rope.prevc buf.rope csr.stop); csr.stop
+  let nextc = move_to NextChar
+  let prevc = move_to PrevChar
+  let nextln = move_to NextLine
+  let prevln = move_to PrevLine
+  let bol = move_to StartOfLine
+  let eol = move_to EndOfLine
 
-  let nextln buf csr =
-    csr.stop <- (Rope.nextln buf.rope csr.stop); csr.stop
+  let is_at dest buf csr =
+    match dest with
+    | StartOfLine -> Rope.is_bol buf.rope csr.stop
+    | EndOfLine   -> Rope.is_eol buf.rope csr.stop
+    | _           -> false
 
-  let prevln buf csr =
-    csr.stop <- (Rope.prevln buf.rope csr.stop); csr.stop
-
-  let is_eol buf csr =
-    Rope.is_eol buf.rope csr.stop
-
-  let to_bol buf csr =
-    csr.stop <- (Rope.to_bol buf.rope csr.stop); csr.stop
+  let is_bol = is_at StartOfLine
+  let is_eol = is_at EndOfLine
 end
 
+let move_to dest buf i =
+  Cursor.move_to dest buf (Cursor.make buf i)
+let nextc = move_to NextChar
+let prevc = move_to PrevChar
+let nextln = move_to NextLine
+let prevln = move_to PrevLine
+let bol = move_to StartOfLine
+let eol = move_to EndOfLine
+let eol = move_to EndOfLine
+
+let is_at dest buf i =
+  Cursor.is_at dest buf (Cursor.make buf i)
+let is_bol = is_at StartOfLine
+let is_eol = is_at EndOfLine
