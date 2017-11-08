@@ -70,8 +70,10 @@
 <pre><span id="VALgetb"><span class="keyword">val</span> getb</span> : <code class="type"><a href="Rope.html#TYPEt">t</a> -> int -> char</code></pre>
 <pre><span id="VALgetc"><span class="keyword">val</span> getc</span> : <code class="type"><a href="Rope.html#TYPEt">t</a> -> int -> int</code></pre>
 <pre><span id="VALputc"><span class="keyword">val</span> putc</span> : <code class="type">'a -> 'b -> 'c -> 'a</code></pre>
-<pre><span id="VALiter_from"><span class="keyword">val</span> iter_from</span> : <code class="type">(int -> bool) -> <a href="Rope.html#TYPEt">t</a> -> int -> unit</code></pre>
-<pre><span id="VALiteri_from"><span class="keyword">val</span> iteri_from</span> : <code class="type">(int -> int -> bool) -> <a href="Rope.html#TYPEt">t</a> -> int -> unit</code></pre>
+<pre><span id="EXCEPTIONBreak_loop"><span class="keyword">exception</span> Break_loop</span></pre>
+
+<pre><span id="VALiteri_leaf"><span class="keyword">val</span> iteri_leaf</span> : <code class="type">(int -> int -> bool) -> int -> string -> int -> int -> unit</code></pre>
+<pre><span id="VALiteri"><span class="keyword">val</span> iteri</span> : <code class="type">(int -> int -> bool) -> <a href="Rope.html#TYPEt">t</a> -> int -> unit</code></pre>
 <pre><span id="VALgets"><span class="keyword">val</span> gets</span> : <code class="type"><a href="Rope.html#TYPEt">t</a> -> int -> int -> string</code></pre>
 <pre><span id="VALputs"><span class="keyword">val</span> puts</span> : <code class="type"><a href="Rope.html#TYPEt">t</a> -> string -> int -> <a href="Rope.html#TYPEt">t</a></code></pre>
 <pre><span id="VALnextc"><span class="keyword">val</span> nextc</span> : <code class="type"><a href="Rope.html#TYPEt">t</a> -> int -> int</code></pre>

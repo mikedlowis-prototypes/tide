@@ -19,8 +19,7 @@ val join : rope -> rope -> rope
 val split : rope -> int -> (rope * rope)
 val del : rope -> int -> int -> rope
 
-val iter_from : (rune -> bool) -> rope -> int -> unit
-val iteri_from : (int -> rune -> bool) -> rope -> int -> unit
+val iteri : (int -> rune -> bool) -> rope -> int -> unit
 
 val getb : rope -> int -> char
 val getc : rope -> int -> rune

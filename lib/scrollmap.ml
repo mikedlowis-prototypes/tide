@@ -20,12 +20,16 @@ let make buf width off =
       lines := i :: !lines;
     not_eol
   in
-  Buf.iteri_from process_glyph buf off;
+  Buf.iteri process_glyph buf off;
   let lines = (Array.of_list (List.rev !lines)) in
+  print_string "map: ";
+  Array.iter (fun x -> Printf.printf "%d " x) lines;
+  print_endline "";
   let index = (find_line lines off ((Array.length lines) - 1)) in
   { width = width; lines = lines; index = index }
 
 let first map =
+  Printf.printf "first: %d\n" map.lines.(map.index);
   map.lines.(map.index)
 
 let bopl buf off =

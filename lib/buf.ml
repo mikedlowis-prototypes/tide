@@ -11,11 +11,11 @@ let empty =
 let load path =
   { path = path; rope = Rope.from_string (Misc.load_file path) }
 
-let iter_from fn buf i =
-  Rope.iter_from fn buf.rope i
+let iter fn buf i =
+  Rope.iteri (fun i c -> (fn c)) buf.rope i
 
-let iteri_from fn buf i =
-  Rope.iteri_from fn buf.rope i
+let iteri fn buf i =
+  Rope.iteri fn buf.rope i
 
 let is_eol buf off =
   Rope.is_eol buf.rope off
@@ -30,6 +30,11 @@ module Cursor = struct
 
   let make buf idx =
     { start = 0; stop = (Rope.limit_index buf.rope idx) }
+
+  let clone csr =
+    { start = csr.start; stop = csr.stop }
+
+  let iter fn buf csr = ()
 
   let offset buf csr =
     csr.stop

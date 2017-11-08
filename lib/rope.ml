@@ -102,6 +102,25 @@ let putc rope i c = rope
 
 (******************************************************************************)
 
+exception Break_loop
+
+let iteri_leaf fn pos str off len =
+  let offset = pos - off in
+  for i = off to off + len - 1 do (* break loop when fn returns false *)
+    if (fn (i + offset) (Char.code str.[i])) == false then
+      raise Break_loop
+  done
+
+let rec iteri fn rope pos =
+  match rope with
+  | Leaf (str, off, len) ->
+      (try iteri_leaf fn pos str off len
+      with Break_loop -> ())
+  | Node (l,r,_,_) ->
+      iteri fn l pos;
+      iteri fn r (pos + (length l))
+
+(*
 let rec iter_from fn rope pos =
   if pos < (length rope) && (fn (getc rope pos)) then
     iter_from fn rope (pos + 1)
@@ -109,12 +128,13 @@ let rec iter_from fn rope pos =
 let rec iteri_from fn rope pos =
   if pos < (length rope) && (fn pos (getc rope pos)) then
     iteri_from fn rope (pos + 1)
+*)
 
 (******************************************************************************)
 
 let gets rope i j =
   let buf = Bytes.create (j - i) in
-  iteri_from
+  iteri
     (fun n c ->
       Bytes.set buf (n - i) (getb rope i);
       (n <= j))

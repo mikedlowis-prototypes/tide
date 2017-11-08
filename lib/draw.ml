@@ -97,7 +97,7 @@ let buffer csr buf off =
     draw_glyph csr c;
     has_next_line csr
   in
-  Buf.iter_from draw_rune buf off
+  Buf.iter draw_rune buf off
 
 let status csr str =
   dark_bkg csr.width (4 + font_height) csr;
