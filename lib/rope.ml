@@ -106,28 +106,12 @@ let gets rope i j =
   let buf = Bytes.create (j - i) in
   iteri
     (fun n c ->
-      Bytes.set buf (n - i) (getb rope i);
+      Bytes.set buf (n - i) (Char.chr c);
       (n <= j))
     rope i;
   Bytes.unsafe_to_string buf
 
 (******************************************************************************)
-(*
-
-If both arguments are short leaves, we produce a flat rope (leaf) consisting of the concatenation.
-
-If the left argument is a concatenation node whose right son is a short leaf, and the right argument is also a short leaf, then we concatenate the two leaves, and then concatenate the result to the left son of the left argument.
-
-let join_special left right =
-  let rlen = (length right) in
-  match left with
-  | Leaf(s,o,l) ->
-      if (l + rlen) <= 256 then
-        flatten ()
-
-  | Node(ln,Leaf(s,o,l),_,_) ->
-      if (l + rlen) <= 256 then
-*)
 
 let flatten rope =
   let s = (gets rope 0 (length rope)) in
@@ -178,7 +162,8 @@ let rec puts rope s i =
   let middle = from_string s in
   (join (join left middle) right)
 
-let putc rope i c = rope (* TODO: convert and call puts *)
+let putc rope i c =
+  puts rope (String.make 1 (Char.chr c)) i
 
 let nextc rope pos =
   let next = limit_index rope (pos + 1) in

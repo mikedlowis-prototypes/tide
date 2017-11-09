@@ -15,6 +15,7 @@ val height : rope -> int
 val limit_index : rope -> int -> int
 val last : rope -> int
 
+val flatten : rope -> rope
 val join : rope -> rope -> rope
 val split : rope -> int -> (rope * rope)
 val del : rope -> int -> int -> rope

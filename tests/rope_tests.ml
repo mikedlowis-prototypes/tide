@@ -16,30 +16,38 @@ let  () =
     assert( length rope == 2 )
   );
 
+  (* flatten() tests *)
+  test "flatten : flatten a tree to a leaf" (fun () ->
+    let tree = Node (Leaf("a", 0, 1), Leaf("b", 0, 1), 2, 2) in
+    let leaf = (flatten tree) in
+    assert( match leaf with
+    | Leaf ("ab",0,2) -> true
+    | _ -> false)
+  );
+
   (* join() tests *)
   test "join : join two leaves into rope" (fun () ->
     let left  = Leaf("a", 0, 1) in
-    let right =  Leaf("a", 0, 1) in
+    let right =  Leaf("b", 0, 1) in
     let rope  = (join left right) in
     assert( match rope with
-    | Node (l,r,h,2) -> (l == left && r == right)
+    | Leaf ("ab",0,2) -> true
     | _ -> false)
   );
   test "join : join a rope with a leaf (l to r)" (fun () ->
-    let left  = join (Leaf("a", 0, 1)) (Leaf("a", 0, 1)) in
-    let right =  Leaf("a", 0, 1) in
+    let left  = join (Leaf("a", 0, 1)) (Leaf("b", 0, 1)) in
+    let right =  Leaf("c", 0, 1) in
     let rope  = (join left right) in
-    Printf.printf "length %d \n" (length rope);
     assert( match rope with
-    | Node (l,r,2,3) -> true
+    | Leaf ("abc",0,3) -> true
     | _ -> false)
   );
   test "join : join a rope with a leaf (r to l)" (fun () ->
     let left  =  Leaf("a", 0, 1) in
-    let right = join (Leaf("a", 0, 1)) (Leaf("a", 0, 1)) in
+    let right = Node (Leaf("b", 0, 1), Leaf("c", 0, 1), 2, 2) in
     let rope  = (join left right) in
     assert( match rope with
-    | Node (l,r,h,3) -> (l == left && r == right)
+    | Leaf ("abc",0,3) -> true
     | _ -> false)
   );
 
@@ -92,6 +100,7 @@ let  () =
     let rope = Leaf("bc", 0, 2) in
     let rope = (puts rope "a" 0) in
     assert( (length rope) == 3 );
+    assert( (gets rope 0 3) = "abc" );
     assert( (getc rope (0)) == Char.code 'a' );
     assert( (getc rope (1)) == Char.code 'b' );
     assert( (getc rope (2)) == Char.code 'c' );
@@ -100,6 +109,7 @@ let  () =
     let rope = Leaf("ac", 0, 2) in
     let rope = (puts rope "b" 1) in
     assert( (length rope) == 3 );
+    assert( (gets rope 0 3) = "abc" );
     assert( (getc rope (0)) == Char.code 'a' );
     assert( (getc rope (1)) == Char.code 'b' );
     assert( (getc rope (2)) == Char.code 'c' );
@@ -108,6 +118,7 @@ let  () =
     let rope = Leaf("ab", 0, 2) in
     let rope = (puts rope "c" 2) in
     assert( (length rope) == 3 );
+    assert( (gets rope 0 3) = "abc" );
     assert( (getc rope (0)) == Char.code 'a' );
     assert( (getc rope (1)) == Char.code 'b' );
     assert( (getc rope (2)) == Char.code 'c' );
