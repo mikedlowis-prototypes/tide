@@ -29,8 +29,9 @@ let  () =
     let left  = join (Leaf("a", 0, 1)) (Leaf("a", 0, 1)) in
     let right =  Leaf("a", 0, 1) in
     let rope  = (join left right) in
+    Printf.printf "length %d \n" (length rope);
     assert( match rope with
-    | Node (l,r,h,3) -> (l == left && r == right)
+    | Node (l,r,2,3) -> true
     | _ -> false)
   );
   test "join : join a rope with a leaf (r to l)" (fun () ->

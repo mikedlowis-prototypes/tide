@@ -61,18 +61,22 @@
 <pre><span id="VALfrom_string"><span class="keyword">val</span> from_string</span> : <code class="type">string -> <a href="Rope.html#TYPEt">t</a></code></pre>
 <pre><span id="VALlength"><span class="keyword">val</span> length</span> : <code class="type"><a href="Rope.html#TYPEt">t</a> -> int</code></pre>
 <pre><span id="VALheight"><span class="keyword">val</span> height</span> : <code class="type"><a href="Rope.html#TYPEt">t</a> -> int</code></pre>
+<pre><span id="VALis_leaf"><span class="keyword">val</span> is_leaf</span> : <code class="type"><a href="Rope.html#TYPEt">t</a> -> bool</code></pre>
+<pre><span id="VALis_leaf"><span class="keyword">val</span> is_leaf</span> : <code class="type"><a href="Rope.html#TYPEt">t</a> -> bool</code></pre>
 <pre><span id="VALlimit_index"><span class="keyword">val</span> limit_index</span> : <code class="type"><a href="Rope.html#TYPEt">t</a> -> int -> int</code></pre>
 <pre><span id="VALlast"><span class="keyword">val</span> last</span> : <code class="type"><a href="Rope.html#TYPEt">t</a> -> int</code></pre>
 <pre><span id="VALcheck_index"><span class="keyword">val</span> check_index</span> : <code class="type"><a href="Rope.html#TYPEt">t</a> -> int -> unit</code></pre>
-<pre><span id="VALjoin"><span class="keyword">val</span> join</span> : <code class="type"><a href="Rope.html#TYPEt">t</a> -> <a href="Rope.html#TYPEt">t</a> -> <a href="Rope.html#TYPEt">t</a></code></pre>
-<pre><span id="VALsplit"><span class="keyword">val</span> split</span> : <code class="type"><a href="Rope.html#TYPEt">t</a> -> int -> <a href="Rope.html#TYPEt">t</a> * <a href="Rope.html#TYPEt">t</a></code></pre>
-<pre><span id="VALdel"><span class="keyword">val</span> del</span> : <code class="type"><a href="Rope.html#TYPEt">t</a> -> int -> int -> <a href="Rope.html#TYPEt">t</a></code></pre>
 <pre><span id="VALgetb"><span class="keyword">val</span> getb</span> : <code class="type"><a href="Rope.html#TYPEt">t</a> -> int -> char</code></pre>
 <pre><span id="VALgetc"><span class="keyword">val</span> getc</span> : <code class="type"><a href="Rope.html#TYPEt">t</a> -> int -> int</code></pre>
-<pre><span id="VALputc"><span class="keyword">val</span> putc</span> : <code class="type">'a -> 'b -> 'c -> 'a</code></pre>
 <pre><span id="VALiteri"><span class="keyword">val</span> iteri</span> : <code class="type">(int -> int -> bool) -> <a href="Rope.html#TYPEt">t</a> -> int -> unit</code></pre>
 <pre><span id="VALgets"><span class="keyword">val</span> gets</span> : <code class="type"><a href="Rope.html#TYPEt">t</a> -> int -> int -> string</code></pre>
+<pre><span id="VALflatten"><span class="keyword">val</span> flatten</span> : <code class="type"><a href="Rope.html#TYPEt">t</a> -> <a href="Rope.html#TYPEt">t</a></code></pre>
+<pre><span id="VALjoin"><span class="keyword">val</span> join</span> : <code class="type"><a href="Rope.html#TYPEt">t</a> -> <a href="Rope.html#TYPEt">t</a> -> <a href="Rope.html#TYPEt">t</a></code></pre>
+<pre><span id="VALjoin_special"><span class="keyword">val</span> join_special</span> : <code class="type"><a href="Rope.html#TYPEt">t</a> -> <a href="Rope.html#TYPEt">t</a> -> <a href="Rope.html#TYPEt">t</a> -> <a href="Rope.html#TYPEt">t</a></code></pre>
+<pre><span id="VALsplit"><span class="keyword">val</span> split</span> : <code class="type"><a href="Rope.html#TYPEt">t</a> -> int -> <a href="Rope.html#TYPEt">t</a> * <a href="Rope.html#TYPEt">t</a></code></pre>
+<pre><span id="VALdel"><span class="keyword">val</span> del</span> : <code class="type"><a href="Rope.html#TYPEt">t</a> -> int -> int -> <a href="Rope.html#TYPEt">t</a></code></pre>
 <pre><span id="VALputs"><span class="keyword">val</span> puts</span> : <code class="type"><a href="Rope.html#TYPEt">t</a> -> string -> int -> <a href="Rope.html#TYPEt">t</a></code></pre>
+<pre><span id="VALputc"><span class="keyword">val</span> putc</span> : <code class="type">'a -> 'b -> 'c -> 'a</code></pre>
 <pre><span id="VALnextc"><span class="keyword">val</span> nextc</span> : <code class="type"><a href="Rope.html#TYPEt">t</a> -> int -> int</code></pre>
 <pre><span id="VALprevc"><span class="keyword">val</span> prevc</span> : <code class="type"><a href="Rope.html#TYPEt">t</a> -> int -> int</code></pre>
 <pre><span id="VALis_bol"><span class="keyword">val</span> is_bol</span> : <code class="type"><a href="Rope.html#TYPEt">t</a> -> int -> bool</code></pre>

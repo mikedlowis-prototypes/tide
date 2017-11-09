@@ -22,6 +22,14 @@ let height = function
   | Leaf (_,_,_)   -> 0
   | Node (_,_,h,_) -> h
 
+let is_leaf = function
+  | Leaf _ -> true
+  | _ -> false
+
+let is_leaf = function
+  | Leaf _ -> true
+  | _ -> false
+
 let limit_index rope i =
   if i < 0 then 0
   else if i > 0 && i >= (length rope) then
@@ -34,37 +42,6 @@ let last rope =
 let check_index rope i =
   if i < 0 || i >= (length rope) then
     raise (Out_of_bounds "Rope.check_index")
-
-(******************************************************************************)
-
-let join left right =
-  let llen = (length left) and rlen = (length right) in
-  if llen == 0 then right
-  else if rlen == 0 then left
-  else
-    let lh = (height left) and rh = (height right) in
-    let nh = 1 + lh + rh in
-    Node (left, right, nh, llen + rlen)
-
-let rec split rope i =
-  if i < 0 || i > (length rope) then
-    raise (Out_of_bounds "Rope.split");
-  match rope with
-  | Leaf (s,off,len) ->
-      (Leaf (s, off,  i), Leaf (s, (off + i), len - (i)))
-  | Node (l,r,h,len) ->
-      let left_len = (length l) in
-      if i < left_len then
-        let (sl,sr) = (split l i) in
-        (sl, (join sr r))
-      else
-        let (sl,sr) = (split r i) in
-        ((join l sl), sr)
-
-let del rope i j =
-  let (l_left,l_right) = split rope i in
-  let (r_left,r_right) = split l_right (j - i) in
-  (join l_left r_right)
 
 (******************************************************************************)
 
@@ -98,8 +75,6 @@ let rec getc rope i =
       else
         getc r (i - left_len)
 
-let putc rope i c = rope
-
 (******************************************************************************)
 
 (* inefficient form of iteri *)
@@ -127,8 +102,6 @@ let rec iteri fn rope pos =
       iteri fn r (pos + (length l))
 *)
 
-(******************************************************************************)
-
 let gets rope i j =
   let buf = Bytes.create (j - i) in
   iteri
@@ -138,12 +111,74 @@ let gets rope i j =
     rope i;
   Bytes.unsafe_to_string buf
 
+(******************************************************************************)
+(*
+
+If both arguments are short leaves, we produce a flat rope (leaf) consisting of the concatenation.
+
+If the left argument is a concatenation node whose right son is a short leaf, and the right argument is also a short leaf, then we concatenate the two leaves, and then concatenate the result to the left son of the left argument.
+
+let join_special left right =
+  let rlen = (length right) in
+  match left with
+  | Leaf(s,o,l) ->
+      if (l + rlen) <= 256 then
+        flatten ()
+
+  | Node(ln,Leaf(s,o,l),_,_) ->
+      if (l + rlen) <= 256 then
+*)
+
+let flatten rope =
+  let s = (gets rope 0 (length rope)) in
+  Leaf (s,0,(String.length s))
+
+let rec join left right =
+  let llen = (length left) and rlen = (length right) in
+  if llen == 0 then right
+  else if rlen == 0 then left
+  else
+    let lh = (height left) and rh = (height right) in
+    let nh = 1 + lh + rh in
+    join_special left right (Node (left, right, nh, llen + rlen))
+
+and join_special left right node =
+  if (is_leaf left) && (length node) <= 256 then
+    flatten node
+  else match left with
+  | Node (lc,rc,_,len) ->
+      if (is_leaf rc) && ((length rc) + (length right)) <= 256 then
+        join lc (flatten (join rc right))
+      else
+        node
+  | _ -> node
+
+let rec split rope i =
+  if i < 0 || i > (length rope) then
+    raise (Out_of_bounds "Rope.split");
+  match rope with
+  | Leaf (s,off,len) ->
+      (Leaf (s, off,  i), Leaf (s, (off + i), len - (i)))
+  | Node (l,r,h,len) ->
+      let left_len = (length l) in
+      if i < left_len then
+        let (sl,sr) = (split l i) in
+        (sl, (join sr r))
+      else
+        let (sl,sr) = (split r i) in
+        ((join l sl), sr)
+
+let del rope i j =
+  let (l_left,l_right) = split rope i in
+  let (r_left,r_right) = split l_right (j - i) in
+  (join l_left r_right)
+
 let rec puts rope s i =
   let (left,right) = split rope i in
   let middle = from_string s in
   (join (join left middle) right)
 
-(******************************************************************************)
+let putc rope i c = rope (* TODO: convert and call puts *)
 
 let nextc rope pos =
   let next = limit_index rope (pos + 1) in
@@ -159,8 +194,6 @@ let prevc rope pos =
     prev2
   else
     prev1
-
-(******************************************************************************)
 
 let is_bol rope pos =
   if pos == 0 then true
@@ -181,8 +214,6 @@ let to_bol rope pos =
 
 let to_eol rope pos =
   move_till (+1) is_eol rope pos
-
-(******************************************************************************)
 
 let nextln rope pos =
   nextc rope (to_eol rope pos)
