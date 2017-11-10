@@ -124,7 +124,7 @@ let tags csr buf =
 let scroll csr pct =
   let thumbsz = int_of_float ((float_of_int csr.height) *. pct) in
   rule_bkg 14 csr.height csr;
-  dark_bkg 14 thumbsz csr;
+  dark_bkg 14 (max thumbsz 5) csr;
   csr.x <- csr.x + 14;
   vrule csr.height csr
 
