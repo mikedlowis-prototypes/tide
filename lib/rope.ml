@@ -26,10 +26,6 @@ let is_leaf = function
   | Leaf _ -> true
   | _ -> false
 
-let is_leaf = function
-  | Leaf _ -> true
-  | _ -> false
-
 let limit_index rope i =
   if i < 0 then 0
   else if i > 0 && i >= (length rope) then
@@ -79,7 +75,7 @@ let rec getc rope i =
 
 (* inefficient form of iteri *)
 let rec iteri fn rope pos =
-  if pos < (length rope) && (fn pos (getc rope pos)) then
+  if pos < (length rope) && (fn pos (Char.code (getb rope pos))) then
     iteri fn rope (pos + 1)
 
 (* More efficient form of iteri?
@@ -112,6 +108,53 @@ let gets rope i j =
   Bytes.unsafe_to_string buf
 
 (******************************************************************************)
+
+(* Rebalancing:
+
+* Height of leaf is 0
+* Height of a node is (1 + max(left,right))
+* Rope balanced if (length >= Fib(n) + 2)
+
+
+The rebalancing operation maintains an ordered sequence of (empty or) balanced
+ropes, one for each length interval [Fn, Fn+1), for n $2.
+
+We traverse the rope from left to right, inserting each leaf into the
+appropriate sequence position, depending on its length.
+
+The concatenation of the sequence of ropes in order of decreasing length is
+equivalent to the prefix of the rope we have traversed so far.
+
+Each new leaf x is inserted into the appropriate entry of the sequence.
+
+Assume that x's length is in the interval [Fib(n), Fib(n+1)], and thus it should be put
+in slot n (which also corresponds to maximum depth n - 2).
+
+If all lower and equal numbered levels are empty, then this can be done directly.
+
+If not, then we concatenate ropes in slots 2,. . .,(n - 1) (concatenating onto
+the left), and concatenate x to the right of the result.
+
+We then continue to concatenate ropes from the sequence in increasing order to
+the left of this result, until the result fits into an empty slot in the sequence.
+
+The concatenation we form in this manner is guaranteed to be balanced.
+
+The concatenations formed before the addition of x each have depth at most one more
+than is warranted by their length.
+
+If slot n - 1 is empty then the concatenation of shorter ropes has depth at most
+n - 3, so the concatenation with x has depth n - 2, and is thus balanced.
+
+If slot n - 1 is full, then the final depth after adding x may be n - 1, but the
+resulting length is guaranteed to be at least Fn+1, again guaranteeing
+balance.
+
+Subsequent concatenations (if any) involve concatenating two balanced ropes with
+lengths at least Fm and Fm-1 and producing a rope of depth m - 1, which must
+again be balanced.
+
+*)
 
 let flatten rope =
   let s = (gets rope 0 (length rope)) in

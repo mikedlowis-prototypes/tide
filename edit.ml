@@ -1,10 +1,14 @@
 open X11
 
 module View = struct
-  type t = { buf : Buf.t; map : Scrollmap.t }
+  type t = {
+    num : int;
+    buf : Buf.t;
+    map : Scrollmap.t
+  }
 
   let from_buffer buf width height =
-    { buf = buf; map = Scrollmap.make buf width 0 }
+    { num = 0; buf = buf; map = Scrollmap.make buf width 0 }
 
   let empty width height =
     from_buffer (Buf.empty) width height
@@ -17,14 +21,18 @@ module View = struct
 
   let draw view csr =
     let view = (resize view (Draw.Cursor.max_width csr)) in
-    Draw.buffer csr view.buf (Scrollmap.first view.map);
-    view
+    let num = Draw.buffer csr view.buf (Scrollmap.first view.map) in
+    { view with num = num }
 
   let scroll_up view =
     { view with map = Scrollmap.scroll_up view.map view.buf }
 
   let scroll_dn view =
     { view with map = Scrollmap.scroll_dn view.map view.buf }
+
+  let visible view =
+    (float_of_int view.num) /. (float_of_int (Buf.length view.buf))
+
 end
 
 let tags_buf = ref Buf.empty
@@ -52,8 +60,10 @@ let onupdate width height =
   let csr = Draw.Cursor.make (width, height) 0 0 in
   Draw.status csr "UNSI> *scratch*";
   Draw.tags csr !tags_buf;
-  Draw.scroll csr;
-  edit_view := View.draw !edit_view csr
+  let scrollcsr = (Draw.Cursor.clone csr) in
+  Draw.Cursor.move_x csr 15;
+  edit_view := View.draw !edit_view csr;
+  Draw.scroll scrollcsr (View.visible !edit_view)
 
 let onshutdown () = ()
 

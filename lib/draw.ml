@@ -22,6 +22,14 @@ module Cursor = struct
     { height = height; width = width;
       startx = x; starty = y; x = x; y = y }
 
+  let clone csr =
+    { height = csr.height; width = csr.width;
+      startx = csr.startx; starty = csr.starty;
+      x = csr.x; y = csr.y }
+
+  let move_x csr n =
+    csr.x <- csr.x + n
+
   let max_width csr =
     (csr.width - csr.x)
 
@@ -92,12 +100,14 @@ let vrule height csr =
 
 let buffer csr buf off =
   dark_bkg (csr.width - csr.x) (csr.height - csr.y) csr;
-  let csr = (restart csr 2 0) in
+  let num = ref 0 and csr = (restart csr 2 0) in
   let draw_rune c =
     draw_glyph csr c;
+    num := !num + 1;
     has_next_line csr
   in
-  Buf.iter draw_rune buf off
+  Buf.iter draw_rune buf off;
+  !num
 
 let status csr str =
   dark_bkg csr.width (4 + font_height) csr;
@@ -111,9 +121,10 @@ let tags csr buf =
   string "Quit Save Undo Redo Cut Copy Paste | Find " csr;
   hrule csr.width csr
 
-let scroll csr =
+let scroll csr pct =
+  let thumbsz = int_of_float ((float_of_int csr.height) *. pct) in
   rule_bkg 14 csr.height csr;
-  dark_bkg 14 (csr.height / 2) csr;
+  dark_bkg 14 thumbsz csr;
   csr.x <- csr.x + 14;
   vrule csr.height csr
 

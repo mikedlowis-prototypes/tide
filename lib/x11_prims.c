@@ -126,14 +126,12 @@ CAMLprim value x11_event_loop(value ms, value cbfn) {
         uint64_t t = getmillis();
         while (XPending(X.display)) {
             XNextEvent(X.display, &e);
-            printf("%d ", e.type);
             if (!XFilterEvent(&e, None) && EventHandlers[e.type]) {
                 event = EventHandlers[e.type](&e);
                 if (event != Val_int(TNone))
                     caml_callback(cbfn, event);
             }
         }
-        puts("");
         printf("time 1 %lu ", getmillis()-t);
         t = getmillis();
         if (X.running) {
