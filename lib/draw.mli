@@ -26,5 +26,5 @@ val vrule : int -> Cursor.t -> unit
 
 val status : Cursor.t -> string -> unit
 val tags : Cursor.t -> Buf.t -> unit
-val scroll : Cursor.t -> float -> unit
+val scroll : Cursor.t -> (float * float) -> unit
 val edit : Cursor.t -> Buf.t -> int -> int

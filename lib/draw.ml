@@ -121,10 +121,13 @@ let tags csr buf =
   string "Quit Save Undo Redo Cut Copy Paste | Find " csr;
   hrule csr.width csr
 
-let scroll csr pct =
-  let thumbsz = int_of_float ((float_of_int csr.height) *. pct) in
+let scroll csr params =
+  let start, pct = params and height = float_of_int (csr.height - csr.y) in
+  let thumbsz = (height *. pct) and thumboff = (height *. start) in
+  let mcsr = Cursor.clone csr in
   rule_bkg 14 csr.height csr;
-  dark_bkg 14 (max thumbsz 5) csr;
+  mcsr.y <- mcsr.y + (int_of_float thumboff);
+  dark_bkg 14 (int_of_float (max thumbsz 5.0)) mcsr;
   csr.x <- csr.x + 14;
   vrule csr.height csr
 
