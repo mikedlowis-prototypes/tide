@@ -12,8 +12,6 @@ let empty = Leaf ("", 0, 0)
 let from_string s =
   Leaf (s, 0, (String.length s))
 
-(******************************************************************************)
-
 let length = function
   | Leaf (_,_,l)   -> l
   | Node (_,_,_,l) -> l
@@ -38,8 +36,6 @@ let last rope =
 let check_index rope i =
   if i < 0 || i >= (length rope) then
     raise (Out_of_bounds "Rope.check_index")
-
-(******************************************************************************)
 
 let rec getb rope i =
   check_index rope i;
@@ -70,8 +66,6 @@ let rec getc rope i =
         getc l i
       else
         getc r (i - left_len)
-
-(******************************************************************************)
 
 (* inefficient form of iteri *)
 let rec iteri fn rope pos =
@@ -106,8 +100,6 @@ let gets rope i j =
       (n <= j))
     rope i;
   Bytes.unsafe_to_string buf
-
-(******************************************************************************)
 
 (* Rebalancing:
 

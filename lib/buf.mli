@@ -36,6 +36,7 @@ end
 
 val empty : t
 val load : string -> t
+val path : t -> string
 val length : t -> int
 val iter : (int -> bool) -> t -> int -> unit
 val iteri : (int -> int -> bool) -> t -> int -> unit

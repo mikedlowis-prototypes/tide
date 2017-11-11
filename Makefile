@@ -31,7 +31,8 @@ LIBSRCS = \
 	lib/rope.ml \
 	lib/buf.ml \
 	lib/draw.ml \
-	lib/scrollmap.ml
+	lib/scrollmap.ml \
+	lib/view.ml
 
 LIBOBJS = \
 	$(LIBSRCS:.ml=.$(OBJEXT)) \

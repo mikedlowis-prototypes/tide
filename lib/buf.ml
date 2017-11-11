@@ -16,6 +16,9 @@ let empty =
 let load path =
   { path = path; rope = Rope.from_string (Misc.load_file path) }
 
+let path buf =
+  buf.path
+
 let length buf =
   Rope.length buf.rope
 
