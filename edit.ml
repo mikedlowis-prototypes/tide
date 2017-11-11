@@ -30,9 +30,11 @@ module View = struct
   let scroll_dn view =
     { view with map = Scrollmap.scroll_dn view.map view.buf }
 
-  let visible view =
-    (float_of_int view.num) /. (float_of_int (Buf.length view.buf))
-
+  let scroll_params view =
+    let length = float_of_int (Buf.length view.buf)
+    and first = float_of_int (Scrollmap.first view.map)
+    and nvisible = float_of_int view.num in
+    ((first /. length), (nvisible /. length))
 end
 
 let tags_buf = ref Buf.empty
@@ -63,7 +65,7 @@ let onupdate width height =
   let scrollcsr = (Draw.Cursor.clone csr) in
   Draw.Cursor.move_x csr 15;
   edit_view := View.draw !edit_view csr;
-  Draw.scroll scrollcsr (View.visible !edit_view)
+  Draw.scroll scrollcsr (View.scroll_params !edit_view)
 
 let onshutdown () = ()
 
