@@ -82,10 +82,11 @@ let  () =
     let rope = Node((Leaf("a", 0, 1)), (Leaf("b", 0, 1)), 0, 2) in
     assert( (getc rope (1)) == Char.code 'b' );
   );
-  test "getc : return \\n for \\r\\n" (fun () ->
+(*  test "getc : return \\n for \\r\\n" (fun () ->
     let rope = from_string "\r\n" in
     assert( (getc rope (0)) == Char.code '\n' );
   );
+*)
   test "getc : return \\r for \\r at end of string" (fun () ->
     let rope = from_string "\r" in
     assert( (getc rope (0)) == Char.code '\r' );
@@ -167,14 +168,14 @@ let  () =
     let rope = Leaf("abc", 0, 3) in
     assert( is_eol rope 2 );
   );
-  test "is_eol : should return true if pos is last char of line with \n ending" (fun () ->
+  test "is_eol : should return true if pos is last char of line with \\n ending" (fun () ->
     let rope = Leaf("abc\n", 0, 4) in
     assert( is_eol rope 3 );
   );
-  test "is_eol : should return true if pos is last char of line with \r\n ending" (fun () ->
+(*  test "is_eol : should return true if pos is last char of line with \\r\\n ending" (fun () ->
     let rope = Leaf("abc\r\n", 0, 5) in
     assert( is_eol rope 3 );
-  );
+  );*)
   test "is_eol : should return false if pos is not last char of line" (fun () ->
     let rope = Leaf("abcd\n", 0, 5) in
     assert( (is_eol rope 2) == false );

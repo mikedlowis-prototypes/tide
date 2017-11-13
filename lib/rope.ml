@@ -53,7 +53,8 @@ let rec getb rope i =
 let rec getc rope i =
   check_index rope i;
   match rope with
-  | Leaf (s,off,_) ->
+  | Leaf (s,off,_) -> (Char.code s.[off + i])
+(*
       let c = (Char.code s.[off + i]) in
       let len = (length rope) in
       let next = (i + 1) in
@@ -61,6 +62,7 @@ let rec getc rope i =
         0x0A
       else
         c
+*)
   | Node (l,r,h,len) ->
       let left_len = (length l) in
       if i < left_len then
@@ -218,7 +220,7 @@ let is_eol rope pos =
 
 let rec move_till step testfn rope pos =
   let adjust_pos = if step < 0 then prevc else nextc in
-  if (testfn rope pos) || pos == 0 || pos == (last rope) then pos
+  if (testfn rope pos) then pos
   else (move_till step testfn rope (adjust_pos rope pos))
 
 let to_bol rope pos =

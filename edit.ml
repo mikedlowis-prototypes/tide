@@ -34,18 +34,18 @@ let onshutdown () = ()
 
 let onevent evnt =
   try match evnt with
-  | Focus state      -> onfocus state
-  | KeyPress e       -> onkeypress e.mods e.rune
-  | MouseClick e     -> onmousebtn e.mods e.btn e.x e.y true
-  | MouseRelease e   -> onmousebtn e.mods e.btn e.x e.y false
-  | MouseMove e      -> onmousemove e.mods e.x e.y
-  | Paste e          -> () (*print_endline "paste"*)
-  | Command e        -> () (*print_endline "command"*)
-  | PipeClosed e     -> () (*print_endline "pipeclosed"*)
-  | PipeWriteReady e -> () (*print_endline "pipewriteready"*)
-  | PipeReadReady e  -> () (*print_endline "pipereadready"*)
-  | Update e         -> onupdate e.width e.height
-  | Shutdown         -> onshutdown ()
+    | Focus state      -> onfocus state
+    | KeyPress e       -> onkeypress e.mods e.rune
+    | MouseClick e     -> onmousebtn e.mods e.btn e.x e.y true
+    | MouseRelease e   -> onmousebtn e.mods e.btn e.x e.y false
+    | MouseMove e      -> onmousemove e.mods e.x e.y
+    | Paste e          -> () (*print_endline "paste"*)
+    | Command e        -> () (*print_endline "command"*)
+    | PipeClosed e     -> () (*print_endline "pipeclosed"*)
+    | PipeWriteReady e -> () (*print_endline "pipewriteready"*)
+    | PipeReadReady e  -> () (*print_endline "pipereadready"*)
+    | Update e         -> onupdate e.width e.height
+    | Shutdown         -> onshutdown ()
   with e -> begin
     print_endline (Printexc.to_string e);
     Printexc.print_backtrace stdout
