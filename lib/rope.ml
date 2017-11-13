@@ -34,8 +34,9 @@ let last rope =
   limit_index rope ((length rope) - 1)
 
 let check_index rope i =
-  if i < 0 || i >= (length rope) then
+  if i < 0 || i >= (length rope) then begin
     raise (Out_of_bounds "Rope.check_index")
+  end
 
 let rec getb rope i =
   check_index rope i;
@@ -101,7 +102,7 @@ let gets rope i j =
     rope i;
   Bytes.unsafe_to_string buf
 
-(* Rebalancing:
+(* Rebalancing Algorithm from the original paper on ropes:
 
 * Height of leaf is 0
 * Height of a node is (1 + max(left,right))
@@ -201,19 +202,10 @@ let putc rope i c =
   puts rope (String.make 1 (Char.chr c)) i
 
 let nextc rope pos =
-  let next = limit_index rope (pos + 1) in
-  if (getb rope pos) == '\r' && (getb rope next) == '\n' then
-    limit_index rope (pos + 2)
-  else
-    next
+  limit_index rope (pos + 1)
 
 let prevc rope pos =
-  let prev1 = limit_index rope (pos - 1) in
-  let prev2 = limit_index rope (pos - 2) in
-  if (getb rope prev2) == '\r' && (getb rope prev1) == '\n' then
-    prev2
-  else
-    prev1
+  limit_index rope (pos - 1)
 
 let is_bol rope pos =
   if pos == 0 then true
@@ -226,7 +218,7 @@ let is_eol rope pos =
 
 let rec move_till step testfn rope pos =
   let adjust_pos = if step < 0 then prevc else nextc in
-  if (testfn rope pos) then pos
+  if (testfn rope pos) || pos == 0 || pos == (last rope) then pos
   else (move_till step testfn rope (adjust_pos rope pos))
 
 let to_bol rope pos =

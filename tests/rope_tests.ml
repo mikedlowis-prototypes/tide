@@ -133,10 +133,6 @@ let  () =
     let rope = Leaf("a\na", 0, 3) in
     assert( 2 == (nextc rope 1) );
   );
-  test "nextc : should return pos of next char" (fun () ->
-    let rope = Leaf("a\r\na", 0, 4) in
-    assert( 3 == (nextc rope 1) );
-  );
 
   (* prevc() tests *)
   test "prevc : should return pos if at start of buffer" (fun () ->
@@ -146,10 +142,6 @@ let  () =
   test "prevc : should return pos of prev char" (fun () ->
     let rope = Leaf("a\na", 0, 3) in
     assert( 1 == (prevc rope 2) );
-  );
-  test "prevc : should return pos of prev char" (fun () ->
-    let rope = Leaf("a\r\na", 0, 4) in
-    assert( 1 == (prevc rope 3) );
   );
 
   (* is_bol() tests *)

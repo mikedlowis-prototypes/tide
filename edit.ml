@@ -32,7 +32,8 @@ let onupdate width height =
 
 let onshutdown () = ()
 
-let onevent = function
+let onevent evnt =
+  try match evnt with
   | Focus state      -> onfocus state
   | KeyPress e       -> onkeypress e.mods e.rune
   | MouseClick e     -> onmousebtn e.mods e.btn e.x e.y true
@@ -45,10 +46,15 @@ let onevent = function
   | PipeReadReady e  -> () (*print_endline "pipereadready"*)
   | Update e         -> onupdate e.width e.height
   | Shutdown         -> onshutdown ()
+  with e -> begin
+    print_endline (Printexc.to_string e);
+    Printexc.print_backtrace stdout
+  end
 
 (* Main Routine
  ******************************************************************************)
 let () =
+  Printexc.record_backtrace true;
   if Array.length Sys.argv > 1 then
     edit_view := View.make 640 480 Sys.argv.(1);
   let win = make_window 640 480 in

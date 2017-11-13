@@ -13,12 +13,12 @@ ifeq ($(NATIVE), 1)
     OLDFLAGS   = -compact -ccopt -dead_strip
 else
     OC         = ocamlc
-    OCFLAGS    =
+    OCFLAGS    = -g
     MKLIB      = ocamlmklib
     MKLIBFLAGS =
     OBJEXT     = cmo
     LIBEXT     = cma
-    OLDFLAGS   = -dllpath .
+    OLDFLAGS   = -g -dllpath .
 endif
 
 # Target Definitions
