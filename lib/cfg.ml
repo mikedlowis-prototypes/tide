@@ -28,7 +28,7 @@ let cmd_tags = strvar "tide.ui.font"
 
 (* font settings *)
 let font = strvar "tide.ui.tags.edit"
-    "Liberation Mono:pixelsize=14:antialias=true:autohint=true"
+    "Liberation Sans:size=11:antialias=true:autohint=true"
 let line_spacing = intvar "tide.ui.line_spacing" 1
 
 (* user interface related options *)

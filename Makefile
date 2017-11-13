@@ -42,7 +42,9 @@ LIBOBJS = \
 
 TESTOBJS = \
     tests/test.$(OBJEXT) \
+    tests/buf_tests.$(OBJEXT) \
     tests/rope_tests.$(OBJEXT) \
+    tests/misc_tests.$(OBJEXT) \
     tests/scrollmap_tests.$(OBJEXT)
 
 .PHONY: all clean docs

@@ -1,5 +1,5 @@
 (* config settings. eventually move to Cfg module *)
-let font = X11.font_load "Verdana:size=11"
+let font = X11.font_load Cfg.font
 let font_height = let open X11 in font.height
 let tabglyph = 0x30
 let tabwidth = 4
