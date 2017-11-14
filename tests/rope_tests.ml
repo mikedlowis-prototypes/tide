@@ -1,8 +1,16 @@
 open Test
 open Rope
 
-let  () =
-  (* length() tests *)
+let () = (* empty tests *)
+  test "empty : should be an empty rope" (fun () ->
+    let rope = Rope.empty in
+    assert( length rope == 0 );
+    assert( height rope == 0 );
+    assert( to_string rope = "" )
+  );
+  ()
+
+let () = (* length() tests *)
   test "length : 0 for empty string" (fun () ->
     let rope = Leaf("", 0, 0) in
     assert( length rope == 0 )
@@ -15,8 +23,28 @@ let  () =
     let rope = (join (Leaf("a", 0, 1)) (Leaf("a", 0, 1))) in
     assert( length rope == 2 )
   );
+  ()
 
-  (* flatten() tests *)
+let () = (* last() tests *)
+  test "last() : should return 0" (fun () ->
+    let rope = from_string "" in
+    assert( last rope == 0 );
+  );
+  test "last() : should return 0" (fun () ->
+    let rope = from_string "a" in
+    assert( last rope == 0 );
+  );
+  test "last() : should return 1" (fun () ->
+    let rope = from_string "ab" in
+    assert( last rope == 1 );
+  );
+  test "last() : should return 2" (fun () ->
+    let rope = from_string "abc" in
+    assert( last rope == 2 );
+  );
+  ()
+
+let () = (* flatten() tests *)
   test "flatten : flatten a tree to a leaf" (fun () ->
     let tree = Node (Leaf("a", 0, 1), Leaf("b", 0, 1), 2, 2) in
     let leaf = (flatten tree) in
@@ -24,8 +52,9 @@ let  () =
     | Leaf ("ab",0,2) -> true
     | _ -> false)
   );
+  ()
 
-  (* join() tests *)
+let () = (* join() tests *)
   test "join : join two leaves into rope" (fun () ->
     let left  = Leaf("a", 0, 1) in
     let right =  Leaf("b", 0, 1) in
@@ -50,17 +79,36 @@ let  () =
     | Leaf ("abc",0,3) -> true
     | _ -> false)
   );
+  ()
 
-  (* getc() tests *)
+let () = (* split() tests *)
+  test "split : split string into two parts" (fun () ->
+    let left, right = split (from_string "ab") 1 in
+    assert (to_string left = "a");
+    assert (to_string right = "b")
+  );
+  test "split : split string into empty left and full right" (fun () ->
+    let left, right = split (from_string "ab") 0 in
+    assert (to_string left = "");
+    assert (to_string right = "ab")
+  );
+  test "split : split string into empty right and full left" (fun () ->
+    let left, right = split (from_string "ab") 2 in
+    assert (to_string left = "ab");
+    assert (to_string right = "")
+  );
+  ()
+
+let () = (* getc() tests *)
   test "getc : raise Out_of_bounds on negative index" (fun () ->
     let rope = Leaf("a", 0, 1) in
     try let _ = getc rope (-1) in assert false
-    with Out_of_bounds _ -> assert true
+    with Invalid_argument _ -> assert true
   );
   test "getc : raise Out_of_bounds on out of bounds index" (fun () ->
     let rope = Leaf("a", 0, 1) in
     try let _ = getc rope (2) in assert false
-    with Out_of_bounds _ -> assert true
+    with Invalid_argument _ -> assert true
   );
   test "getc : return index 0 of leaf" (fun () ->
     let rope = Leaf("abc", 0, 3) in
@@ -82,11 +130,6 @@ let  () =
     let rope = Node((Leaf("a", 0, 1)), (Leaf("b", 0, 1)), 0, 2) in
     assert( (getc rope (1)) == Char.code 'b' );
   );
-(*  test "getc : return \\n for \\r\\n" (fun () ->
-    let rope = from_string "\r\n" in
-    assert( (getc rope (0)) == Char.code '\n' );
-  );
-*)
   test "getc : return \\r for \\r at end of string" (fun () ->
     let rope = from_string "\r" in
     assert( (getc rope (0)) == Char.code '\r' );
@@ -95,8 +138,9 @@ let  () =
     let rope = from_string "\ra" in
     assert( (getc rope (0)) == Char.code '\r' );
   );
+  ()
 
-  (* puts() tests *)
+let () = (* puts() tests *)
   test "puts : insert at index 0" (fun () ->
     let rope = Leaf("bc", 0, 2) in
     let rope = (puts rope "a" 0) in
@@ -124,8 +168,9 @@ let  () =
     assert( (getc rope (1)) == Char.code 'b' );
     assert( (getc rope (2)) == Char.code 'c' );
   );
+  ()
 
-  (* nextc() tests *)
+let () = (* nextc() tests *)
   test "nextc : should return pos if at end of buffer" (fun () ->
     let rope = Leaf("abc", 0, 3) in
     assert( 2 == (nextc rope 2) );
@@ -134,8 +179,9 @@ let  () =
     let rope = Leaf("a\na", 0, 3) in
     assert( 2 == (nextc rope 1) );
   );
+  ()
 
-  (* prevc() tests *)
+let () = (* prevc() tests *)
   test "prevc : should return pos if at start of buffer" (fun () ->
     let rope = Leaf("abc", 0, 3) in
     assert( 0 == (prevc rope 0) );
@@ -144,8 +190,9 @@ let  () =
     let rope = Leaf("a\na", 0, 3) in
     assert( 1 == (prevc rope 2) );
   );
+  ()
 
-  (* is_bol() tests *)
+let () = (* is_bol() tests *)
   test "is_bol : should return true if pos is 0" (fun () ->
     let rope = Leaf("abc", 0, 3) in
     assert( is_bol rope 0 );
@@ -162,8 +209,9 @@ let  () =
     let rope = Leaf("\rabc", 0, 3) in
     assert( (is_bol rope 1) == false );
   );
+  ()
 
-  (* is_eol() tests *)
+let () = (* is_eol() tests *)
   test "is_eol : should return true if pos is Rope.last" (fun () ->
     let rope = Leaf("abc", 0, 3) in
     assert( is_eol rope 2 );
@@ -172,18 +220,22 @@ let  () =
     let rope = Leaf("abc\n", 0, 4) in
     assert( is_eol rope 3 );
   );
-(*  test "is_eol : should return true if pos is last char of line with \\r\\n ending" (fun () ->
-    let rope = Leaf("abc\r\n", 0, 5) in
-    assert( is_eol rope 3 );
-  );*)
   test "is_eol : should return false if pos is not last char of line" (fun () ->
     let rope = Leaf("abcd\n", 0, 5) in
     assert( (is_eol rope 2) == false );
   );
+  ()
 
-  (* to_bol() tests *)
+let () = (* to_bol() tests *)
   test "to_bol : should return index of first char on the line" (fun () ->
     let rope = Leaf("\nabc\n", 0, 5) in
     assert( (to_bol rope 2) == 1 );
+  );
+  ()
+
+let () = (* to_eol() tests *)
+  test "to_bol : should return index of last char on the line" (fun () ->
+    let rope = Leaf("\nabc\n", 0, 5) in
+    assert( (to_eol rope 1) == 4 );
   );
   ()

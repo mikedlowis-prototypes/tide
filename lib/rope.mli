@@ -9,6 +9,7 @@ type rune = int
 
 val empty : rope
 val from_string : string -> rope
+val to_string : rope -> string
 
 val length : rope -> int
 val height : rope -> int
@@ -22,7 +23,6 @@ val del : rope -> int -> int -> rope
 
 val iteri : (int -> rune -> bool) -> rope -> int -> unit
 
-val getb : rope -> int -> char
 val getc : rope -> int -> rune
 val putc : rope -> int -> rune -> rope
 val gets : rope -> int -> int -> string

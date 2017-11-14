@@ -28,7 +28,7 @@
 </div>
 <h1>Module <a href="type_Rope.html">Rope</a></h1>
 
-<pre><span class="keyword">module</span> Rope: <code class="code">sig</code> <a href="Rope.html">..</a> <code class="code">end</code></pre><hr width="100%">
+<pre><span id="MODULERope"><span class="keyword">module</span> Rope</span>: <code class="code">sig</code> <a href="Rope.html">..</a> <code class="code">end</code></pre><hr width="100%">
 
 <pre><span id="EXCEPTIONOut_of_bounds"><span class="keyword">exception</span> Out_of_bounds</span> <span class="keyword">of</span> <code class="type">string</code></pre>
 
@@ -65,11 +65,10 @@
 <pre><span id="VALis_leaf"><span class="keyword">val</span> is_leaf</span> : <code class="type"><a href="Rope.html#TYPEt">t</a> -> bool</code></pre>
 <pre><span id="VALlimit_index"><span class="keyword">val</span> limit_index</span> : <code class="type"><a href="Rope.html#TYPEt">t</a> -> int -> int</code></pre>
 <pre><span id="VALlast"><span class="keyword">val</span> last</span> : <code class="type"><a href="Rope.html#TYPEt">t</a> -> int</code></pre>
-<pre><span id="VALcheck_index"><span class="keyword">val</span> check_index</span> : <code class="type"><a href="Rope.html#TYPEt">t</a> -> int -> unit</code></pre>
-<pre><span id="VALgetb"><span class="keyword">val</span> getb</span> : <code class="type"><a href="Rope.html#TYPEt">t</a> -> int -> char</code></pre>
 <pre><span id="VALgetc"><span class="keyword">val</span> getc</span> : <code class="type"><a href="Rope.html#TYPEt">t</a> -> int -> int</code></pre>
 <pre><span id="VALiteri"><span class="keyword">val</span> iteri</span> : <code class="type">(int -> int -> bool) -> <a href="Rope.html#TYPEt">t</a> -> int -> unit</code></pre>
 <pre><span id="VALgets"><span class="keyword">val</span> gets</span> : <code class="type"><a href="Rope.html#TYPEt">t</a> -> int -> int -> string</code></pre>
+<pre><span id="VALto_string"><span class="keyword">val</span> to_string</span> : <code class="type"><a href="Rope.html#TYPEt">t</a> -> string</code></pre>
 <pre><span id="VALflatten"><span class="keyword">val</span> flatten</span> : <code class="type"><a href="Rope.html#TYPEt">t</a> -> <a href="Rope.html#TYPEt">t</a></code></pre>
 <pre><span id="VALjoin"><span class="keyword">val</span> join</span> : <code class="type"><a href="Rope.html#TYPEt">t</a> -> <a href="Rope.html#TYPEt">t</a> -> <a href="Rope.html#TYPEt">t</a></code></pre>
 <pre><span id="VALjoin_special"><span class="keyword">val</span> join_special</span> : <code class="type"><a href="Rope.html#TYPEt">t</a> -> <a href="Rope.html#TYPEt">t</a> -> <a href="Rope.html#TYPEt">t</a> -> <a href="Rope.html#TYPEt">t</a></code></pre>

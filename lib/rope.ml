@@ -33,36 +33,10 @@ let limit_index rope i =
 let last rope =
   limit_index rope ((length rope) - 1)
 
-let check_index rope i =
-  if i < 0 || i >= (length rope) then begin
-    raise (Out_of_bounds "Rope.check_index")
-  end
-
-let rec getb rope i =
-  check_index rope i;
+let rec getc rope i =
   match rope with
   | Leaf (s,off,_) ->
-      s.[off + i]
-  | Node (l,r,h,len) ->
-      let left_len = (length l) in
-      if i < left_len then
-        getb l i
-      else
-        getb r (i - left_len)
-
-let rec getc rope i =
-  check_index rope i;
-  match rope with
-  | Leaf (s,off,_) -> (Char.code s.[off + i])
-(*
-      let c = (Char.code s.[off + i]) in
-      let len = (length rope) in
-      let next = (i + 1) in
-      if (c == 0x0D && next < len && (getc rope next) == 0x0A) then
-        0x0A
-      else
-        c
-*)
+      Char.code s.[off + i]
   | Node (l,r,h,len) ->
       let left_len = (length l) in
       if i < left_len then
@@ -72,7 +46,7 @@ let rec getc rope i =
 
 (* inefficient form of iteri *)
 let rec iteri fn rope pos =
-  if pos < (length rope) && (fn pos (Char.code (getb rope pos))) then
+  if pos < (length rope) && (fn pos (getc rope pos)) then
     iteri fn rope (pos + 1)
 
 (* More efficient form of iteri?
@@ -103,6 +77,9 @@ let gets rope i j =
       (n <= j))
     rope i;
   Bytes.unsafe_to_string buf
+
+let to_string rope =
+  gets rope 0 (length rope)
 
 (* Rebalancing Algorithm from the original paper on ropes:
 
@@ -176,8 +153,6 @@ and join_special left right node =
   | _ -> node
 
 let rec split rope i =
-  if i < 0 || i > (length rope) then
-    raise (Out_of_bounds "Rope.split");
   match rope with
   | Leaf (s,off,len) ->
       (Leaf (s, off,  i), Leaf (s, (off + i), len - (i)))
