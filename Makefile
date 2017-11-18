@@ -1,6 +1,9 @@
 # Toolchain Configuration
 #-------------------------------------------------------------------------------
-INCS = -I . -I lib -I tests -I /usr/X11R6/include -I /usr/include/freetype2 -I /usr/X11R6/include/freetype2
+NATIVE = 1
+INCS = -I . -I lib -I tests \
+    -I /usr/X11R6/include \
+    -I /usr/include/freetype2 -I /usr/X11R6/include/freetype2
 LIBS = -L/usr/X11R6/lib -lX11 -lXft -lfontconfig
 
 ifeq ($(NATIVE), 1)
@@ -24,6 +27,11 @@ endif
 # Target Definitions
 #-------------------------------------------------------------------------------
 BINS = edit unittests
+
+BINSRCS = \
+	edit.ml \
+	unittests.ml
+
 LIBSRCS = \
 	lib/misc.ml \
 	lib/x11.ml \
@@ -34,18 +42,20 @@ LIBSRCS = \
 	lib/scrollmap.ml \
 	lib/view.ml
 
+TESTSRCS = \
+	tests/test.ml \
+	tests/buf_tests.ml \
+	tests/misc_tests.ml \
+	tests/rope_tests.ml \
+	tests/scrollmap_tests.ml
+
 LIBOBJS = \
 	$(LIBSRCS:.ml=.$(OBJEXT)) \
     lib/x11_prims.o \
     lib/misc_prims.o \
     lib/utf8.o
 
-TESTOBJS = \
-    tests/test.$(OBJEXT) \
-    tests/buf_tests.$(OBJEXT) \
-    tests/rope_tests.$(OBJEXT) \
-    tests/misc_tests.$(OBJEXT) \
-    tests/scrollmap_tests.$(OBJEXT)
+TESTOBJS = $(TESTSRCS:.ml=.$(OBJEXT))
 
 .PHONY: all clean docs
 
@@ -53,7 +63,7 @@ all: docs/index.html $(BINS)
 	./unittests
 
 clean:
-	$(RM) deps.mk $(BINS) *.cm* *.o *.a *.so lib/*.cm* lib/*.o tests/*.cm* tests/*.o
+	$(RM) $(BINS) *.cm* *.o *.a *.so lib/*.cm* lib/*.o tests/*.cm* tests/*.o
 
 # Executable targets
 edit: tide.$(LIBEXT) edit.$(OBJEXT)
@@ -64,8 +74,8 @@ tide.$(LIBEXT): $(LIBOBJS)
 docs/index.html: tide.$(LIBEXT)
 	ocamldoc -d docs -html -I lib $(LIBSRCS)
 
-deps.mk: $(LIBSRCS)
-	ocamldep -all *.ml* lib/*.ml* > deps.mk
+deps.mk: $(BINSRCS) $(LIBSRCS) $(TESTSRCS)
+	ocamldep -I . -I lib/ -I tests/ -all -native -one-line *.ml* lib/*.ml* tests/*.ml* > deps.mk
 -include deps.mk
 
 # Implicit Rule Definitions
