@@ -74,8 +74,9 @@ tide.$(LIBEXT): $(LIBOBJS)
 docs/index.html: tide.$(LIBEXT)
 	ocamldoc -d docs -html -I lib $(LIBSRCS)
 
-deps.mk: $(BINSRCS) $(LIBSRCS) $(TESTSRCS)
-	ocamldep -I . -I lib/ -I tests/ -all -native -one-line *.ml* lib/*.ml* tests/*.ml* > deps.mk
+# Dependency generation
+deps.mk: $(wildcard *.ml* lib/*.ml* tests/*.ml*)
+	ocamldep -I . -I lib/ -I tests/ -all -native -one-line $^ > deps.mk
 -include deps.mk
 
 # Implicit Rule Definitions
