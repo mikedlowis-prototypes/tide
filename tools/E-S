@@ -1,2 +1,3 @@
 #!/bin/sh
-sed 's/GNTX_EXTERN\|extern/static/g'
+# mark extern items as static in C files
+sed 's/GNTX_EXTERN\|extern/static/g' "$@"

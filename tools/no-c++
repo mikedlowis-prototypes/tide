@@ -1,2 +1,3 @@
 #!/bin/sh
-sed 's_\/\/\([^\r\n]\+\)_\/*\1 *\/_g'
+# replace C++ style comments with C style block comments
+sed 's_\/\/\([^\r\n]\+\)_\/*\1 *\/_g' "$@"
