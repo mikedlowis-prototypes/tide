@@ -28,7 +28,7 @@
 </div>
 <h1>Module <a href="type_X11.html">X11</a></h1>
 
-<pre><span id="MODULEX11"><span class="keyword">module</span> X11</span>: <code class="code">sig</code> <a href="X11.html">..</a> <code class="code">end</code></pre><hr width="100%">
+<pre><span class="keyword">module</span> X11: <code class="code">sig</code> <a href="X11.html">..</a> <code class="code">end</code></pre><hr width="100%">
 
 <pre><span id="TYPExatom"><span class="keyword">type</span> <code class="type"></code>xatom</span> </pre>
 
@@ -456,8 +456,8 @@
 
 
 
-<pre><span id="MODULERune"><span class="keyword">module</span> <a href="X11.Rune.html">Rune</a></span>: <code class="code">sig</code> <a href="X11.Rune.html">..</a> <code class="code">end</code></pre>
-<pre><span id="MODULEGlyphMap"><span class="keyword">module</span> <a href="X11.GlyphMap.html">GlyphMap</a></span>: <code class="type">Map.Make</code><code class="code">(</code><code class="type"><a href="X11.Rune.html">Rune</a></code><code class="code">)</code></pre>
+<pre><span class="keyword">module</span> <a href="X11.Rune.html">Rune</a>: <code class="code">sig</code> <a href="X11.Rune.html">..</a> <code class="code">end</code></pre>
+<pre><span class="keyword">module</span> <a href="X11.GlyphMap.html">GlyphMap</a>: <code class="type">Map.Make</code><code class="code">(</code><code class="type"><a href="X11.Rune.html">Rune</a></code><code class="code">)</code></pre>
 <pre><span id="VALconnect"><span class="keyword">val</span> connect</span> : <code class="type">unit -> unit</code></pre>
 <pre><span id="VALdisconnect"><span class="keyword">val</span> disconnect</span> : <code class="type">unit -> unit</code></pre>
 <pre><span id="VALmake_window"><span class="keyword">val</span> make_window</span> : <code class="type">int -> int -> <a href="X11.html#TYPExwin">xwin</a></code></pre>
