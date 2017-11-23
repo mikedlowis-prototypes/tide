@@ -1,32 +1,30 @@
 # Toolchain Configuration
 #-------------------------------------------------------------------------------
-NATIVE = 1
+OFLAGS     = -g
+MKLIBFLAGS = -custom
+OLDFLAGS   =
+
+# Native Config
+BINEXT = bin
+OBJEXT = cmx
+LIBEXT = cmxa
+
+# Bytecode Config
+#BINEXT = byte
+#OBJEXT = cmo
+#LIBEXT = cma
+
+# Include and Lib Paths
+#-------------------------------------------------------------------------------
 INCS = -I . -I lib -I tests \
     -I /usr/X11R6/include \
     -I /usr/include/freetype2 -I /usr/X11R6/include/freetype2
-LIBS = -L/usr/X11R6/lib -lX11 -lXft -lfontconfig
 
-ifeq ($(NATIVE), 1)
-    OC         = ocamlopt
-    OCFLAGS    = -g
-    MKLIB      = ocamlmklib
-    MKLIBFLAGS = -custom
-    OBJEXT     = cmx
-    LIBEXT     = cmxa
-    OLDFLAGS   = -compact -ccopt -dead_strip
-else
-    OC         = ocamlc
-    OCFLAGS    = -g
-    MKLIB      = ocamlmklib
-    MKLIBFLAGS =
-    OBJEXT     = cmo
-    LIBEXT     = cma
-    OLDFLAGS   = -g -dllpath .
-endif
+LIBS = -L/usr/X11R6/lib -lX11 -lXft -lfontconfig
 
 # Target Definitions
 #-------------------------------------------------------------------------------
-BINS = edit unittests
+BINS = edit.$(BINEXT) unittests.$(BINEXT)
 
 BINSRCS = \
 	edit.ml \
@@ -59,40 +57,51 @@ TESTOBJS = $(TESTSRCS:.ml=.$(OBJEXT))
 
 .PHONY: all clean docs
 
-all: docs/index.html $(BINS)
-	./unittests
+all: $(BINS)
+	./unittests.$(BINEXT)
 
 clean:
-	$(RM) $(BINS) *.cm* *.o *.a *.so lib/*.cm* lib/*.o tests/*.cm* tests/*.o
+	$(RM) *.byte *.bin *.cm* *.o *.a *.so lib/*.cm* lib/*.o tests/*.cm* tests/*.o
 
 # Executable targets
-edit: tide.$(LIBEXT) edit.$(OBJEXT)
-unittests: tide.$(LIBEXT) $(TESTOBJS) unittests.$(OBJEXT)
+edit.$(BINEXT): tide.$(LIBEXT) edit.$(OBJEXT)
+unittests.$(BINEXT): tide.$(LIBEXT) $(TESTOBJS) unittests.$(OBJEXT)
 
 # Library targets
 tide.$(LIBEXT): $(LIBOBJS)
-docs/index.html: tide.$(LIBEXT)
+docs: tide.$(LIBEXT)
 	ocamldoc -d docs -html -I lib $(LIBSRCS)
 
 # Dependency generation
 deps.mk: $(wildcard *.ml* lib/*.ml* tests/*.ml*)
-	ocamldep -I . -I lib/ -I tests/ -all -native -one-line $^ > deps.mk
+	ocamldep -I . -I lib/ -I tests/ -all -one-line $^ > deps.mk
 -include deps.mk
 
 # Implicit Rule Definitions
 #-------------------------------------------------------------------------------
-%:
-	$(OC) $(OLDFLAGS) -o $@ $^ $(INCS)
-
-%.cmi: %.mli
-	$(OC) $(OCFLAGS) -c -o $@ $< $(INCS)
-
-%.$(OBJEXT): %.ml
-	$(OC) $(OCFLAGS) -c -o $@ $< $(INCS)
-
-%.$(LIBEXT):
-	$(MKLIB) $(MKLIBFLAGS) $(OCFLAGS) -o $* -oc $* $^ $(LIBS)
-
-%.o: %.c
-	$(OC) $(OCFLAGS) -c $^ $(INCS)
+.SUFFIXES: .c .o .ml .mli .cmo .cmx .cmi .cma .cmxa .byte .bin
+.c.o:
+	ocamlc $(OFLAGS) -c $^ $(INCS)
 	mv $(notdir $@) $(dir $@)
+.ml.cmo :
+	ocamlc -c $(OFLAGS) $(INCS) -o $@ $<
+.ml.cmx :
+	ocamlopt -c $(OFLAGS) $(INCS) -o $@ $<
+.mli.cmi :
+	ocamlc -c $(OFLAGS) $(INCS) -o $@ $<
+%.cma:
+	ocamlmklib $(MKLIBFLAGS) $(OFLAGS) -o $* -oc $* $(LIBS) $^
+%.cmxa:
+	ocamlmklib $(MKLIBFLAGS) $(OFLAGS) -o $* -oc $* $(LIBS) $^
+%.byte:
+	ocamlc $(OLDFLAGS) $(INCS) -o $@ $^
+%.bin:
+	ocamlopt $(OLDFLAGS) $(INCS) -o $@ $^
+
+# Lexer and parser generation
+#.mll.ml :
+#	ocamllex $(OLEXFLAGS) $<
+#.mly.ml :
+#	ocamlyacc $(OYACCFLAGS) $<
+#.mly.mli:
+#	ocamlyacc $(OYACCFLAGS) $<

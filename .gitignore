@@ -1,3 +1,4 @@
+tags
 *.o
 *.cmo
 *.cmx
@@ -5,7 +6,5 @@
 *.cmxa
 *.cmi
 *.a
-edit
-dlltide.so
-unittests
-tags
+*.bin
+*.byte

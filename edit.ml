@@ -3,6 +3,16 @@ open X11
 let tags_buf = ref Buf.empty
 let edit_view = ref (View.empty 640 480)
 
+let scroll_up () =
+  for i = 1 to 4 do
+    edit_view := View.scroll_up !edit_view
+  done
+
+let scroll_dn () =
+  for i = 1 to 4 do
+    edit_view := View.scroll_dn !edit_view
+  done
+
 (* Event functions
  ******************************************************************************)
 let onfocus focused = ()
@@ -15,8 +25,8 @@ let onmousebtn mods btn x y pressed =
   | 1 -> ()
   | 2 -> ()
   | 3 -> ()
-  | 4 -> (edit_view := View.scroll_up !edit_view)
-  | 5 -> (edit_view := View.scroll_dn !edit_view)
+  | 4 -> scroll_up ()
+  | 5 -> scroll_dn ()
   | _ -> ()
 
 let onmousemove mods x y = ()
