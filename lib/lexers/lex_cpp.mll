@@ -1,4 +1,4 @@
-{ open Highlight }
+(*{ open Highlight }*)
 
 (* Line and Block Comments *)
 let ln_cmt = "//" [^ '\r' '\n']*

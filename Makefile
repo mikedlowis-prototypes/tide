@@ -55,13 +55,15 @@ LIBOBJS = \
 
 TESTOBJS = $(TESTSRCS:.ml=.$(OBJEXT))
 
-.PHONY: all clean docs
+.PHONY: all clean docs deps
 
 all: $(BINS)
 	./unittests.$(BINEXT)
 
 clean:
-	$(RM) *.byte *.bin *.cm* *.o *.a *.so lib/*.cm* lib/*.o tests/*.cm* tests/*.o
+	$(RM) *.byte *.bin *.cm* *.o *.a
+	$(RM) lib/*.cm* lib/*.o tests/*.cm* tests/*.o
+	$(RM) lib/lexers/*.cm* lib/lexers/*.ml
 
 # Executable targets
 edit.$(BINEXT): tide.$(LIBEXT) edit.$(OBJEXT)
@@ -73,13 +75,13 @@ docs: tide.$(LIBEXT)
 	ocamldoc -d docs -html -I lib $(LIBSRCS)
 
 # Dependency generation
-deps.mk: $(wildcard *.ml* lib/*.ml* tests/*.ml*)
+deps deps.mk: $(wildcard *.ml* lib/*.ml* tests/*.ml*)
 	ocamldep -I . -I lib/ -I tests/ -all -one-line $^ > deps.mk
 -include deps.mk
 
 # Implicit Rule Definitions
 #-------------------------------------------------------------------------------
-.SUFFIXES: .c .o .ml .mli .cmo .cmx .cmi .cma .cmxa .byte .bin
+.SUFFIXES: .c .o .ml .mli .mll .cmo .cmx .cmi .cma .cmxa .byte .bin
 .c.o:
 	ocamlc $(OFLAGS) -c $^ $(INCS)
 	mv $(notdir $@) $(dir $@)
@@ -89,6 +91,8 @@ deps.mk: $(wildcard *.ml* lib/*.ml* tests/*.ml*)
 	ocamlopt -c $(OFLAGS) $(INCS) -o $@ $<
 .mli.cmi :
 	ocamlc -c $(OFLAGS) $(INCS) -o $@ $<
+.mll.ml :
+	ocamllex $(OLEXFLAGS) -o $@ $<
 %.cma:
 	ocamlmklib $(MKLIBFLAGS) $(OFLAGS) -o $* -oc $* $(LIBS) $^
 %.cmxa:
@@ -98,10 +102,7 @@ deps.mk: $(wildcard *.ml* lib/*.ml* tests/*.ml*)
 %.bin:
 	ocamlopt $(OLDFLAGS) $(INCS) -o $@ $^
 
-# Lexer and parser generation
-#.mll.ml :
-#	ocamllex $(OLEXFLAGS) $<
 #.mly.ml :
-#	ocamlyacc $(OYACCFLAGS) $<
+#	ocamlyacc $(OYACCFLAGS) -o $@ $<
 #.mly.mli:
-#	ocamlyacc $(OYACCFLAGS) $<
+#	ocamlyacc $(OYACCFLAGS) -o $@ $<
