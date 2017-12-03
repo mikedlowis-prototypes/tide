@@ -38,6 +38,7 @@ LIBSRCS = \
 	lib/buf.ml \
 	lib/draw.ml \
 	lib/scrollmap.ml \
+	lib/colormap.ml \
 	lib/view.ml
 
 TESTSRCS = \
@@ -45,7 +46,11 @@ TESTSRCS = \
 	tests/buf_tests.ml \
 	tests/misc_tests.ml \
 	tests/rope_tests.ml \
+	tests/view_tests.ml \
 	tests/scrollmap_tests.ml
+
+LEXERS = \
+	lib/lexers/lex_cpp.ml
 
 LIBOBJS = \
 	$(LIBSRCS:.ml=.$(OBJEXT)) \
@@ -57,7 +62,7 @@ TESTOBJS = $(TESTSRCS:.ml=.$(OBJEXT))
 
 .PHONY: all clean docs deps
 
-all: $(BINS)
+all: $(BINS) lib/lexers/lex_cpp.ml
 	./unittests.$(BINEXT)
 
 clean:
@@ -70,7 +75,7 @@ edit.$(BINEXT): tide.$(LIBEXT) edit.$(OBJEXT)
 unittests.$(BINEXT): tide.$(LIBEXT) $(TESTOBJS) unittests.$(OBJEXT)
 
 # Library targets
-tide.$(LIBEXT): $(LIBOBJS)
+tide.$(LIBEXT): $(LIBOBJS) $(LEXERS:.ml=.$(OBJEXT))
 docs: tide.$(LIBEXT)
 	ocamldoc -d docs -html -I lib $(LIBSRCS)
 

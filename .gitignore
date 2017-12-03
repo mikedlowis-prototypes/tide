@@ -8,3 +8,4 @@ tags
 *.a
 *.bin
 *.byte
+lib/lexers/*.ml
