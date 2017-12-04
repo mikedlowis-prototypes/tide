@@ -51,18 +51,18 @@ module Cursor = struct
     let tabsz = (xoff * tabwidth) in
     csr.x <- (csr.startx + ((csr.x - csr.startx + tabsz) / tabsz * tabsz))
 
-  let place_glyph csr glyph =
+  let place_glyph csr glyph clr =
     let xoff = (glyph_width glyph) in
     if (csr.x + xoff) > csr.width then (next_line csr);
-    let _ = X11.draw_glyph Cfg.Color.palette.(5) glyph (csr.x, csr.y) in
+    let _ = X11.draw_glyph Cfg.Color.palette.(clr) glyph (csr.x, csr.y) in
     csr.x <- csr.x + xoff
 
-  let draw_glyph csr c =
+  let draw_glyph csr c clr =
     match c with
     | 0x0A -> next_line csr
     | 0x0D -> ()
     | 0x09 -> draw_tab csr
-    | _    -> place_glyph csr (X11.get_glyph font c)
+    | _    -> place_glyph csr (X11.get_glyph font c) clr
 
   let next_glyph csr c =
     let glyph = (X11.get_glyph font c) in
@@ -102,7 +102,7 @@ let buffer csr buf off =
   dark_bkg (csr.width - csr.x) (csr.height - csr.y) csr;
   let num = ref 0 and csr = (restart csr 2 0) in
   let draw_rune c =
-    draw_glyph csr c;
+    draw_glyph csr c Cfg.Color.Syntax.normal;
     num := !num + 1;
     has_next_line csr
   in

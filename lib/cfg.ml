@@ -88,14 +88,15 @@ module Color = struct
     let normal    = intvar "tide.colors.syntax.normal"    5
     let comment   = intvar "tide.colors.syntax.comment"   3
     let constant  = intvar "tide.colors.syntax.constant"  14
+    let keyword   = intvar "tide.colors.syntax.keyword"   15
+    let typedef   = intvar "tide.colors.syntax.typedef"   8
+
     let number    = intvar "tide.colors.syntax.number"    14
     let boolean   = intvar "tide.colors.syntax.boolean"   14
     let float     = intvar "tide.colors.syntax.float"     14
     let string    = intvar "tide.colors.syntax.string"    14
     let char      = intvar "tide.colors.syntax.character" 14
     let preproc   = intvar "tide.colors.syntax.preproc"   9
-    let typedef   = intvar "tide.colors.syntax.typedef"   8
-    let keyword   = intvar "tide.colors.syntax.keyword"   15
     let statement = intvar "tide.colors.syntax.statement" 10
     let procedure = intvar "tide.colors.syntax.function"  11
     let variable  = intvar "tide.colors.syntax.variable"  12

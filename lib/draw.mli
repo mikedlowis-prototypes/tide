@@ -7,7 +7,7 @@ module Cursor : sig
   val restart : t -> int -> int -> t
   val next_line : t -> unit
   val has_next_line : t -> bool
-  val draw_glyph : t -> int -> unit
+  val draw_glyph : t -> int -> int -> unit
   val next_glyph : t -> int -> bool
 end
 

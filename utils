@@ -1,0 +1,20 @@
+# change indentation
+'s/^/    /g'        # increase indentation
+'s/^    //g'        # decrease indentation
+
+# change comment
+'s,^\/\/[ ]\?,,g'   # remove C comment
+'s,^#[ ]\?,,g'      # remove script comment
+
+'s,^,\/\/,g'        # add C comment
+'s,^,#,g'           # add script comment
+
+'s/\n\n\n+/\n\n/g'  # remove redundant newlines, keep max two
+'s/[     ]+$//g'    # remove trailing whitespace
+
+'s/->/./g'          # pointer to struct
+'s/\./->/g'         # struct to pointer
+
+s,//[^\n]*\n,,g     # strip C // comments from selection
+s,/\*.*\*/\n,,g     # strip C /* */ 1-line comments from selection
+t "scratch" 0       # copy selection to scratch file

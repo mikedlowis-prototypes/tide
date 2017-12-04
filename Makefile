@@ -54,6 +54,7 @@ LEXERS = \
 
 LIBOBJS = \
 	$(LIBSRCS:.ml=.$(OBJEXT)) \
+	$(LEXERS:.ml=.$(OBJEXT)) \
     lib/x11_prims.o \
     lib/misc_prims.o \
     lib/utf8.o
@@ -106,8 +107,3 @@ deps deps.mk: $(wildcard *.ml* lib/*.ml* tests/*.ml*)
 	ocamlc $(OLDFLAGS) $(INCS) -o $@ $^
 %.bin:
 	ocamlopt $(OLDFLAGS) $(INCS) -o $@ $^
-
-#.mly.ml :
-#	ocamlyacc $(OYACCFLAGS) -o $@ $<
-#.mly.mli:
-#	ocamlyacc $(OYACCFLAGS) -o $@ $<
