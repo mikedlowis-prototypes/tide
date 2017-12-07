@@ -39,16 +39,20 @@ let set_color mapref lexbuf c =
   mapref := SpanSet.add span !mapref;
   ()
 
-let create scanfn fetchfn =
+let make scanfn fetchfn =
+  print_endline "generating colormap";
   let mapref = ref SpanSet.empty in
   try
     let lexbuf = Lexing.from_function fetchfn in
     let set_color = set_color mapref lexbuf in
     while true do
+      print_endline "scanning";
       scanfn set_color lexbuf
     done;
     !mapref
   with Eof -> !mapref
+
+let empty = SpanSet.empty
 
 let find pos set =
   let range = Span.({ start = pos; stop = pos; style = Normal }) in

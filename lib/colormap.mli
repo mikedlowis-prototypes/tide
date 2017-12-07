@@ -8,7 +8,8 @@ type t
 
 type lexer = (style -> unit) -> Lexing.lexbuf -> unit
 
-val create : lexer -> (bytes -> int -> int) -> t
+val empty : t
+val make : lexer -> (bytes -> int -> int) -> t
 
 (*
 val from_channel : lexer -> in_channel -> t

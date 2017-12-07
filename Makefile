@@ -16,7 +16,7 @@ LIBEXT = cmxa
 
 # Include and Lib Paths
 #-------------------------------------------------------------------------------
-INCS = -I . -I lib -I tests \
+INCS = -I . -I lib -I tests -I lib/lexers \
     -I /usr/X11R6/include \
     -I /usr/include/freetype2 -I /usr/X11R6/include/freetype2
 
@@ -30,6 +30,9 @@ BINSRCS = \
 	edit.ml \
 	unittests.ml
 
+LEXERS = \
+	lib/lexers/lex_cpp.ml
+
 LIBSRCS = \
 	lib/misc.ml \
 	lib/x11.ml \
@@ -39,6 +42,7 @@ LIBSRCS = \
 	lib/draw.ml \
 	lib/scrollmap.ml \
 	lib/colormap.ml \
+	$(LEXERS) \
 	lib/view.ml
 
 TESTSRCS = \
@@ -49,12 +53,8 @@ TESTSRCS = \
 	tests/view_tests.ml \
 	tests/scrollmap_tests.ml
 
-LEXERS = \
-	lib/lexers/lex_cpp.ml
-
 LIBOBJS = \
 	$(LIBSRCS:.ml=.$(OBJEXT)) \
-	$(LEXERS:.ml=.$(OBJEXT)) \
     lib/x11_prims.o \
     lib/misc_prims.o \
     lib/utf8.o

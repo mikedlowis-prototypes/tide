@@ -20,5 +20,5 @@ rule scan color = parse
   | typedef { color Type }
   | ln_cmt { color Comment }
   | blk_cmt { color Comment }
-  | _ { None }
+  | _
   | eof { raise Eof }

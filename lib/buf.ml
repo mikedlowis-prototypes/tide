@@ -28,6 +28,19 @@ let iteri fn buf i =
 let iter fn buf i =
   iteri (fun i c -> (fn c)) buf i
 
+let make_lexfn buf =
+  let pos = ref 0 in
+  (fun bytebuf n ->
+    let count = ref 0 in
+    iteri (fun i c ->
+      Bytes.set bytebuf !count (Char.chr c);
+      incr count;
+      (!count >= n)
+    ) buf !pos;
+    pos := !pos + !count;
+    Printf.printf "count %d\n" !count;
+    !count)
+
 module Cursor = struct
   type csr = {
     mutable start : int;
