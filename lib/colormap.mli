@@ -2,7 +2,7 @@ open Lexing
 
 exception Eof
 
-type style = Normal | Comment | Constant | Keyword | Type
+type style = Normal | Comment | Constant | Keyword | Type | PreProcessor
 
 type t
 

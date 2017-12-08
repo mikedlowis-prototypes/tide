@@ -2,7 +2,7 @@ open Lexing
 
 exception Eof
 
-type style = Normal | Comment | Constant | Keyword | Type
+type style = Normal | Comment | Constant | Keyword | Type | PreProcessor
 (*
     String | Character | Number | Boolean
   | Variable | Function | Keyword | Operator | PreProcessor | Type
@@ -29,6 +29,7 @@ let get_color = function
 | Constant -> Cfg.Color.Syntax.constant
 | Keyword  -> Cfg.Color.Syntax.keyword
 | Type     -> Cfg.Color.Syntax.typedef
+| PreProcessor -> Cfg.Color.Syntax.preproc
 
 let set_color mapref lexbuf c =
   let span = Span.({
@@ -49,13 +50,7 @@ let make scanfn fetchfn =
       scanfn set_color lexbuf
     done;
     !mapref
-  with Eof ->
-    Printf.printf "%b\n" @@ SpanSet.is_empty !mapref;
-    SpanSet.iter
-      (fun x -> Printf.printf "%d-%d\n" x.start x.stop)
-      !mapref;
-    print_endline "";
-    !mapref
+  with Eof -> !mapref
 
 let empty = SpanSet.empty
 
