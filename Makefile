@@ -1,18 +1,25 @@
 # Toolchain Configuration
 #-------------------------------------------------------------------------------
-OFLAGS     = -g
+OS         = $(shell uname)
+OFLAGS     = -g -nodynlink
 MKLIBFLAGS = -custom
 OLDFLAGS   =
 
 # Native Config
+OC     = ocamlopt
 BINEXT = bin
 OBJEXT = cmx
 LIBEXT = cmxa
 
 # Bytecode Config
+#OC     = ocamlc
 #BINEXT = byte
 #OBJEXT = cmo
 #LIBEXT = cma
+
+ifeq ($(OS),Darwin)
+	OFLAGS += -ccopt -dead_strip
+endif
 
 # Include and Lib Paths
 #-------------------------------------------------------------------------------
@@ -39,9 +46,9 @@ LIBSRCS = \
 	lib/cfg.ml \
 	lib/rope.ml \
 	lib/buf.ml \
+	lib/colormap.ml \
 	lib/draw.ml \
 	lib/scrollmap.ml \
-	lib/colormap.ml \
 	$(LEXERS) \
 	lib/view.ml
 
@@ -89,14 +96,14 @@ deps deps.mk: $(wildcard *.ml* lib/*.ml* tests/*.ml*)
 #-------------------------------------------------------------------------------
 .SUFFIXES: .c .o .ml .mli .mll .cmo .cmx .cmi .cma .cmxa .byte .bin
 .c.o:
-	ocamlc $(OFLAGS) -c $^ $(INCS)
+	ocamlopt $(OFLAGS) -c $^ $(INCS)
 	mv $(notdir $@) $(dir $@)
 .ml.cmo :
 	ocamlc -c $(OFLAGS) $(INCS) -o $@ $<
 .ml.cmx :
 	ocamlopt -c $(OFLAGS) $(INCS) -o $@ $<
 .mli.cmi :
-	ocamlc -c $(OFLAGS) $(INCS) -o $@ $<
+	$(OC) -c $(OFLAGS) $(INCS) -o $@ $<
 .mll.ml :
 	ocamllex $(OLEXFLAGS) -o $@ $<
 %.cma:

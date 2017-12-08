@@ -8,9 +8,9 @@ lib/cfg.cmx lib/cfg.o lib/cfg.cmi : lib/x11.cmi lib/x11.cmx lib/cfg.ml
 lib/colormap.cmo : lib/cfg.cmi lib/colormap.cmi lib/colormap.ml
 lib/colormap.cmx lib/colormap.o : lib/cfg.cmi lib/cfg.cmx lib/colormap.cmi lib/colormap.ml
 lib/colormap.cmi :
-lib/draw.cmo : lib/x11.cmi lib/cfg.cmi lib/buf.cmi lib/draw.cmi lib/draw.ml
-lib/draw.cmx lib/draw.o : lib/x11.cmi lib/x11.cmx lib/cfg.cmi lib/cfg.cmx lib/buf.cmi lib/buf.cmx lib/draw.cmi lib/draw.ml
-lib/draw.cmi : lib/x11.cmi lib/buf.cmi
+lib/draw.cmo : lib/x11.cmi lib/colormap.cmi lib/cfg.cmi lib/buf.cmi lib/draw.cmi lib/draw.ml
+lib/draw.cmx lib/draw.o : lib/x11.cmi lib/x11.cmx lib/colormap.cmi lib/colormap.cmx lib/cfg.cmi lib/cfg.cmx lib/buf.cmi lib/buf.cmx lib/draw.cmi lib/draw.ml
+lib/draw.cmi : lib/x11.cmi lib/colormap.cmi lib/buf.cmi
 lib/misc.cmo lib/misc.cmi : lib/misc.ml
 lib/misc.cmx lib/misc.o lib/misc.cmi : lib/misc.ml
 lib/rope.cmo : lib/rope.cmi lib/rope.ml

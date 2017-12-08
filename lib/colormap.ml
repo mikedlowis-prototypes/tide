@@ -33,7 +33,7 @@ let get_color = function
 let set_color mapref lexbuf c =
   let span = Span.({
     start = (lexeme_start lexbuf);
-    stop  = (lexeme_end lexbuf);
+    stop  = (lexeme_end lexbuf) - 1;
     style = c })
   in
   mapref := SpanSet.add span !mapref;
@@ -46,11 +46,16 @@ let make scanfn fetchfn =
     let lexbuf = Lexing.from_function fetchfn in
     let set_color = set_color mapref lexbuf in
     while true do
-      print_endline "scanning";
       scanfn set_color lexbuf
     done;
     !mapref
-  with Eof -> !mapref
+  with Eof ->
+    Printf.printf "%b\n" @@ SpanSet.is_empty !mapref;
+    SpanSet.iter
+      (fun x -> Printf.printf "%d-%d\n" x.start x.stop)
+      !mapref;
+    print_endline "";
+    !mapref
 
 let empty = SpanSet.empty
 

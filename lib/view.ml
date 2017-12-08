@@ -24,7 +24,7 @@ let resize view width =
 
 let draw view csr =
   let view = (resize view (Draw.Cursor.max_width csr)) in
-  let num = Draw.buffer csr view.buf (Scrollmap.first view.map) in
+  let num = Draw.buffer csr view.buf view.clr (Scrollmap.first view.map) in
   { view with num = num }
 
 let scroll_up view =

@@ -38,7 +38,6 @@ let make_lexfn buf =
       (!count >= n)
     ) buf !pos;
     pos := !pos + !count;
-    Printf.printf "count %d\n" !count;
     !count)
 
 module Cursor = struct

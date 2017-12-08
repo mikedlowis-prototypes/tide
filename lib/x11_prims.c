@@ -108,6 +108,7 @@ CAMLprim value x11_draw_rect(value rect) {
 #define _XOPEN_SOURCE 700
 #include <time.h>
 #include <sys/time.h>
+#define printf(...) ((void)0)
 
 uint64_t getmillis(void) {
     struct timespec time;

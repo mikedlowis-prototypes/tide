@@ -98,11 +98,11 @@ let vrule height csr =
   rule_bkg 1 (height - csr.y) csr;
   csr.x <- csr.x + 1
 
-let buffer csr buf off =
+let buffer csr buf clr off =
   dark_bkg (csr.width - csr.x) (csr.height - csr.y) csr;
   let num = ref 0 and csr = (restart csr 2 0) in
   let draw_rune c =
-    draw_glyph csr c Cfg.Color.Syntax.normal;
+    draw_glyph csr c (Colormap.find (off + !num) clr);
     num := !num + 1;
     has_next_line csr
   in
@@ -131,6 +131,6 @@ let scroll csr params =
   csr.x <- csr.x + 14;
   vrule csr.height csr
 
-let edit csr buf =
+let edit csr buf clr =
   dark_bkg (csr.width - csr.x) (csr.height - csr.y) csr;
-  buffer csr buf
+  buffer csr buf clr
