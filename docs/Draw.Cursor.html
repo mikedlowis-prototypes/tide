@@ -15,16 +15,17 @@
 <link title="Cfg" rel="Chapter" href="Cfg.html">
 <link title="Rope" rel="Chapter" href="Rope.html">
 <link title="Buf" rel="Chapter" href="Buf.html">
+<link title="Colormap" rel="Chapter" href="Colormap.html">
 <link title="Draw" rel="Chapter" href="Draw.html">
 <link title="Scrollmap" rel="Chapter" href="Scrollmap.html">
-<link title="View" rel="Chapter" href="View.html"><title>Draw.Cursor</title>
+<link title="Lex_cpp" rel="Chapter" href="Lex_cpp.html"><title>Draw.Cursor</title>
 </head>
 <body>
 <div class="navbar">&nbsp;<a class="up" href="Draw.html" title="Draw">Up</a>
 &nbsp;</div>
 <h1>Module <a href="type_Draw.Cursor.html">Draw.Cursor</a></h1>
 
-<pre><span class="keyword">module</span> Cursor: <code class="code">sig</code> <a href="Draw.Cursor.html">..</a> <code class="code">end</code></pre><hr width="100%">
+<pre><span id="MODULECursor"><span class="keyword">module</span> Cursor</span>: <code class="code">sig</code> <a href="Draw.Cursor.html">..</a> <code class="code">end</code></pre><hr width="100%">
 
 <pre><code><span id="TYPEt"><span class="keyword">type</span> <code class="type"></code>t</span> = {</code></pre><table class="typetable">
 <tr>
@@ -81,6 +82,6 @@
 <pre><span id="VALnext_line"><span class="keyword">val</span> next_line</span> : <code class="type"><a href="Draw.Cursor.html#TYPEt">t</a> -> unit</code></pre>
 <pre><span id="VALhas_next_line"><span class="keyword">val</span> has_next_line</span> : <code class="type"><a href="Draw.Cursor.html#TYPEt">t</a> -> bool</code></pre>
 <pre><span id="VALdraw_tab"><span class="keyword">val</span> draw_tab</span> : <code class="type"><a href="Draw.Cursor.html#TYPEt">t</a> -> unit</code></pre>
-<pre><span id="VALplace_glyph"><span class="keyword">val</span> place_glyph</span> : <code class="type"><a href="Draw.Cursor.html#TYPEt">t</a> -> <a href="X11.html#TYPEglyph">X11.glyph</a> -> unit</code></pre>
-<pre><span id="VALdraw_glyph"><span class="keyword">val</span> draw_glyph</span> : <code class="type"><a href="Draw.Cursor.html#TYPEt">t</a> -> int -> unit</code></pre>
+<pre><span id="VALplace_glyph"><span class="keyword">val</span> place_glyph</span> : <code class="type"><a href="Draw.Cursor.html#TYPEt">t</a> -> <a href="X11.html#TYPEglyph">X11.glyph</a> -> int -> unit</code></pre>
+<pre><span id="VALdraw_glyph"><span class="keyword">val</span> draw_glyph</span> : <code class="type"><a href="Draw.Cursor.html#TYPEt">t</a> -> int -> int -> unit</code></pre>
 <pre><span id="VALnext_glyph"><span class="keyword">val</span> next_glyph</span> : <code class="type"><a href="Draw.Cursor.html#TYPEt">t</a> -> int -> bool</code></pre></body></html>

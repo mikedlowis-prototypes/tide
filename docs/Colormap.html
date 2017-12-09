@@ -1,0 +1,94 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<link rel="stylesheet" href="style.css" type="text/css">
+<meta content="text/html; charset=iso-8859-1" http-equiv="Content-Type">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="Start" href="index.html">
+<link rel="previous" href="Buf.html">
+<link rel="next" href="Draw.html">
+<link rel="Up" href="index.html">
+<link title="Index of types" rel=Appendix href="index_types.html">
+<link title="Index of exceptions" rel=Appendix href="index_exceptions.html">
+<link title="Index of values" rel=Appendix href="index_values.html">
+<link title="Index of modules" rel=Appendix href="index_modules.html">
+<link title="Misc" rel="Chapter" href="Misc.html">
+<link title="X11" rel="Chapter" href="X11.html">
+<link title="Cfg" rel="Chapter" href="Cfg.html">
+<link title="Rope" rel="Chapter" href="Rope.html">
+<link title="Buf" rel="Chapter" href="Buf.html">
+<link title="Colormap" rel="Chapter" href="Colormap.html">
+<link title="Draw" rel="Chapter" href="Draw.html">
+<link title="Scrollmap" rel="Chapter" href="Scrollmap.html">
+<link title="Lex_cpp" rel="Chapter" href="Lex_cpp.html"><title>Colormap</title>
+</head>
+<body>
+<div class="navbar"><a class="pre" href="Buf.html" title="Buf">Previous</a>
+&nbsp;<a class="up" href="index.html" title="Index">Up</a>
+&nbsp;<a class="post" href="Draw.html" title="Draw">Next</a>
+</div>
+<h1>Module <a href="type_Colormap.html">Colormap</a></h1>
+
+<pre><span id="MODULEColormap"><span class="keyword">module</span> Colormap</span>: <code class="code">sig</code> <a href="Colormap.html">..</a> <code class="code">end</code></pre><hr width="100%">
+
+<pre><span id="EXCEPTIONEof"><span class="keyword">exception</span> Eof</span></pre>
+
+<pre><code><span id="TYPEstyle"><span class="keyword">type</span> <code class="type"></code>style</span> = </code></pre><table class="typetable">
+<tr>
+<td align="left" valign="top" >
+<code><span class="keyword">|</span></code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTstyle.Normal"><span class="constructor">Normal</span></span></code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code><span class="keyword">|</span></code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTstyle.Comment"><span class="constructor">Comment</span></span></code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code><span class="keyword">|</span></code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTstyle.Constant"><span class="constructor">Constant</span></span></code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code><span class="keyword">|</span></code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTstyle.Keyword"><span class="constructor">Keyword</span></span></code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code><span class="keyword">|</span></code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTstyle.Type"><span class="constructor">Type</span></span></code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code><span class="keyword">|</span></code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTstyle.PreProcessor"><span class="constructor">PreProcessor</span></span></code></td>
+
+</tr></table>
+
+
+
+<pre><span id="MODULESpan"><span class="keyword">module</span> <a href="Colormap.Span.html">Span</a></span>: <code class="code">sig</code> <a href="Colormap.Span.html">..</a> <code class="code">end</code></pre>
+<pre><span id="MODULESpanSet"><span class="keyword">module</span> <a href="Colormap.SpanSet.html">SpanSet</a></span>: <code class="type">Set.Make</code><code class="code">(</code><code class="type"><a href="Colormap.Span.html">Span</a></code><code class="code">)</code></pre>
+<pre><span id="TYPEt"><span class="keyword">type</span> <code class="type"></code>t</span> = <code class="type">SpanSet.t</code> </pre>
+
+
+<pre><span id="TYPElexer"><span class="keyword">type</span> <code class="type"></code>lexer</span> = <code class="type">(<a href="Colormap.html#TYPEstyle">style</a> -> unit) -> Lexing.lexbuf -> unit</code> </pre>
+
+
+<pre><span id="VALget_color"><span class="keyword">val</span> get_color</span> : <code class="type"><a href="Colormap.html#TYPEstyle">style</a> -> int</code></pre>
+<pre><span id="VALset_color"><span class="keyword">val</span> set_color</span> : <code class="type">SpanSet.t Pervasives.ref -> Lexing.lexbuf -> <a href="Colormap.html#TYPEstyle">style</a> -> unit</code></pre>
+<pre><span id="VALmake"><span class="keyword">val</span> make</span> : <code class="type">((<a href="Colormap.html#TYPEstyle">style</a> -> unit) -> Lexing.lexbuf -> 'a) -><br>       (bytes -> int -> int) -> SpanSet.t</code></pre>
+<pre><span id="VALempty"><span class="keyword">val</span> empty</span> : <code class="type">SpanSet.t</code></pre>
+<pre><span id="VALfind"><span class="keyword">val</span> find</span> : <code class="type">int -> SpanSet.t -> int</code></pre></body></html>
