@@ -10,7 +10,7 @@ type style = Normal | Comment | Constant | Keyword | Type | PreProcessor
 *)
 
 module Span = struct
-  type t = { start : int; stop : int; style : style }
+  type t = { start : int; stop : int; style : int }
   let compare a b =
     if a.stop < b.start then -1
     else if a.start > b.stop then 1
@@ -21,7 +21,13 @@ module SpanSet = Set.Make(Span)
 
 type t = SpanSet.t
 
-type lexer = (style -> unit) -> Lexing.lexbuf -> unit
+type ctx = {
+  lbuf : lexbuf;
+  mutable map : t;
+  mutable pos : int;
+}
+
+type lexer = ctx -> Lexing.lexbuf -> unit
 
 let get_color = function
 | Normal   -> Cfg.Color.Syntax.normal
@@ -31,31 +37,36 @@ let get_color = function
 | Type     -> Cfg.Color.Syntax.typedef
 | PreProcessor -> Cfg.Color.Syntax.preproc
 
-let set_color mapref lexbuf c =
+let make_span lbuf clr =
+  Span.({ start = (lexeme_start lbuf);
+          stop  = (lexeme_end lbuf) - 1;
+          style = get_color clr })
+
+let set_color ctx clr =
+  ctx.map <- SpanSet.add (make_span ctx.lbuf clr) ctx.map
+
+let range_start ctx =
+  ctx.pos <- (lexeme_start ctx.lbuf)
+
+let range_stop ctx clr =
   let span = Span.({
-    start = (lexeme_start lexbuf);
-    stop  = (lexeme_end lexbuf) - 1;
-    style = c })
+    start = ctx.pos;
+    stop  = (lexeme_end ctx.lbuf) - 1;
+    style = get_color clr })
   in
-  mapref := SpanSet.add span !mapref;
-  ()
+  ctx.map <- SpanSet.add span ctx.map
 
 let make scanfn fetchfn =
-  print_endline "generating colormap";
-  let mapref = ref SpanSet.empty in
-  try
-    let lexbuf = Lexing.from_function fetchfn in
-    let set_color = set_color mapref lexbuf in
-    while true do
-      scanfn set_color lexbuf
-    done;
-    !mapref
-  with Eof -> !mapref
+  let lexbuf = Lexing.from_function fetchfn in
+  let ctx = { lbuf = lexbuf; map = SpanSet.empty; pos = 0; } in
+  (try while true do scanfn ctx lexbuf done
+   with Eof -> ());
+  ctx.map
 
 let empty = SpanSet.empty
 
 let find pos set =
-  let range = Span.({ start = pos; stop = pos; style = Normal }) in
+  let range = Span.({ start = pos; stop = pos; style = Cfg.Color.Syntax.normal }) in
   match (SpanSet.find_opt range set) with
-  | Some r -> get_color Span.(r.style)
-  | None   -> get_color Normal
+  | Some r -> Span.(r.style)
+  | None   -> Cfg.Color.Syntax.normal
