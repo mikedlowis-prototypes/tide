@@ -53,5 +53,5 @@ val is_at : dest -> t -> int -> bool
 val is_bol : t -> int -> bool
 val is_eol : t -> int -> bool
 
-val make_lexfn : t -> (bytes -> int -> int)
+val make_lexer : t -> Colormap.lexer
 

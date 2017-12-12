@@ -8,7 +8,7 @@ type t = {
 let from_buffer buf width height =
   { num = 0; buf = buf;
     map = Scrollmap.make buf width 0;
-    clr = Colormap.make Lex_cpp.scan (Buf.make_lexfn buf) }
+    clr = Colormap.make (Buf.make_lexer buf) }
 
 let empty width height =
   from_buffer (Buf.empty) width height

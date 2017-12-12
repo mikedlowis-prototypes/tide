@@ -1,4 +1,5 @@
 type buf = {
+  lexfn : Colormap.ctx -> Lexing.lexbuf -> unit;
   path : string;
   rope : Rope.t
 }
@@ -10,11 +11,49 @@ type dest =
   | NextChar | PrevChar
   | NextLine | PrevLine
 
+type filetype = {
+  syntax : Colormap.ctx -> Lexing.lexbuf -> unit;
+  names : string list;
+  exts : string list;
+}
+
+let filetypes = [
+  {
+    syntax = Lex_cpp.scan;
+    names  = [];
+    exts   = [".c"; ".h"; ".cpp"; ".hpp"; ".cc"; ".c++"; ".cxx"]
+  };
+  {
+    syntax = Lex_cpp.scan;
+    names  = ["Rakefile"; "rakefile"; "gpkgfile"];
+    exts   = [".rb"]
+  };
+  {
+    syntax = Lex_cpp.scan;
+    names  = [];
+    exts   = [".ml"; ".mll"; "mli"]
+  }
+]
+
+let pick_syntax path =
+  let name = Filename.basename path in
+  let ext = Filename.extension path in
+  let match_ftype ftype =
+    (List.exists ((=) name) ftype.names) ||
+    (List.exists ((=) ext) ftype.exts)
+  in match (List.find_opt match_ftype filetypes) with
+    | Some ft -> ft.syntax
+    | None -> Lex_cpp.scan
+
 let empty =
-  { path = ""; rope = Rope.empty }
+  { lexfn = Lex_cpp.scan;
+    path = "";
+    rope = Rope.empty }
 
 let load path =
-  { path = path; rope = Rope.from_string (Misc.load_file path) }
+  { lexfn = pick_syntax path;
+    path = path;
+    rope = Rope.from_string (Misc.load_file path) }
 
 let path buf =
   buf.path
@@ -28,17 +67,19 @@ let iteri fn buf i =
 let iter fn buf i =
   iteri (fun i c -> (fn c)) buf i
 
-let make_lexfn buf =
+let make_lexer buf =
   let pos = ref 0 in
-  (fun bytebuf n ->
-    let count = ref 0 in
-    iteri (fun i c ->
-      Bytes.set bytebuf !count (Char.chr c);
-      incr count;
-      (!count >= n)
-    ) buf !pos;
-    pos := !pos + !count;
-    !count)
+  Colormap.({
+    scanfn = buf.lexfn;
+    lexbuf = Lexing.from_function (fun bytebuf n ->
+      let count = ref 0 in
+      iteri (fun i c ->
+        Bytes.set bytebuf !count (Char.chr c);
+        incr count;
+        (!count >= n)) buf !pos;
+      pos := !pos + !count;
+      !count)
+  })
 
 module Cursor = struct
   type csr = {

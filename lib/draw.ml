@@ -1,11 +1,10 @@
 (* config settings. eventually move to Cfg module *)
 let font = X11.font_load Cfg.font
-let font_height = let open X11 in font.height
+let font_height = X11.(font.height)
 let tabglyph = 0x30
 let tabwidth = 4
 
-let glyph_width g =
-  let open X11 in g.xoff
+let glyph_width g = X11.(g.xoff)
 
 module Cursor = struct
   type t = {

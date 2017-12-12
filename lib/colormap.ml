@@ -3,11 +3,6 @@ open Lexing
 exception Eof
 
 type style = Normal | Comment | Constant | Keyword | Type | PreProcessor
-(*
-    String | Character | Number | Boolean
-  | Variable | Function | Keyword | Operator | PreProcessor | Type
-  | Statement | Special
-*)
 
 module Span = struct
   type t = { start : int; stop : int; style : int }
@@ -27,15 +22,18 @@ type ctx = {
   mutable pos : int;
 }
 
-type lexer = ctx -> Lexing.lexbuf -> unit
+type lexer = {
+  scanfn : ctx -> Lexing.lexbuf -> unit;
+  lexbuf : Lexing.lexbuf
+}
 
 let get_color = function
-| Normal   -> Cfg.Color.Syntax.normal
-| Comment  -> Cfg.Color.Syntax.comment
-| Constant -> Cfg.Color.Syntax.constant
-| Keyword  -> Cfg.Color.Syntax.keyword
-| Type     -> Cfg.Color.Syntax.typedef
-| PreProcessor -> Cfg.Color.Syntax.preproc
+  | Normal   -> Cfg.Color.Syntax.normal
+  | Comment  -> Cfg.Color.Syntax.comment
+  | Constant -> Cfg.Color.Syntax.constant
+  | Keyword  -> Cfg.Color.Syntax.keyword
+  | Type     -> Cfg.Color.Syntax.typedef
+  | PreProcessor -> Cfg.Color.Syntax.preproc
 
 let make_span lbuf clr =
   Span.({ start = (lexeme_start lbuf);
@@ -56,10 +54,9 @@ let range_stop ctx clr =
   in
   ctx.map <- SpanSet.add span ctx.map
 
-let make scanfn fetchfn =
-  let lexbuf = Lexing.from_function fetchfn in
-  let ctx = { lbuf = lexbuf; map = SpanSet.empty; pos = 0; } in
-  (try while true do scanfn ctx lexbuf done
+let make lexer =
+  let ctx = { lbuf = lexer.lexbuf; map = SpanSet.empty; pos = 0; } in
+  (try while true do lexer.scanfn ctx lexer.lexbuf done
    with Eof -> ());
   ctx.map
 

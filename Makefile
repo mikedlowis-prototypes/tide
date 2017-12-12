@@ -44,12 +44,12 @@ LIBSRCS = \
 	lib/misc.ml \
 	lib/x11.ml \
 	lib/cfg.ml \
+	lib/colormap.ml \
+	$(LEXERS) \
 	lib/rope.ml \
 	lib/buf.ml \
-	lib/colormap.ml \
 	lib/draw.ml \
 	lib/scrollmap.ml \
-	$(LEXERS) \
 	lib/view.ml
 
 TESTSRCS = \
