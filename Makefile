@@ -38,7 +38,10 @@ BINSRCS = \
 	unittests.ml
 
 LEXERS = \
-	lib/lexers/lex_cpp.ml
+	lib/lexers/lex_text.ml \
+	lib/lexers/lex_cpp.ml \
+	lib/lexers/lex_ruby.ml \
+	lib/lexers/lex_ocaml.ml
 
 LIBSRCS = \
 	lib/misc.ml \
@@ -76,7 +79,7 @@ all: $(BINS) lib/lexers/lex_cpp.ml
 clean:
 	$(RM) *.byte *.bin *.cm* *.o *.a
 	$(RM) lib/*.cm* lib/*.o tests/*.cm* tests/*.o
-	$(RM) lib/lexers/*.cm* lib/lexers/*.ml
+	$(RM) lib/lexers/*.cm* lib/lexers/*.ml lib/lexers/*.o
 
 # Executable targets
 edit.$(BINEXT): tide.$(LIBEXT) edit.$(OBJEXT)
