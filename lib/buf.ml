@@ -24,12 +24,12 @@ let filetypes = [
     exts   = [".c"; ".h"; ".cpp"; ".hpp"; ".cc"; ".c++"; ".cxx"]
   };
   {
-    syntax = Lex_cpp.scan;
+    syntax = Lex_ruby.scan;
     names  = ["Rakefile"; "rakefile"; "gpkgfile"];
     exts   = [".rb"]
   };
   {
-    syntax = Lex_cpp.scan;
+    syntax = Lex_ocaml.scan;
     names  = [];
     exts   = [".ml"; ".mll"; "mli"]
   }
@@ -43,10 +43,10 @@ let pick_syntax path =
     (List.exists ((=) ext) ftype.exts)
   in match (List.find_opt match_ftype filetypes) with
     | Some ft -> ft.syntax
-    | None -> Lex_cpp.scan
+    | None -> Lex_text.scan
 
 let empty =
-  { lexfn = Lex_cpp.scan;
+  { lexfn = Lex_text.scan;
     path = "";
     rope = Rope.empty }
 
