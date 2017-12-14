@@ -44,30 +44,54 @@ let rec getc rope i =
       else
         getc r (i - left_len)
 
+(* UTF-8 **********************************************************************)
+
+exception Return of int
+
+let utf8_seqbits = [| 0x00; 0x80; 0xC0; 0xE0; 0xF0; 0xF8; 0xFC; 0xFE |]
+let utf8_seqlens = [| 0x01; 0x00; 0x02; 0x03; 0x04; 0x05; 0x06; 0x00 |]
+let utf8_seqmask = [| 0x00; 0xFF; 0x1F; 0x0F; 0x07; 0x03; 0x01; 0x00 |]
+
+let is_cont_byte c =
+  ((c land 0xC0) == 0x80)
+
+let utfseq byte =
+  try
+    for i = 1 to 8 do
+      if ((byte land utf8_seqbits.(i)) = utf8_seqbits.(i-1)) then
+        raise (Return utf8_seqlens.(i-1))
+    done;
+    raise (Return 1)
+  with Return v -> v
+
+let rec getr rope i =
+  let pos = ref i and rune = ref 0 in
+  while ((!pos > 0) && (is_cont_byte (getc rope !pos))) do
+    pos := !pos - 1
+  done;
+  let byte = (getc rope !pos) in
+  let len  = ref (utfseq byte) in
+  rune := byte land utf8_seqmask.(!len);
+  pos  := !pos + 1;
+  while !len > 1 do
+    rune := (!rune lsl 6) lor ((getc rope !pos) land 0x3F);
+    pos := !pos + 1;
+    len := !len - 1;
+  done;
+  (!rune, !pos)
+
+let rec each_rune fn rope pos =
+  if pos < (length rope) then
+    let rune, next = getr rope pos in
+    if (fn pos rune) then
+      each_rune fn rope next
+
+(******************************************************************************)
+
 (* inefficient form of iteri *)
 let rec iteri fn rope pos =
   if pos < (length rope) && (fn pos (getc rope pos)) then
     iteri fn rope (pos + 1)
-
-(* More efficient form of iteri?
-exception Break_loop
-
-let iteri_leaf fn pos str off len =
-  let offset = pos - off in
-  for i = off to off + len - 1 do
-    if (fn (i + offset) (Char.code str.[i])) == false then
-      raise Break_loop
-  done
-
-let rec iteri fn rope pos =
-  match rope with
-  | Leaf (str, off, len) ->
-      (try iteri_leaf fn pos str off len
-      with Break_loop -> ())
-  | Node (l,r,_,_) ->
-      iteri fn l pos;
-      iteri fn r (pos + (length l))
-*)
 
 let gets rope i j =
   let buf = Bytes.create (j - i) in

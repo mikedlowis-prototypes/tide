@@ -62,7 +62,7 @@ let length buf =
   Rope.length buf.rope
 
 let iteri fn buf i =
-  Rope.iteri fn buf.rope i
+  Rope.each_rune fn buf.rope i
 
 let iter fn buf i =
   iteri (fun i c -> (fn c)) buf i
@@ -73,10 +73,10 @@ let make_lexer buf =
     scanfn = buf.lexfn;
     lexbuf = Lexing.from_function (fun bytebuf n ->
       let count = ref 0 in
-      iteri (fun i c ->
+      Rope.iteri (fun i c ->
         Bytes.set bytebuf !count (Char.chr c);
         incr count;
-        (!count >= n)) buf !pos;
+        (!count >= n)) buf.rope !pos;
       pos := !pos + !count;
       !count)
   })
@@ -92,6 +92,17 @@ module Cursor = struct
   let make buf idx =
     { start = 0; stop = (Rope.limit_index buf.rope idx) }
 
+  let move_to dest buf csr =
+    csr.stop <- (match dest with
+      | StartOfLine -> Rope.to_bol buf.rope csr.stop
+      | EndOfLine   -> Rope.to_eol buf.rope csr.stop
+      | NextChar    -> Rope.nextc buf.rope csr.stop
+      | PrevChar    -> Rope.prevc buf.rope csr.stop
+      | NextLine    -> Rope.nextln buf.rope csr.stop
+      | PrevLine    -> Rope.prevln buf.rope csr.stop
+    );
+    csr.stop
+(*
   let clone csr =
     { start = csr.start; stop = csr.stop }
 
@@ -106,17 +117,6 @@ module Cursor = struct
 
   let getc buf csr =
     Rope.getc buf.rope csr.stop
-
-  let move_to dest buf csr =
-    csr.stop <- (match dest with
-      | StartOfLine -> Rope.to_bol buf.rope csr.stop
-      | EndOfLine   -> Rope.to_eol buf.rope csr.stop
-      | NextChar    -> Rope.nextc buf.rope csr.stop
-      | PrevChar    -> Rope.prevc buf.rope csr.stop
-      | NextLine    -> Rope.nextln buf.rope csr.stop
-      | PrevLine    -> Rope.prevln buf.rope csr.stop
-    );
-    csr.stop
 
   let nextc = move_to NextChar
   let prevc = move_to PrevChar
@@ -133,15 +133,18 @@ module Cursor = struct
 
   let is_bol = is_at StartOfLine
   let is_eol = is_at EndOfLine
+*)
 end
 
 let move_to dest buf i =
   Cursor.move_to dest buf (Cursor.make buf i)
-let nextc = move_to NextChar
-let prevc = move_to PrevChar
 let nextln = move_to NextLine
 let prevln = move_to PrevLine
 let bol = move_to StartOfLine
+
+(*
+let nextc = move_to NextChar
+let prevc = move_to PrevChar
 let eol = move_to EndOfLine
 let eol = move_to EndOfLine
 
@@ -149,3 +152,6 @@ let is_at dest buf i =
   Cursor.is_at dest buf (Cursor.make buf i)
 let is_bol = is_at StartOfLine
 let is_eol = is_at EndOfLine
+*)
+
+
