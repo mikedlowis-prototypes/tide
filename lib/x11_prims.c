@@ -3,6 +3,18 @@
 #include <unistd.h>
 #include <poll.h>
 
+#define FontCacheSize 8
+
+typedef struct XFont {
+    struct {
+        XftFont* match;
+        FcFontSet* set;
+        FcPattern* pattern;
+    } base;
+    XftFont* cache[FontCacheSize];
+    int ncached;
+} XFont;
+
 static int error_handler(Display* disp, XErrorEvent* ev);
 static char* readprop(Window win, Atom prop);
 static void create_window(int height, int width);
@@ -215,38 +227,127 @@ CAMLprim value x11_font_load(value fontname) {
             caml_failwith("Could not init fontconfig");
         initialized = true;
     }
-
-    /* find and load the base font */
-    XftFont* xftfont;
+    /* load the font */
     FcResult result;
+    XFont* font = calloc(1,sizeof(XFont));
     FcPattern* pattern = FcNameParse((FcChar8 *)String_val(fontname));
     if (!pattern)
-        caml_failwith("cannot open font");
+        caml_failwith("could not load font");
     FcPattern* match = XftFontMatch(X.display, X.screen, pattern, &result);
-    if (!match || !(xftfont = XftFontOpenPattern(X.display, match)))
-        caml_failwith("could not load default font");
-
-    /* populate the stats and return the font */
-    value font = mkvariant(0, 4,
-        xftfont, FcPatternDuplicate(pattern), Val_int(xftfont->ascent + xftfont->descent),
-        mkvariant(0,0));
+    if (!match || !(font->base.match = XftFontOpenPattern(X.display, match)))
+        caml_failwith("could not load font");
+    font->base.set     = NULL;
+    font->base.pattern = FcPatternDuplicate(pattern);
     FcPatternDestroy(pattern);
-    CAMLreturn(font);
+    /* populate the stats and return the font */
+    CAMLreturn(
+        mkvariant(0, 2, font,
+            Val_int(font->base.match->ascent + font->base.match->descent)));
+}
+
+/*
+CAMLprim value x11_font_unload(value font) {
+   CAMLparam1(font);
+    XftFontClose(X.display, (XftFont*)Field(font,0));
+    CAMLreturn(Val_unit);
+}
+
+CAMLprim value x11_font_match(value font, value rune) {
+    CAMLparam2(font, rune);
+
+    FcResult result;
+    XftFont* xftfont = (XftFont*)Field(font,0);
+
+    FcFontSet* fcsets[]  = { FcFontSort(0, xftfont->pattern, 1, 0, &result) };
+    FcPattern* fcpattern = FcPatternDuplicate(xftfont->pattern);
+    FcCharSet* fccharset = FcCharSetCreate();
+
+    FcCharSetAddChar(fccharset, rune);
+    FcPatternAddCharSet(fcpattern, FC_CHARSET, fccharset);
+    FcPatternAddBool(fcpattern, FC_SCALABLE, 1);
+    FcConfigSubstitute(0, fcpattern, FcMatchPattern);
+    FcDefaultSubstitute(fcpattern);
+
+    FcPattern* fcmatch = FcFontSetMatch(0, fcsets, 1, fcpattern, &result);
+    XftFont* newfont = XftFontOpenPattern(X.display, fcmatch);
+    //FcPatternPrint(newfont->pattern);
+    fprintf(stderr,"loading match\n");
+
+    FcFontSetDestroy(fcsets[0]);
+    FcPatternDestroy(fcpattern);
+    FcCharSetDestroy(fccharset);
+    FcPatternDestroy(fcmatch);
+
+    CAMLreturn( mkvariant(0, 2, newfont, Field(font,1)) );
+}
+
+CAMLprim value x11_font_hasglyph(value font, value rune) {
+    CAMLparam2(font, rune);
+    XftFont* xfont = (XftFont*)Field(font, 0);
+    int val = XftCharIndex(X.display, xfont, Int_val(rune));
+    CAMLreturn( Val_int(val > 0) );
+}
+*/
+
+void get_glyph(XFont* font, XftGlyphFontSpec* spec, uint32_t rune) {
+    /* if the rune is in the base font, set it and return */
+    FT_UInt glyphidx = XftCharIndex(X.display, font->base.match, rune);
+    if (glyphidx) {
+        spec->font  = font->base.match;
+        spec->glyph = glyphidx;
+        return;
+    }
+    /* Otherwise check the cache */
+    for (int f = 0; f < font->ncached; f++) {
+        glyphidx = XftCharIndex(X.display, font->cache[f], rune);
+        /* Fond a suitable font or found a default font */
+        //if (glyphidx || (!glyphidx && font->cache[f]->unicodep == rune)) {
+        if (glyphidx) {
+            spec->font  = font->cache[f];
+            spec->glyph = glyphidx;
+            return;
+        }
+    }
+    /* if all other options fail, ask fontconfig for a suitable font */
+    FcResult fcres;
+    if (!font->base.set)
+        font->base.set = FcFontSort(0, font->base.pattern, 1, 0, &fcres);
+    FcFontSet* fcsets[]  = { font->base.set };
+    FcPattern* fcpattern = FcPatternDuplicate(font->base.pattern);
+    FcCharSet* fccharset = FcCharSetCreate();
+    FcCharSetAddChar(fccharset, rune);
+    FcPatternAddCharSet(fcpattern, FC_CHARSET, fccharset);
+    FcPatternAddBool(fcpattern, FC_SCALABLE, 1);
+    FcConfigSubstitute(0, fcpattern, FcMatchPattern);
+    FcDefaultSubstitute(fcpattern);
+    FcPattern* fontmatch = FcFontSetMatch(0, fcsets, 1, fcpattern, &fcres);
+    /* add the font to the cache and use it */
+    if (font->ncached >= FontCacheSize) {
+        font->ncached = FontCacheSize - 1;
+        XftFontClose(X.display, font->cache[font->ncached]);
+    }
+    font->cache[font->ncached] = XftFontOpenPattern(X.display, fontmatch);
+    spec->glyph = XftCharIndex(X.display, font->cache[font->ncached], rune);
+    spec->font  = font->cache[font->ncached];
+    font->ncached++;
+    FcPatternDestroy(fcpattern);
+    FcCharSetDestroy(fccharset);
 }
 
 CAMLprim value x11_font_glyph(value font, value rune) {
     CAMLparam2(font, rune);
     CAMLlocal1(glyph);
     /* search for the rune in currently loaded fonts */
-    FcChar32 codept = Int_val(rune);
-    XftFont* xfont = (XftFont*)Field(font, 0);
-    FT_UInt glyphidx = XftCharIndex(X.display, xfont, codept);
     XGlyphInfo extents;
-    XftTextExtents32 (X.display, xfont, &codept, 1, &extents);
+    XftGlyphFontSpec spec;
+    FcChar32 codept = Int_val(rune);
+    XFont* xfont = (XFont*)Field(font, 0);
+    get_glyph(xfont, &spec, (uint32_t)codept);
+    XftTextExtents32(X.display, spec.font, &codept, 1, &extents);
     /* create the glyph structure */
     glyph = caml_alloc(8, 0);
-    Store_field(glyph, 0, (value)xfont);
-    Store_field(glyph, 1, Val_int(glyphidx));
+    Store_field(glyph, 0, (value)spec.font);
+    Store_field(glyph, 1, Val_int(spec.glyph));
     Store_field(glyph, 2, rune);
     Store_field(glyph, 3, Val_int(extents.width));
     Store_field(glyph, 4, Val_int(extents.x));
@@ -279,7 +380,7 @@ CAMLprim value x11_draw_glyph(value color, value glyph, value coord) {
     textchunk->specs = realloc(textchunk->specs, textchunk->nspecs * sizeof(XftGlyphFontSpec));
     XftFont* font = (XftFont*)Field(glyph,0);
     XftGlyphFontSpec spec = {
-        .font  = (XftFont*)Field(glyph,0),
+        .font  = font,
         .glyph = intfield(glyph,1),
         .x     = intfield(coord,0),
         .y     = intfield(coord,1) + font->ascent

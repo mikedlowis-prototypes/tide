@@ -85,12 +85,15 @@ struct X {
     XrmDatabase db;
 };
 
+/*
 typedef struct XFont {
     XftFont* font;
+    FcPattern* set;
     FcPattern* pattern;
     int height;
     struct XFont* next;
 } XFont;
+*/
 
 typedef struct XText {
     struct XText* next;

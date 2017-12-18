@@ -72,10 +72,10 @@ let rec utfbeg rope pos =
 
 let rec decode rope i len rune =
   let byte = (getc rope i) in
-  if not (is_cont_byte byte) then
-    (0xFFFD, i + 1)
-  else if len == 0 then
-    (rune, i + 1)
+  if len == 0 then
+    (rune, i)
+  else if not (is_cont_byte byte) then
+    (0xFFFD, i)
   else
     decode rope (i + 1) (len - 1) ((rune lsl 6) lor (byte land 0x3F))
 

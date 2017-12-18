@@ -36,9 +36,7 @@ type xcfgvar =
 
 type font = {
   font: xfont;
-  patt: xfontpatt;
   height: int;
-  next: font;
 }
 
 type glyph = {
@@ -109,7 +107,59 @@ external font_glyph : font -> int -> glyph
 external draw_glyph : int -> glyph -> (int * int) -> int
                     = "x11_draw_glyph"
 
+let (font_cache : font option array) = Array.make 8 None
 let glyph_cache = Hashtbl.create 127
+
+
+(*
+let unbox = function
+| Some v -> v
+| None -> failwith "Expected some got none"
+
+let load_match font rune i =
+  Printf.printf "load_match %d %d\n" rune i;
+  (match font_cache.(i) with
+   | Some f -> font_unload f;
+   | None -> ());
+  let fmatch = (font_match font rune) in
+  Array.set font_cache i (Some fmatch);
+  font_glyph fmatch rune
+
+let rec get_cache_glyph font rune i =
+  if i < 8 then
+    match font_cache.(i) with
+    | None ->
+        load_match font rune i
+    | Some f ->
+        if font_hasglyph f rune then
+          font_glyph f rune
+        else
+          get_cache_glyph font rune (i + 1)
+  else
+    load_match font rune 7
+
+let clear_font_cache () =
+  print_endline "clearing cache";
+  let clear_entry i f = match f with
+    | Some f -> (if i > 0 then (font_unload f)); None
+    | None -> None
+  in Array.mapi clear_entry font_cache
+
+let rec get_font_glyph font rune =
+  match font_cache.(0) with
+  | None ->
+      print_endline "changing root font";
+      Array.set font_cache 0 (Some font);
+      font_glyph font rune
+  | Some f ->
+      if f != font then
+        (clear_font_cache (); get_font_glyph font rune)
+      else
+        get_cache_glyph font rune 0
+*)
+
+
+
 
 let cache_update rune glyph =
   Hashtbl.replace glyph_cache rune glyph;
