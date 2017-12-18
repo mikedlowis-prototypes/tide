@@ -11,7 +11,10 @@ typedef struct XFont {
         FcFontSet* set;
         FcPattern* pattern;
     } base;
-    XftFont* cache[FontCacheSize];
+    struct {
+        XftFont* font;
+        uint32_t unicodep;
+    } cache[FontCacheSize];
     int ncached;
 } XFont;
 
@@ -245,50 +248,6 @@ CAMLprim value x11_font_load(value fontname) {
             Val_int(font->base.match->ascent + font->base.match->descent)));
 }
 
-/*
-CAMLprim value x11_font_unload(value font) {
-   CAMLparam1(font);
-    XftFontClose(X.display, (XftFont*)Field(font,0));
-    CAMLreturn(Val_unit);
-}
-
-CAMLprim value x11_font_match(value font, value rune) {
-    CAMLparam2(font, rune);
-
-    FcResult result;
-    XftFont* xftfont = (XftFont*)Field(font,0);
-
-    FcFontSet* fcsets[]  = { FcFontSort(0, xftfont->pattern, 1, 0, &result) };
-    FcPattern* fcpattern = FcPatternDuplicate(xftfont->pattern);
-    FcCharSet* fccharset = FcCharSetCreate();
-
-    FcCharSetAddChar(fccharset, rune);
-    FcPatternAddCharSet(fcpattern, FC_CHARSET, fccharset);
-    FcPatternAddBool(fcpattern, FC_SCALABLE, 1);
-    FcConfigSubstitute(0, fcpattern, FcMatchPattern);
-    FcDefaultSubstitute(fcpattern);
-
-    FcPattern* fcmatch = FcFontSetMatch(0, fcsets, 1, fcpattern, &result);
-    XftFont* newfont = XftFontOpenPattern(X.display, fcmatch);
-    //FcPatternPrint(newfont->pattern);
-    fprintf(stderr,"loading match\n");
-
-    FcFontSetDestroy(fcsets[0]);
-    FcPatternDestroy(fcpattern);
-    FcCharSetDestroy(fccharset);
-    FcPatternDestroy(fcmatch);
-
-    CAMLreturn( mkvariant(0, 2, newfont, Field(font,1)) );
-}
-
-CAMLprim value x11_font_hasglyph(value font, value rune) {
-    CAMLparam2(font, rune);
-    XftFont* xfont = (XftFont*)Field(font, 0);
-    int val = XftCharIndex(X.display, xfont, Int_val(rune));
-    CAMLreturn( Val_int(val > 0) );
-}
-*/
-
 void get_glyph(XFont* font, XftGlyphFontSpec* spec, uint32_t rune) {
     /* if the rune is in the base font, set it and return */
     FT_UInt glyphidx = XftCharIndex(X.display, font->base.match, rune);
@@ -299,11 +258,10 @@ void get_glyph(XFont* font, XftGlyphFontSpec* spec, uint32_t rune) {
     }
     /* Otherwise check the cache */
     for (int f = 0; f < font->ncached; f++) {
-        glyphidx = XftCharIndex(X.display, font->cache[f], rune);
+        glyphidx = XftCharIndex(X.display, font->cache[f].font, rune);
         /* Fond a suitable font or found a default font */
-        //if (glyphidx || (!glyphidx && font->cache[f]->unicodep == rune)) {
-        if (glyphidx) {
-            spec->font  = font->cache[f];
+        if (glyphidx || (!glyphidx && font->cache[f].unicodep == rune)) {
+            spec->font  = font->cache[f].font;
             spec->glyph = glyphidx;
             return;
         }
@@ -324,11 +282,12 @@ void get_glyph(XFont* font, XftGlyphFontSpec* spec, uint32_t rune) {
     /* add the font to the cache and use it */
     if (font->ncached >= FontCacheSize) {
         font->ncached = FontCacheSize - 1;
-        XftFontClose(X.display, font->cache[font->ncached]);
+        XftFontClose(X.display, font->cache[font->ncached].font);
     }
-    font->cache[font->ncached] = XftFontOpenPattern(X.display, fontmatch);
-    spec->glyph = XftCharIndex(X.display, font->cache[font->ncached], rune);
-    spec->font  = font->cache[font->ncached];
+    font->cache[font->ncached].font = XftFontOpenPattern(X.display, fontmatch);
+    font->cache[font->ncached].unicodep = rune;
+    spec->glyph = XftCharIndex(X.display, font->cache[font->ncached].font, rune);
+    spec->font  = font->cache[font->ncached].font;
     font->ncached++;
     FcPatternDestroy(fcpattern);
     FcCharSetDestroy(fccharset);

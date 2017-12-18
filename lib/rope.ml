@@ -88,7 +88,7 @@ let get_rune rope i =
   else
     let byte = (getc rope i) in
     let len  = (utfseq byte) in
-    try decode rope (i + 1) len (byte land utf8_seqmask.(len))
+    try decode rope (i + 1) (len - 1) (byte land utf8_seqmask.(len))
     with _ -> (0xFFFD, i + 1)
 
 let rec each_rune_rec fn rope pos =
