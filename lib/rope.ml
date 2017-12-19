@@ -33,16 +33,16 @@ let limit_index rope i =
 let last rope =
   limit_index rope ((length rope) - 1)
 
-let rec getc rope i =
+let rec getb rope i =
   match rope with
   | Leaf (s,off,_) ->
       Char.code s.[off + i]
   | Node (l,r,h,len) ->
       let left_len = (length l) in
       if i < left_len then
-        getc l i
+        getb l i
       else
-        getc r (i - left_len)
+        getb r (i - left_len)
 
 (* UTF-8 **********************************************************************)
 
@@ -65,7 +65,7 @@ let utfseq byte =
   with Return v -> v
 
 let rec utfbeg rope pos =
-  if (pos > 0) && (is_cont_byte (getc rope pos)) then
+  if (pos > 0) && (is_cont_byte (getb rope pos)) then
     utfbeg rope (pos - 1)
   else
     pos
@@ -76,23 +76,23 @@ let runeerr msg =
 let rec decode rope i len rune =
   if len == 0 then (rune, i)
   else
-    let byte = (getc rope i) in
+    let byte = (getb rope i) in
     if not (is_cont_byte byte) then
       (runeerr "missing cont. byte", i)
     else
       decode rope (i + 1) (len - 1) ((rune lsl 6) lor (byte land 0x3F))
 
 let get_rune rope i =
-  let byte = (getc rope i) in
+  let byte = (getb rope i) in
   if byte == 192 || byte == 193 then
     (runeerr "invalid utf8 byte", i + 1)
   else
-    let byte = (getc rope i) and len = (utfseq byte) in
+    let byte = (getb rope i) and len = (utfseq byte) in
     try decode rope (i + 1) (len - 1) (byte land utf8_seqmask.(len))
     with e ->
       (runeerr "failure decoding", i + 1)
 
-let getr rope i =
+let getc rope i =
   let rune, next = get_rune rope i in rune
 
 let rec each_rune_rec fn rope pos =
@@ -108,7 +108,7 @@ let rec each_rune fn rope pos =
 
 (* inefficient form of iteri *)
 let rec iteri fn rope pos =
-  if pos < (length rope) && (fn pos (getc rope pos)) then
+  if pos < (length rope) && (fn pos (getb rope pos)) then
     iteri fn rope (pos + 1)
 
 let gets rope i j =
@@ -217,8 +217,10 @@ let rec puts rope s i =
   let middle = from_string s in
   (join (join left middle) right)
 
-let putc rope i c =
+let putb rope i c =
   puts rope (String.make 1 (Char.chr c)) i
+
+let putc = putb
 
 let nextc rope pos =
   limit_index rope (pos + 1)
@@ -229,11 +231,11 @@ let prevc rope pos =
 let is_bol rope pos =
   if pos == 0 then true
   else let prev = (prevc rope pos) in
-  ((getc rope prev) == 0x0A)
+  ((getb rope prev) == 0x0A)
 
 let is_eol rope pos =
   if pos >= (last rope) then true
-  else ((getc rope pos) == 0x0A)
+  else ((getb rope pos) == 0x0A)
 
 let rec move_till step testfn rope pos =
   let adjust_pos = if step < 0 then prevc else nextc in

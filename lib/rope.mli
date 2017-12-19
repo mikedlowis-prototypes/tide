@@ -24,12 +24,11 @@ val del : rope -> int -> int -> rope
 val iteri : (int -> rune -> bool) -> rope -> int -> unit
 val each_rune : (int -> rune -> bool) -> rope -> int -> unit
 
+val getb : rope -> int -> int
 val getc : rope -> int -> rune
-val getr : rope -> int -> rune
-(*
-val putc : rope -> int -> rune -> rope
-*)
 val gets : rope -> int -> int -> string
+val putb : rope -> int -> int -> rope
+val putc : rope -> int -> rune -> rope
 val puts : rope -> string -> int -> rope
 
 val nextc : rope -> int -> int
@@ -43,5 +42,4 @@ val is_eol : rope -> int -> bool
 
 val to_bol : rope -> int -> int
 val to_eol : rope -> int -> int
-
 
