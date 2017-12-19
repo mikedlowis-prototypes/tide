@@ -70,27 +70,24 @@ let rec utfbeg rope pos =
   else
     pos
 
-let runeerr msg =
-  print_endline msg; 0xFFFD
-
 let rec decode rope i len rune =
   if len == 0 then (rune, i)
   else
     let byte = (getb rope i) in
     if not (is_cont_byte byte) then
-      (runeerr "missing cont. byte", i)
+      (0xFFFD, i)
     else
       decode rope (i + 1) (len - 1) ((rune lsl 6) lor (byte land 0x3F))
 
 let get_rune rope i =
   let byte = (getb rope i) in
   if byte == 192 || byte == 193 then
-    (runeerr "invalid utf8 byte", i + 1)
+    (0xFFFD, i + 1)
   else
     let byte = (getb rope i) and len = (utfseq byte) in
     try decode rope (i + 1) (len - 1) (byte land utf8_seqmask.(len))
     with e ->
-      (runeerr "failure decoding", i + 1)
+      (0xFFFD, i + 1)
 
 let getc rope i =
   let rune, next = get_rune rope i in rune
