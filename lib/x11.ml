@@ -63,6 +63,9 @@ external connect : unit -> unit
 external disconnect : unit -> unit
                     = "x11_disconnect"
 
+external shutdown : unit -> unit
+                  = "x11_shutdown"
+
 external make_window : int -> int -> xwin
                      = "x11_make_window"
 

@@ -88,6 +88,12 @@ CAMLprim value x11_disconnect(void) {
     CAMLreturn(Val_unit);
 }
 
+CAMLprim value x11_shutdown(void) {
+    CAMLparam0();
+    X.running = false;
+    CAMLreturn(Val_unit);
+}
+
 CAMLprim value x11_make_window(value height, value width) {
     CAMLparam2(height, width);
     create_window(Int_val(height), Int_val(width));

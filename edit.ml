@@ -40,7 +40,8 @@ let onupdate width height =
   edit_view := View.draw !edit_view csr;
   Draw.scroll scrollcsr (View.scroll_params !edit_view)
 
-let onshutdown () = ()
+let onshutdown () =
+  shutdown ()
 
 let onevent evnt =
   try match evnt with
