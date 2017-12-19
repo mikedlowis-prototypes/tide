@@ -239,3 +239,30 @@ let () = (* to_eol() tests *)
     assert( (to_eol rope 1) == 4 );
   );
   ()
+
+let () =
+  test "getr : " (fun () ->
+    let rope = from_string "\x7F" in
+    assert( (getr rope 0) == 0x7F );
+  );
+  test "getr : " (fun () ->
+    let rope = from_string "\xDF\xBF" in
+    assert( (getr rope 0) == 0x7FF );
+  );
+  test "getr : " (fun () ->
+    let rope = from_string "\xEF\xBF\xBF" in
+    assert( (getr rope 0) == 0xFFFF );
+  );
+  test "getr : " (fun () ->
+    let rope = from_string "\xF7\xBF\xBF\xBF" in
+    assert( (getr rope 0) == 0x1FFFFF );
+  );
+  test "getr : " (fun () ->
+    let rope = from_string "\xFB\xBF\xBF\xBF\xBF" in
+    assert( (getr rope 0) == 0x3FFFFFF );
+  );
+  test "getr : " (fun () ->
+    let rope = from_string "\xFD\xBF\xBF\xBF\xBF\xBF" in
+    assert( (getr rope 0) == 0x7FFFFFFF );
+  );
+  ()

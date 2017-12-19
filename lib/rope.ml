@@ -70,26 +70,30 @@ let rec utfbeg rope pos =
   else
     pos
 
+let runeerr msg =
+  print_endline msg; 0xFFFD
+
 let rec decode rope i len rune =
-  let byte = (getc rope i) in
-  if len == 0 then
-    (rune, i)
-  else if not (is_cont_byte byte) then
-    (0xFFFD, i)
+  if len == 0 then (rune, i)
   else
-    decode rope (i + 1) (len - 1) ((rune lsl 6) lor (byte land 0x3F))
+    let byte = (getc rope i) in
+    if not (is_cont_byte byte) then
+      (runeerr "missing cont. byte", i)
+    else
+      decode rope (i + 1) (len - 1) ((rune lsl 6) lor (byte land 0x3F))
 
 let get_rune rope i =
   let byte = (getc rope i) in
-  if byte < 128 then
-    (byte, i+1)
-  else if byte >= 245 || byte == 192 || byte == 193 then
-    (0xFFFD, i+1)
+  if byte == 192 || byte == 193 then
+    (runeerr "invalid utf8 byte", i + 1)
   else
-    let byte = (getc rope i) in
-    let len  = (utfseq byte) in
+    let byte = (getc rope i) and len = (utfseq byte) in
     try decode rope (i + 1) (len - 1) (byte land utf8_seqmask.(len))
-    with _ -> (0xFFFD, i + 1)
+    with e ->
+      (runeerr "failure decoding", i + 1)
+
+let getr rope i =
+  let rune, next = get_rune rope i in rune
 
 let rec each_rune_rec fn rope pos =
   if pos < (length rope) then

@@ -25,6 +25,7 @@ val iteri : (int -> rune -> bool) -> rope -> int -> unit
 val each_rune : (int -> rune -> bool) -> rope -> int -> unit
 
 val getc : rope -> int -> rune
+val getr : rope -> int -> rune
 (*
 val putc : rope -> int -> rune -> rope
 *)
