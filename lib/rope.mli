@@ -21,7 +21,7 @@ val flatten : rope -> rope
 val split : rope -> int -> (rope * rope)
 val del : rope -> int -> int -> rope
 
-val iteri : (int -> rune -> bool) -> rope -> int -> unit
+val each_byte : (int -> rune -> bool) -> rope -> int -> unit
 val each_rune : (int -> rune -> bool) -> rope -> int -> unit
 
 val getb : rope -> int -> int

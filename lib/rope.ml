@@ -106,14 +106,13 @@ let rec each_rune fn rope pos =
 
 (******************************************************************************)
 
-(* inefficient form of iteri *)
-let rec iteri fn rope pos =
+let rec each_byte fn rope pos =
   if pos < (length rope) && (fn pos (getb rope pos)) then
-    iteri fn rope (pos + 1)
+    each_byte fn rope (pos + 1)
 
 let gets rope i j =
   let buf = Bytes.create (j - i) in
-  iteri
+  each_byte
     (fun n c ->
       Bytes.set buf (n - i) (Char.chr c);
       (n <= j))

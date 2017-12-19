@@ -73,7 +73,7 @@ let make_lexer buf =
     scanfn = buf.lexfn;
     lexbuf = Lexing.from_function (fun bytebuf n ->
       let count = ref 0 in
-      Rope.iteri (fun i c ->
+      Rope.each_byte (fun i c ->
         Bytes.set bytebuf !count (Char.chr c);
         incr count;
         (!count >= n)) buf.rope !pos;
