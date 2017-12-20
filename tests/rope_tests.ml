@@ -1,6 +1,6 @@
 open Test
 open Rope
-(*
+
 let () = (* empty tests *)
   test "empty : should be an empty rope" (fun () ->
     let rope = Rope.empty in
@@ -239,7 +239,6 @@ let () = (* to_eol() tests *)
     assert( (to_eol rope 1) == 4 );
   );
   ()
-*)
 
 let () = (* getc() tests *)
   test "getc : " (fun () ->

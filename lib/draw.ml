@@ -84,6 +84,7 @@ let rectangle color width height csr =
 let dark_bkg = rectangle Cfg.Color.palette.(0)
 let light_bkg = rectangle Cfg.Color.palette.(1)
 let rule_bkg = rectangle Cfg.Color.palette.(3)
+let draw_cursor = rectangle Cfg.Color.palette.(6) 1 font_height
 
 let string text csr =
   X11.draw_string font Cfg.Color.palette.(5) text (csr.x + 2, csr.y);
@@ -99,9 +100,13 @@ let vrule height csr =
 
 let buffer csr buf clr off =
   dark_bkg (csr.width - csr.x) (csr.height - csr.y) csr;
+  csr.y <- csr.y + 2;
   let num = ref 0 and csr = (restart csr 2 0) in
   let draw_rune c =
-    draw_glyph csr c (Colormap.find (off + !num) clr);
+    let pos = off + !num in
+    if pos == (Buf.Cursor.stop (Buf.cursor buf)) then
+      draw_cursor csr;
+    draw_glyph csr c (Colormap.find pos clr);
     num := !num + 1;
     has_next_line csr
   in

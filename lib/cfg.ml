@@ -27,7 +27,7 @@ let cmd_tags = strvar "tide.ui.font"
     "Quit Undo Redo Cut Copy Paste | Send Find "
 
 (* font settings *)
-let font = strvar "tide.ui.tags.edit" "Verdana:size=10"
+let font = strvar "tide.ui.tags.edit" "Verdana:size=11"
 let line_spacing = intvar "tide.ui.line_spacing" 1
 
 (* user interface related options *)

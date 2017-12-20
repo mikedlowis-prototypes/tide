@@ -17,8 +17,7 @@ let scroll_dn () =
  ******************************************************************************)
 let onfocus focused = ()
 
-let onkeypress mods rune =
-  edit_view := View.scroll_up !edit_view
+let onkeypress mods rune = ()
 
 let onmousebtn mods btn x y pressed =
   if pressed then match btn with

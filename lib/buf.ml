@@ -1,7 +1,13 @@
+type cursor = {
+  mutable start : int;
+  mutable stop : int
+}
+
 type buf = {
   lexfn : Colormap.ctx -> Lexing.lexbuf -> unit;
   path : string;
-  rope : Rope.t
+  rope : Rope.t;
+  cursor : cursor
 }
 
 type t = buf
@@ -35,6 +41,48 @@ let filetypes = [
   }
 ]
 
+module Cursor = struct
+  type csr = cursor
+  type t = csr
+
+  let swap csr =
+    if csr.stop < csr.start then
+      { start = csr.stop; stop = csr.start }
+    else
+      csr
+
+  let initial =
+    { start = 0; stop = 0 }
+
+  let make buf idx =
+    { start = 0; stop = (Rope.limit_index buf.rope idx) }
+
+  let move_to dest buf csr =
+    csr.stop <- (match dest with
+      | StartOfLine -> Rope.to_bol buf.rope csr.stop
+      | EndOfLine   -> Rope.to_eol buf.rope csr.stop
+      | NextChar    -> Rope.nextc buf.rope csr.stop
+      | PrevChar    -> Rope.prevc buf.rope csr.stop
+      | NextLine    -> Rope.nextln buf.rope csr.stop
+      | PrevLine    -> Rope.prevln buf.rope csr.stop
+    );
+    csr.stop
+
+  let stop csr =
+    csr.stop
+
+  let selected csr pos =
+    let csr = swap csr in
+    (pos >= csr.start && pos <= csr.stop)
+end
+
+let move_to dest buf i =
+  Cursor.move_to dest buf (Cursor.make buf i)
+let nextln = move_to NextLine
+let prevln = move_to PrevLine
+let bol = move_to StartOfLine
+
+
 let pick_syntax path =
   let name = Filename.basename path in
   let ext = Filename.extension path in
@@ -48,12 +96,14 @@ let pick_syntax path =
 let empty =
   { lexfn = Lex_text.scan;
     path = "";
-    rope = Rope.empty }
+    rope = Rope.empty;
+    cursor = Cursor.initial }
 
 let load path =
   { lexfn = pick_syntax path;
     path = path;
-    rope = Rope.from_string (Misc.load_file path) }
+    rope = Rope.from_string (Misc.load_file path);
+    cursor = Cursor.initial }
 
 let path buf =
   buf.path
@@ -66,6 +116,9 @@ let iteri fn buf i =
 
 let iter fn buf i =
   iteri (fun i c -> (fn c)) buf i
+
+let cursor buf =
+  buf.cursor
 
 let make_lexer buf =
   let pos = ref 0 in
@@ -81,27 +134,6 @@ let make_lexer buf =
       !count)
   })
 
-module Cursor = struct
-  type csr = {
-    mutable start : int;
-    mutable stop : int
-  }
-
-  type t = csr
-
-  let make buf idx =
-    { start = 0; stop = (Rope.limit_index buf.rope idx) }
-
-  let move_to dest buf csr =
-    csr.stop <- (match dest with
-      | StartOfLine -> Rope.to_bol buf.rope csr.stop
-      | EndOfLine   -> Rope.to_eol buf.rope csr.stop
-      | NextChar    -> Rope.nextc buf.rope csr.stop
-      | PrevChar    -> Rope.prevc buf.rope csr.stop
-      | NextLine    -> Rope.nextln buf.rope csr.stop
-      | PrevLine    -> Rope.prevln buf.rope csr.stop
-    );
-    csr.stop
 (*
   let clone csr =
     { start = csr.start; stop = csr.stop }
@@ -133,16 +165,7 @@ module Cursor = struct
 
   let is_bol = is_at StartOfLine
   let is_eol = is_at EndOfLine
-*)
-end
 
-let move_to dest buf i =
-  Cursor.move_to dest buf (Cursor.make buf i)
-let nextln = move_to NextLine
-let prevln = move_to PrevLine
-let bol = move_to StartOfLine
-
-(*
 let nextc = move_to NextChar
 let prevc = move_to PrevChar
 let eol = move_to EndOfLine
