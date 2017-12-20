@@ -73,7 +73,7 @@ module Cursor = struct
 
   let selected csr pos =
     let csr = swap csr in
-    (pos >= csr.start && pos <= csr.stop)
+    (pos >= csr.start && pos < csr.stop)
 end
 
 let move_to dest buf i =

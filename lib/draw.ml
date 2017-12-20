@@ -45,23 +45,39 @@ module Cursor = struct
   let has_next_line csr =
     ((csr.y + font_height) < csr.height)
 
-  let draw_tab csr =
+  let draw_sel_bkg csr width insel boxes =
+    if insel then
+      (X11.make_rect csr.x csr.y width font_height Cfg.Color.palette.(2)) :: boxes
+    else
+      boxes
+
+  let draw_newline csr insel boxes =
+    let boxes = draw_sel_bkg csr (csr.width - csr.x) insel boxes in
+    next_line csr;
+    boxes
+
+  let draw_tab csr insel boxes =
     let xoff = (glyph_width (X11.get_glyph font tabglyph)) in
     let tabsz = (xoff * tabwidth) in
-    csr.x <- (csr.startx + ((csr.x - csr.startx + tabsz) / tabsz * tabsz))
+    let newx = (csr.startx + ((csr.x - csr.startx + tabsz) / tabsz * tabsz)) in
+    let boxes = draw_sel_bkg csr (newx - csr.x) insel boxes in
+    csr.x <- newx;
+    boxes
 
-  let place_glyph csr glyph clr =
+  let place_glyph csr glyph clr insel boxes =
     let xoff = (glyph_width glyph) in
     if (csr.x + xoff) > csr.width then (next_line csr);
+    let boxes = draw_sel_bkg csr xoff insel boxes in
     let _ = X11.draw_glyph Cfg.Color.palette.(clr) glyph (csr.x, csr.y) in
-    csr.x <- csr.x + xoff
+    csr.x <- csr.x + xoff;
+    boxes
 
-  let draw_glyph csr c clr =
+  let draw_glyph csr c clr insel boxes =
     match c with
-    | 0x0A -> next_line csr
-    | 0x0D -> ()
-    | 0x09 -> draw_tab csr
-    | _    -> place_glyph csr (X11.get_glyph font c) clr
+    | 0x0A -> draw_newline csr insel boxes
+    | 0x0D -> boxes
+    | 0x09 -> draw_tab csr insel boxes
+    | _    -> place_glyph csr (X11.get_glyph font c) clr insel boxes
 
   let next_glyph csr c =
     let glyph = (X11.get_glyph font c) in
@@ -69,7 +85,7 @@ module Cursor = struct
     match c with
     | 0x0A -> next_line csr; true
     | 0x0D -> false
-    | 0x09 -> draw_tab csr; false
+    | 0x09 -> let _ = draw_tab csr false [] in false
     | _    -> let nl = (if (csr.x + xoff) > csr.width then
                         (next_line csr; true) else false) in
               csr.x <- csr.x + xoff; nl
@@ -101,16 +117,17 @@ let vrule height csr =
 let buffer csr buf clr off =
   dark_bkg (csr.width - csr.x) (csr.height - csr.y) csr;
   csr.y <- csr.y + 2;
-  let num = ref 0 and csr = (restart csr 2 0) in
+  let num = ref 0 and csr = (restart csr 2 0) and boxes = ref [] in
   let draw_rune c =
     let pos = off + !num in
     if pos == (Buf.csrpos buf) then
       draw_cursor csr;
-    draw_glyph csr c (Colormap.find pos clr);
+    boxes := draw_glyph csr c (Colormap.find pos clr) (Buf.selected buf pos) !boxes;
     num := !num + 1;
     has_next_line csr
   in
   Buf.iter draw_rune buf off;
+  List.iter X11.draw_rect !boxes; (* draw selection boxes *)
   !num
 
 let status csr str =
