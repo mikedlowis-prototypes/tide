@@ -52,7 +52,7 @@ module Cursor = struct
       csr
 
   let initial =
-    { start = 0; stop = 0 }
+    { start = 0; stop = 1 }
 
   let make buf idx =
     { start = 0; stop = (Rope.limit_index buf.rope idx) }
@@ -81,7 +81,6 @@ let move_to dest buf i =
 let nextln = move_to NextLine
 let prevln = move_to PrevLine
 let bol = move_to StartOfLine
-
 
 let pick_syntax path =
   let name = Filename.basename path in
@@ -117,8 +116,11 @@ let iteri fn buf i =
 let iter fn buf i =
   iteri (fun i c -> (fn c)) buf i
 
-let cursor buf =
-  buf.cursor
+let csrpos buf =
+  Cursor.stop buf.cursor
+
+let selected buf pos =
+  Cursor.selected buf.cursor pos
 
 let make_lexer buf =
   let pos = ref 0 in
@@ -176,5 +178,3 @@ let is_at dest buf i =
 let is_bol = is_at StartOfLine
 let is_eol = is_at EndOfLine
 *)
-
-

@@ -104,7 +104,7 @@ let buffer csr buf clr off =
   let num = ref 0 and csr = (restart csr 2 0) in
   let draw_rune c =
     let pos = off + !num in
-    if pos == (Buf.Cursor.stop (Buf.cursor buf)) then
+    if pos == (Buf.csrpos buf) then
       draw_cursor csr;
     draw_glyph csr c (Colormap.find pos clr);
     num := !num + 1;

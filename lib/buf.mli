@@ -19,8 +19,10 @@ val path : t -> string
 val length : t -> int
 val iteri : (int -> int -> bool) -> t -> int -> unit
 val iter : (int -> bool) -> t -> int -> unit
-val cursor : t -> Cursor.t
+val csrpos : t -> int
+val selected : t -> int -> bool
 val make_lexer : t -> Colormap.lexer
+
 val nextln : t -> int -> int
 val prevln : t -> int -> int
 val bol : t -> int -> int
