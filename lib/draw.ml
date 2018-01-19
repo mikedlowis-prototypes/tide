@@ -26,6 +26,12 @@ module Cursor = struct
       startx = csr.startx; starty = csr.starty;
       x = csr.x; y = csr.y }
 
+  let pos csr =
+    (csr.x, csr.y)
+
+  let dim csr =
+    (csr.width, csr.height)
+
   let move_x csr n =
     csr.x <- csr.x + n
 

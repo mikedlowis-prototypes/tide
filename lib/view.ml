@@ -2,13 +2,17 @@ type t = {
   num : int;
   buf : Buf.t;
   map : Scrollmap.t;
-  clr : Colormap.t
+  clr : Colormap.t;
+  pos : int * int;
+  dim : int * int
 }
 
 let from_buffer buf width height =
   { num = 0; buf = buf;
     map = Scrollmap.make buf width 0;
-    clr = Colormap.make (Buf.make_lexer buf) }
+    clr = Colormap.make (Buf.make_lexer buf);
+    pos = (0,0);
+    dim = (width, height) }
 
 let empty width height =
   from_buffer (Buf.empty) width height
@@ -24,8 +28,12 @@ let resize view width =
 
 let draw view csr =
   let view = (resize view (Draw.Cursor.max_width csr)) in
-  let num = Draw.buffer csr view.buf view.clr (Scrollmap.first view.map) in
-  { view with num = num }
+  let newcsr = (Draw.Cursor.clone csr) in
+  let num = Draw.buffer newcsr view.buf view.clr (Scrollmap.first view.map) in
+  { view with
+    num = num;
+    pos = Draw.Cursor.pos csr;
+    dim = Draw.Cursor.dim csr }
 
 let scroll_up view =
   { view with map = Scrollmap.scroll_up view.map view.buf }

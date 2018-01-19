@@ -91,7 +91,8 @@ docs: tide.$(LIBEXT)
 	ocamldoc -d docs -html -I lib $(LIBSRCS)
 
 # Dependency generation
-deps deps.mk: $(wildcard *.ml* lib/*.ml* tests/*.ml*)
+deps: deps.mk
+deps.mk: $(wildcard *.ml* lib/*.ml* tests/*.ml*)
 	ocamldep -I . -I lib/ -I tests/ -all -one-line $^ > deps.mk
 -include deps.mk
 

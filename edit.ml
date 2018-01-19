@@ -13,22 +13,42 @@ let scroll_dn () =
     edit_view := View.scroll_dn !edit_view
   done
 
+(* Mouse Actions
+ ******************************************************************************)
+let onselect mods x y nclicks =
+  let sx,sy = !edit_view.pos and w,h = !edit_view.dim in
+  Printf.printf "lines: %d\n" ((h - sy) / Draw.font.height);
+  Printf.printf "select (%d,%d) %d" x y nclicks;
+  print_endline ""
+
+let onexec mods x y nclicks =
+  Printf.printf "exec (%d,%d) %d" x y nclicks;
+  print_endline ""
+
+let onfetch mods x y nclicks =
+  Printf.printf "fetch (%d,%d) %d" x y nclicks;
+  print_endline ""
+
 (* Event functions
  ******************************************************************************)
-let onfocus focused = ()
+let onfocus focused =
+  Printf.printf "focused %b" focused;
+  print_endline ""
 
 let onkeypress mods rune = ()
 
-let onmousebtn mods btn x y pressed =
+let onmousebtn mods btn x y pressed nclicks =
   if pressed then match btn with
-  | 1 -> ()
-  | 2 -> ()
-  | 3 -> ()
+  | 1 -> onselect mods x y nclicks
+  | 2 -> onexec mods x y nclicks
+  | 3 -> onfetch mods x y nclicks
   | 4 -> scroll_up ()
   | 5 -> scroll_dn ()
   | _ -> ()
 
-let onmousemove mods x y = ()
+let onmousemove mods x y =
+  Printf.printf "click (%d,%d)" x y;
+  print_endline ""
 
 let onupdate width height =
   let csr = Draw.Cursor.make (width, height) 0 0 in
@@ -46,8 +66,8 @@ let onevent evnt =
   try match evnt with
     | Focus state      -> onfocus state
     | KeyPress e       -> onkeypress e.mods e.rune
-    | MouseClick e     -> onmousebtn e.mods e.btn e.x e.y true
-    | MouseRelease e   -> onmousebtn e.mods e.btn e.x e.y false
+    | MouseClick e     -> onmousebtn e.mods e.btn e.x e.y true e.nclicks
+    | MouseRelease e   -> onmousebtn e.mods e.btn e.x e.y false 1
     | MouseMove e      -> onmousemove e.mods e.x e.y
     | Paste e          -> () (*print_endline "paste"*)
     | Command e        -> () (*print_endline "command"*)

@@ -421,10 +421,10 @@ static void create_window(int height, int width) {
 }
 
 static value ev_focus(XEvent* e) {
-    bool focused = (e->type = FocusIn);
-    if (X.xic)
-        (focused ? XSetICFocus : XUnsetICFocus)(X.xic);
-    return mkvariant(TFocus, 1, Val_true);
+    bool focused = (e->type == FocusIn);
+    value focusval = (focused ? Val_true : Val_false);
+    if (X.xic) (focused ? XSetICFocus : XUnsetICFocus)(X.xic);
+    return mkvariant(TFocus, 1, focusval);
 }
 
 static value ev_keypress(XEvent* e) {
@@ -449,13 +449,23 @@ static value ev_keypress(XEvent* e) {
     return mkvariant(TKeyPress, 2, e->xkey.state, Val_int(special_keys(key)));
 }
 
+static int times_clicked(int btn, Time curr) {
+    static struct { Time time; int nclicks; } hist[5] = {0,0};
+    if (btn >= 5) return 1;
+    Time diff = curr - hist[btn].time;
+    hist[btn].time = curr;
+    if (diff < 250) return ++(hist[btn].nclicks);
+    else return (hist[btn].nclicks = 1);
+}
+
 static value ev_mouse(XEvent* e) {
+    Time time = e->xbutton.time;
     int mods = e->xbutton.state, btn = e->xbutton.button,
         x = e->xbutton.x, y = e->xbutton.y;
     if (e->type == MotionNotify)
         return mkvariant(TMouseMove, 3, Val_int(mods), Val_int(x), Val_int(y));
     else if (e->type == ButtonPress)
-        return mkvariant(TMouseClick, 4, Val_int(mods), Val_int(btn), Val_int(x), Val_int(y));
+        return mkvariant(TMouseClick, 5, Val_int(mods), Val_int(btn), Val_int(x), Val_int(y), Val_int(times_clicked(btn, time)));
     else
         return mkvariant(TMouseRelease, 4, Val_int(mods), Val_int(btn), Val_int(x), Val_int(y));
 }

@@ -2,6 +2,8 @@ module Cursor : sig
   type t
   val make : (int * int) -> int -> int -> t
   val clone : t -> t
+  val pos : t -> (int * int)
+  val dim : t -> (int * int)
   val move_x : t -> int -> unit
   val max_width : t -> int
 (*
