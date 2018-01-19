@@ -22,7 +22,7 @@ val dark_bkg : int -> int -> Cursor.t -> unit
 val light_bkg : int -> int -> Cursor.t -> unit
 val rule_bkg : int -> int -> Cursor.t -> unit
 
-val buffer : Cursor.t -> Buf.t -> Colormap.t -> int -> int
+val buffer : Cursor.t -> Buf.t -> Colormap.t -> int -> (int * int list)
 
 val string : string -> Cursor.t -> unit
 val hrule : int -> Cursor.t -> unit
@@ -31,4 +31,4 @@ val vrule : int -> Cursor.t -> unit
 val status : Cursor.t -> string -> unit
 val tags : Cursor.t -> Buf.t -> unit
 val scroll : Cursor.t -> (float * float) -> unit
-val edit : Cursor.t -> Buf.t -> Colormap.t -> int -> int
+val edit : Cursor.t -> Buf.t -> Colormap.t -> int -> (int * int list)

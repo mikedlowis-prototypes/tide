@@ -17,7 +17,6 @@ let scroll_dn () =
  ******************************************************************************)
 let onselect mods x y nclicks =
   let sx,sy = !edit_view.pos and w,h = !edit_view.dim in
-  Printf.printf "lines: %d\n" ((h - sy) / Draw.font.height);
   Printf.printf "select (%d,%d) %d" x y nclicks;
   print_endline ""
 

@@ -123,18 +123,21 @@ let vrule height csr =
 let buffer csr buf clr off =
   dark_bkg (csr.width - csr.x) (csr.height - csr.y) csr;
   csr.y <- csr.y + 2;
-  let num = ref 0 and csr = (restart csr 2 0) and boxes = ref [] in
+  let num = ref 0 and csr = (restart csr 2 0)
+  and boxes = ref [] and lines = ref [] in
   let draw_rune c =
     let pos = off + !num in
     if pos == (Buf.csrpos buf) then
       draw_cursor csr;
+    if csr.x == csr.startx then
+      lines := pos :: !lines;
     boxes := draw_glyph csr c (Colormap.find pos clr) (Buf.selected buf pos) !boxes;
     num := !num + 1;
     has_next_line csr
   in
   Buf.iter draw_rune buf off;
   List.iter X11.draw_rect !boxes; (* draw selection boxes *)
-  !num
+  (!num, !lines)
 
 let status csr str =
   dark_bkg csr.width (4 + font_height) csr;
@@ -160,4 +163,5 @@ let scroll csr params =
 
 let edit csr buf clr =
   dark_bkg (csr.width - csr.x) (csr.height - csr.y) csr;
-  buffer csr buf clr
+  let nchars = buffer csr buf clr in
+  nchars
