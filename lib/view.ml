@@ -21,6 +21,14 @@ let empty width height =
 let make width height path =
   from_buffer (Buf.load path) width height
 
+let get_at view x y =
+  let sx,sy = view.pos and w,h = view.dim in
+  try List.nth view.lines ((h - (y + 2)) / Draw.font.height)
+  with Failure _ -> Buf.length view.buf
+
+let select view start stop =
+  { view with buf = Buf.select view.buf start stop }
+
 let path view =
   Buf.path view.buf
 

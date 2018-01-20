@@ -16,9 +16,8 @@ let scroll_dn () =
 (* Mouse Actions
  ******************************************************************************)
 let onselect mods x y nclicks =
-  let sx,sy = !edit_view.pos and w,h = !edit_view.dim in
-  Printf.printf "select (%d,%d) %d" x y nclicks;
-  print_endline ""
+  let pos = (View.get_at !edit_view x y) in
+  edit_view := View.select !edit_view pos pos
 
 let onexec mods x y nclicks =
   Printf.printf "exec (%d,%d) %d" x y nclicks;

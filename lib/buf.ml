@@ -136,6 +136,9 @@ let make_lexer buf =
       !count)
   })
 
+let select buf start stop =
+  { buf with cursor = Cursor.make buf start }
+
 (*
   let clone csr =
     { start = csr.start; stop = csr.stop }

@@ -22,6 +22,7 @@ val iter : (int -> bool) -> t -> int -> unit
 val csrpos : t -> int
 val selected : t -> int -> bool
 val make_lexer : t -> Colormap.lexer
+val select : t -> int -> int -> t
 
 val nextln : t -> int -> int
 val prevln : t -> int -> int
