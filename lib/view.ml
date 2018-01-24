@@ -24,31 +24,17 @@ let make width height path =
 let get_col_offset buf off w x =
   let csr = Draw.Cursor.make (w,0) 0 0 in
   let off = ref off in
-  Printf.printf "off: %d\n" !off;
   let measure_rune c =
-    Draw.Cursor.next_glyph csr c;
-    let clicked = (csr.x > x) in
-    (if not clicked then off := !off + 1);
-    (not clicked && (csr.x > 0))
-
-(*
-    Printf.printf "%d %d\n" x csr.x;
-    if csr.x < x then
-      (off := !off + 1; csr.x < w)
-    else
-      false
-*)
-(*
-    if csr.x > x then
-      (off := (!off + 1); false)
-    else
-      ((off := !off + 1; csr.x < w)
-*)
+    if c == 0xA || c == 0xD then false
+    else begin
+      Draw.Cursor.next_glyph csr c;
+      let clicked = (csr.x > x) in
+      (if not clicked then off := !off + 1);
+      (not clicked && (csr.x > 0))
+    end
   in
   Buf.iter measure_rune buf !off;
-  Printf.printf "off: %d\n" !off;
-  print_endline "";
-  (!off)
+  !off
 
 
 let get_at view x y =
