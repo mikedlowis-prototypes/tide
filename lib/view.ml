@@ -21,10 +21,44 @@ let empty width height =
 let make width height path =
   from_buffer (Buf.load path) width height
 
+let get_col_offset buf off w x =
+  let csr = Draw.Cursor.make (w,0) 0 0 in
+  let off = ref off in
+  Printf.printf "off: %d\n" !off;
+  let measure_rune c =
+    Draw.Cursor.next_glyph csr c;
+    let clicked = (csr.x > x) in
+    (if not clicked then off := !off + 1);
+    (not clicked && (csr.x > 0))
+
+(*
+    Printf.printf "%d %d\n" x csr.x;
+    if csr.x < x then
+      (off := !off + 1; csr.x < w)
+    else
+      false
+*)
+(*
+    if csr.x > x then
+      (off := (!off + 1); false)
+    else
+      ((off := !off + 1; csr.x < w)
+*)
+  in
+  Buf.iter measure_rune buf !off;
+  Printf.printf "off: %d\n" !off;
+  print_endline "";
+  (!off)
+
+
 let get_at view x y =
   let sx,sy = view.pos and w,h = view.dim in
-  try List.nth view.lines ((h - (y + 2)) / Draw.font.height)
-  with Failure _ -> Buf.length view.buf
+  let off =
+    try List.nth view.lines ((h - (y + 2)) / Draw.font.height)
+    with Failure _ -> Buf.length view.buf
+  in
+  get_col_offset view.buf off (w - sx) (x - sx)
+
 
 let select view start stop =
   { view with buf = Buf.select view.buf start stop }

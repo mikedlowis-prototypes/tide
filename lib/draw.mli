@@ -1,5 +1,12 @@
 module Cursor : sig
-  type t
+  type t = {
+    height : int;
+    width : int;
+    startx : int;
+    starty : int;
+    mutable x: int;
+    mutable y: int
+  }
   val make : (int * int) -> int -> int -> t
   val clone : t -> t
   val pos : t -> (int * int)
