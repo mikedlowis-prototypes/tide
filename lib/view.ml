@@ -48,6 +48,14 @@ let get_at view x y =
 let select view start stop =
   { view with buf = Buf.select view.buf start stop }
 
+let select ?extend:(ext=false) view pos =
+  let start,stop = Buf.csrrange view.buf in
+  if ext then
+    { view with buf = Buf.select view.buf start pos }
+  else
+    { view with buf = Buf.select view.buf pos pos }
+
+
 let path view =
   Buf.path view.buf
 

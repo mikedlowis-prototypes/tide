@@ -52,10 +52,15 @@ module Cursor = struct
       csr
 
   let initial =
-    { start = 0; stop = 1 }
+    { start = 0; stop = 0 }
 
   let make buf idx =
-    { start = 0; stop = (Rope.limit_index buf.rope idx) }
+    let idx = (Rope.limit_index buf.rope idx) in
+    { start = idx; stop = idx }
+
+  let select buf start stop =
+    { start = (Rope.limit_index buf.rope start);
+      stop = (Rope.limit_index buf.rope stop) }
 
   let move_to dest buf csr =
     csr.stop <- (match dest with
@@ -119,6 +124,9 @@ let iter fn buf i =
 let csrpos buf =
   Cursor.stop buf.cursor
 
+let csrrange buf =
+  (buf.cursor.start, buf.cursor.stop)
+
 let selected buf pos =
   Cursor.selected buf.cursor pos
 
@@ -137,7 +145,9 @@ let make_lexer buf =
   })
 
 let select buf start stop =
-  { buf with cursor = Cursor.make buf start }
+  Printf.printf "Buf.select %d %d\n" start stop;
+  print_endline "";
+  { buf with cursor = Cursor.select buf start stop }
 
 (*
   let clone csr =
