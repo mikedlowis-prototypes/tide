@@ -27,7 +27,8 @@ let get_col_offset buf off w x =
   let measure_rune c =
     if c == 0xA || c == 0xD then false
     else begin
-      Draw.Cursor.next_glyph csr c;
+      let open Draw.Cursor in
+      let _ = next_glyph csr c in
       let clicked = (csr.x > x) in
       (if not clicked then off := !off + 1);
       (not clicked && (csr.x > 0))
@@ -35,7 +36,6 @@ let get_col_offset buf off w x =
   in
   Buf.iter measure_rune buf !off;
   !off
-
 
 let get_at view x y =
   let sx,sy = view.pos and w,h = view.dim in
