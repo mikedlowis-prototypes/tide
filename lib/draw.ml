@@ -120,9 +120,17 @@ let vrule height csr =
   rule_bkg 1 (height - csr.y) csr;
   csr.x <- csr.x + 1
 
+let make_line_array lines nlines =
+  let lines = (Array.of_list (List.rev !lines)) in
+  let line_ary = (Array.make nlines (-1)) in
+  Array.blit lines 0 line_ary 0;
+  lines
+
 let buffer csr buf clr off =
-  dark_bkg (csr.width - csr.x) (csr.height - csr.y) csr;
+  let height = (csr.height - csr.y) in
+  dark_bkg (csr.width - csr.x) height csr;
   csr.y <- csr.y + 2;
+  let nlines = ((height -2) / font_height) in
   let num = ref 0 and csr = (restart csr 2 0)
   and boxes = ref [] and lines = ref [] in
   let draw_rune c =
@@ -137,7 +145,7 @@ let buffer csr buf clr off =
   in
   Buf.iter draw_rune buf off;
   List.iter X11.draw_rect !boxes; (* draw selection boxes *)
-  (!num, !lines)
+  (!num, (make_line_array lines nlines))
 
 let status csr str =
   dark_bkg csr.width (4 + font_height) csr;

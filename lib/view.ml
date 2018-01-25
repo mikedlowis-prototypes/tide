@@ -1,6 +1,6 @@
 type t = {
   num : int;
-  lines: int list;
+  lines: int array;
   buf : Buf.t;
   map : Scrollmap.t;
   clr : Colormap.t;
@@ -9,7 +9,7 @@ type t = {
 }
 
 let from_buffer buf width height =
-  { num = 0; buf = buf; lines = [];
+  { num = 0; buf = buf; lines = [||];
     map = Scrollmap.make buf width 0;
     clr = Colormap.make (Buf.make_lexer buf);
     pos = (0,0);
@@ -40,11 +40,10 @@ let get_col_offset buf off w x =
 let get_at view x y =
   let sx,sy = view.pos and w,h = view.dim in
   let off =
-    try List.nth view.lines ((h - (y + 2)) / Draw.font.height)
-    with Failure _ -> Buf.length view.buf
+    try view.lines.((y - sy - 2) / Draw.font.height)
+    with Invalid_argument _ -> ((Buf.length view.buf) - 1)
   in
   get_col_offset view.buf off (w - sx) (x - sx)
-
 
 let select view start stop =
   { view with buf = Buf.select view.buf start stop }
