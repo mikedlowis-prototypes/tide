@@ -55,6 +55,18 @@ let select ?extend:(ext=false) view pos =
 let select_at ?extend:(ext=false) view x y =
   select ~extend:ext view (get_at view x y)
 
+let exec view pos =
+  view
+
+let exec_at view x y =
+  exec view (get_at view x y)
+
+let fetch view pos =
+  view
+
+let fetch_at view x y =
+  fetch view (get_at view x y)
+
 let path view =
   Buf.path view.buf
 

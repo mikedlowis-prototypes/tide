@@ -13,3 +13,10 @@ val scroll_params : t -> (float * float)
 
 val select : ?extend:bool -> t -> int -> t
 val select_at : ?extend:bool -> t -> int -> int -> t
+
+val exec : t -> int -> t
+val exec_at : t -> int -> int -> t
+
+val fetch : t -> int -> t
+val fetch_at : t -> int -> int -> t
+

@@ -18,15 +18,21 @@ let scroll_dn () =
 let onselect mods x y nclicks =
   Printf.printf "select (%d,%d) %d" x y nclicks;
   print_endline "";
-  edit_view := View.select_at !edit_view x y
+  match nclicks with
+  | 1 -> edit_view := View.select_at !edit_view x y
+  | 2 -> () (* edit_view := View.select_ctx_at !edit_view x y *)
+  | 3 -> () (* edit_view := View.select_line_at !edit_view x y *)
+  | _ -> ()
 
 let onexec mods x y nclicks =
   Printf.printf "exec (%d,%d) %d" x y nclicks;
-  print_endline ""
+  print_endline "";
+  edit_view := View.exec_at !edit_view x y
 
 let onfetch mods x y nclicks =
   Printf.printf "fetch (%d,%d) %d" x y nclicks;
-  print_endline ""
+  print_endline "";
+  edit_view := View.fetch_at !edit_view x y
 
 (* Event functions
  ******************************************************************************)
