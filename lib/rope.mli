@@ -42,4 +42,3 @@ val is_eol : rope -> int -> bool
 
 val to_bol : rope -> int -> int
 val to_eol : rope -> int -> int
-

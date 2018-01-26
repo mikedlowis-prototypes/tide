@@ -19,8 +19,9 @@ lib/rope.cmi :
 lib/scrollmap.cmo : lib/draw.cmi lib/buf.cmi lib/scrollmap.cmi lib/scrollmap.ml
 lib/scrollmap.cmx lib/scrollmap.o : lib/draw.cmi lib/draw.cmx lib/buf.cmi lib/buf.cmx lib/scrollmap.cmi lib/scrollmap.ml
 lib/scrollmap.cmi : lib/buf.cmi
-lib/view.cmo lib/view.cmi : lib/scrollmap.cmi lib/draw.cmi lib/colormap.cmi lib/buf.cmi lib/view.ml
-lib/view.cmx lib/view.o lib/view.cmi : lib/scrollmap.cmi lib/scrollmap.cmx lib/draw.cmi lib/draw.cmx lib/colormap.cmi lib/colormap.cmx lib/buf.cmi lib/buf.cmx lib/view.ml
+lib/view.cmo : lib/scrollmap.cmi lib/draw.cmi lib/colormap.cmi lib/buf.cmi lib/view.cmi lib/view.ml
+lib/view.cmx lib/view.o : lib/scrollmap.cmi lib/scrollmap.cmx lib/draw.cmi lib/draw.cmx lib/colormap.cmi lib/colormap.cmx lib/buf.cmi lib/buf.cmx lib/view.cmi lib/view.ml
+lib/view.cmi : lib/draw.cmi lib/buf.cmi
 lib/x11.cmo lib/x11.cmi : lib/x11.ml
 lib/x11.cmx lib/x11.o lib/x11.cmi : lib/x11.ml
 tests/buf_tests.cmo tests/buf_tests.cmi : tests/buf_tests.ml

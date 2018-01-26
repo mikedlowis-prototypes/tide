@@ -18,7 +18,7 @@ let scroll_dn () =
 let onselect mods x y nclicks =
   Printf.printf "select (%d,%d) %d" x y nclicks;
   print_endline "";
-  edit_view := View.select !edit_view (View.get_at !edit_view x y)
+  edit_view := View.select_at !edit_view x y
 
 let onexec mods x y nclicks =
   Printf.printf "exec (%d,%d) %d" x y nclicks;
@@ -48,7 +48,7 @@ let onmousebtn mods btn x y pressed nclicks =
 let onmousemove mods x y =
   Printf.printf "select (%d,%d)" x y;
   print_endline "";
-  edit_view := View.select ~extend:true !edit_view (View.get_at !edit_view x y)
+  edit_view := View.select_at ~extend:true !edit_view x y
 
 let onupdate width height =
   let csr = Draw.Cursor.make (width, height) 0 0 in

@@ -45,9 +45,6 @@ let get_at view x y =
   in
   get_col_offset view.buf off (w - sx) (x - sx)
 
-let select view start stop =
-  { view with buf = Buf.select view.buf start stop }
-
 let select ?extend:(ext=false) view pos =
   let start,stop = Buf.csrrange view.buf in
   if ext then
@@ -55,6 +52,8 @@ let select ?extend:(ext=false) view pos =
   else
     { view with buf = Buf.select view.buf pos pos }
 
+let select_at ?extend:(ext=false) view x y =
+  select ~extend:ext view (get_at view x y)
 
 let path view =
   Buf.path view.buf
