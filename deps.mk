@@ -1,5 +1,5 @@
-edit.cmo edit.cmi : lib/x11.cmi lib/view.cmi lib/draw.cmi lib/buf.cmi edit.ml
-edit.cmx edit.o edit.cmi : lib/x11.cmi lib/x11.cmx lib/view.cmi lib/view.cmx lib/draw.cmi lib/draw.cmx lib/buf.cmi lib/buf.cmx edit.ml
+edit.cmo edit.cmi : lib/x11.cmi lib/view.cmi lib/draw.cmi edit.ml
+edit.cmx edit.o edit.cmi : lib/x11.cmi lib/x11.cmx lib/view.cmi lib/view.cmx lib/draw.cmi lib/draw.cmx edit.ml
 lib/buf.cmo : lib/rope.cmi lib/misc.cmi lib/colormap.cmi lib/buf.cmi lib/buf.ml
 lib/buf.cmx lib/buf.o : lib/rope.cmi lib/rope.cmx lib/misc.cmi lib/misc.cmx lib/colormap.cmi lib/colormap.cmx lib/buf.cmi lib/buf.ml
 lib/buf.cmi : lib/colormap.cmi
