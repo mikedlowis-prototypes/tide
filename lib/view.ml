@@ -76,12 +76,12 @@ let resize view width =
 let draw view csr =
   let view = (resize view (Draw.Cursor.max_width csr)) in
   let newcsr = (Draw.Cursor.clone csr) in
-  let num, lines = Draw.buffer newcsr view.buf view.clr (Scrollmap.first view.map) in
+  let num, lines = Draw.buffer csr view.buf view.clr (Scrollmap.first view.map) in
   { view with
     num = num;
     lines = lines;
-    pos = Draw.Cursor.pos csr;
-    dim = Draw.Cursor.dim csr }
+    pos = Draw.Cursor.pos newcsr;
+    dim = Draw.Cursor.dim newcsr }
 
 let scroll_up view =
   { view with map = Scrollmap.scroll_up view.map view.buf }

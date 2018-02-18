@@ -8,10 +8,10 @@ let glyph_width g = X11.(g.xoff)
 
 module Cursor = struct
   type t = {
-    height : int;
-    width : int;
-    startx : int;
-    starty : int;
+    mutable height : int;
+    mutable width : int;
+    mutable startx : int;
+    mutable starty : int;
     mutable x: int;
     mutable y: int
   }
@@ -39,10 +39,18 @@ module Cursor = struct
     (csr.width - csr.x)
 
   let restart csr x y =
-    let csr = { csr with startx = csr.x + x; starty = csr.y + y } in
+    csr.startx <- csr.x + x;
+    csr.starty <- csr.y + y;
     csr.x <- csr.startx;
     csr.y <- csr.starty;
     csr
+
+  let reanchor csr xoff yoff =
+    csr.x <- csr.x + xoff;
+    csr.y <- csr.y + yoff;
+    csr.startx <- csr.x + xoff;
+    csr.starty <- csr.y + yoff;
+    ()
 
   let next_line csr =
     csr.x <- csr.startx;
@@ -108,10 +116,6 @@ let light_bkg = rectangle Cfg.Color.palette.(1)
 let rule_bkg = rectangle Cfg.Color.palette.(3)
 let draw_cursor = rectangle Cfg.Color.palette.(6) 1 font_height
 
-let string text csr =
-  X11.draw_string font Cfg.Color.palette.(5) text (csr.x + 2, csr.y);
-  csr.y <- csr.y + 2 + font_height
-
 let hrule width csr =
   rule_bkg width 1 csr;
   csr.y <- csr.y + 1
@@ -123,12 +127,12 @@ let vrule height csr =
 let make_line_array lines nlines =
   let lines = (Array.of_list (List.rev !lines)) in
   let line_ary = (Array.make nlines (-1)) in
-  Array.blit lines 0 line_ary 0;
+  Array.blit lines 0 line_ary 0 (Array.length lines);
   lines
 
 let buffer csr buf clr off =
   let height = (csr.height - csr.y) in
-  dark_bkg (csr.width - csr.x) height csr;
+  (if csr.y == 0 then light_bkg else dark_bkg) (csr.width - csr.x) height csr;
   csr.y <- csr.y + 2;
   let nlines = ((height -2) / font_height) in
   let num = ref 0 and csr = (restart csr 2 0)
@@ -145,19 +149,8 @@ let buffer csr buf clr off =
   in
   Buf.iter draw_rune buf off;
   List.iter X11.draw_rect !boxes; (* draw selection boxes *)
+  reanchor csr (-2) 2;
   (!num, (make_line_array lines nlines))
-
-let status csr str =
-  dark_bkg csr.width (4 + font_height) csr;
-  string str csr;
-  hrule csr.width csr
-
-let tags csr buf =
-  let maxlns = (csr.height / font_height / 4) in
-  let height = ((font_height * maxlns) + 4) in
-  light_bkg csr.width height csr;
-  string "Quit Save Undo Redo Cut Copy Paste | Find " csr;
-  hrule csr.width csr
 
 let scroll csr params =
   let start, pct = params and height = float_of_int (csr.height - csr.y) in
@@ -168,8 +161,3 @@ let scroll csr params =
   dark_bkg 14 (int_of_float (max thumbsz 5.0)) mcsr;
   csr.x <- csr.x + 14;
   vrule csr.height csr
-
-let edit csr buf clr =
-  dark_bkg (csr.width - csr.x) (csr.height - csr.y) csr;
-  let nchars = buffer csr buf clr in
-  nchars

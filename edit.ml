@@ -1,7 +1,7 @@
 open X11
 
-let tags_buf = ref Buf.empty
 let edit_view = ref (View.empty 640 480)
+let tags_view = ref (View.empty 640 480)
 
 let scroll_up () =
   for i = 1 to 4 do
@@ -58,12 +58,13 @@ let onmousemove mods x y =
 
 let onupdate width height =
   let csr = Draw.Cursor.make (width, height) 0 0 in
-  Draw.status csr (View.path !edit_view);
-  Draw.tags csr !tags_buf;
+  tags_view := View.draw !tags_view csr;
+  Draw.hrule csr.width csr;
   let scrollcsr = (Draw.Cursor.clone csr) in
   Draw.Cursor.move_x csr 15;
   edit_view := View.draw !edit_view csr;
-  Draw.scroll scrollcsr (View.scroll_params !edit_view)
+  Draw.scroll scrollcsr (View.scroll_params !edit_view);
+  ()
 
 let onshutdown () =
   shutdown ()
@@ -91,6 +92,7 @@ let onevent evnt =
  ******************************************************************************)
 let () =
   Printexc.record_backtrace true;
+  tags_view := View.make 640 480 "deftags";
   if Array.length Sys.argv > 1 then
     edit_view := View.make 640 480 Sys.argv.(1);
   let win = make_window 640 480 in
