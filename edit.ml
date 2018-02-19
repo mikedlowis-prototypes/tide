@@ -3,15 +3,32 @@ open X11
 let edit_view = ref (View.empty 640 480)
 let tags_view = ref (View.empty 640 480)
 
-let scroll_up () =
+(* Mouse Actions
+ ******************************************************************************)
+let scroll_up view =
   for i = 1 to 4 do
-    edit_view := View.scroll_up !edit_view
+    view := View.scroll_up !view
   done
 
-let scroll_dn () =
+let scroll_dn view =
   for i = 1 to 4 do
-    edit_view := View.scroll_dn !edit_view
+    view := View.scroll_dn !view
   done
+
+let select_at view x y =
+  view := View.select_at !view x y
+
+let select_ctx_at view x y = ()
+  (*view := View.select_ctx_at !view x y*)
+
+let select_line_at view x y = ()
+  (*view := View.select_line_at !view x y*)
+
+let exec_at view x y =
+  view := View.exec_at !view x y
+
+let fetch_at view x y =
+  view := View.fetch_at !view x y
 
 (* Mouse Actions
  ******************************************************************************)
@@ -19,20 +36,20 @@ let onselect mods x y nclicks =
   Printf.printf "select (%d,%d) %d" x y nclicks;
   print_endline "";
   match nclicks with
-  | 1 -> edit_view := View.select_at !edit_view x y
-  | 2 -> () (* edit_view := View.select_ctx_at !edit_view x y *)
-  | 3 -> () (* edit_view := View.select_line_at !edit_view x y *)
+  | 1 -> select_at edit_view x y
+  | 2 -> select_ctx_at edit_view x y
+  | 3 -> select_line_at edit_view x y
   | _ -> ()
 
 let onexec mods x y nclicks =
   Printf.printf "exec (%d,%d) %d" x y nclicks;
   print_endline "";
-  edit_view := View.exec_at !edit_view x y
+  exec_at edit_view x y
 
 let onfetch mods x y nclicks =
   Printf.printf "fetch (%d,%d) %d" x y nclicks;
   print_endline "";
-  edit_view := View.fetch_at !edit_view x y
+  fetch_at edit_view x y
 
 (* Event functions
  ******************************************************************************)
@@ -47,8 +64,8 @@ let onmousebtn mods btn x y pressed nclicks =
   | 1 -> onselect mods x y nclicks
   | 2 -> onexec mods x y nclicks
   | 3 -> onfetch mods x y nclicks
-  | 4 -> scroll_up ()
-  | 5 -> scroll_dn ()
+  | 4 -> scroll_up edit_view
+  | 5 -> scroll_dn edit_view
   | _ -> ()
 
 let onmousemove mods x y =
