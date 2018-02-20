@@ -139,6 +139,11 @@ uint64_t getmillis(void) {
     return ms;
 }
 
+static void get_pointer(int* ptrx, int* ptry) {
+    Window xw; int x; unsigned int ux;
+    XQueryPointer(X.display, X.self, &xw, &xw, &x, &x, ptrx, ptry, &ux);
+}
+
 CAMLprim value x11_event_loop(value ms, value cbfn) {
     CAMLparam2(ms, cbfn);
     CAMLlocal1( event );
@@ -146,6 +151,11 @@ CAMLprim value x11_event_loop(value ms, value cbfn) {
     while (X.running) {
         XPeekEvent(X.display, &e);
         uint64_t t = getmillis();
+
+        int x = 0, y = 0;
+        get_pointer(&x,&y);
+        caml_callback(cbfn, mkvariant(TSetRegion, 2, Val_int(x), Val_int(y)));
+
         while (XPending(X.display)) {
             XNextEvent(X.display, &e);
             if (!XFilterEvent(&e, None) && EventHandlers[e.type]) {

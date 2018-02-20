@@ -20,6 +20,7 @@
    type definition */
 enum {
     TFocus = 0,
+    TSetRegion,
     TKeyPress,
     TMouseClick,
     TMouseRelease,

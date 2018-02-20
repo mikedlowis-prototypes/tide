@@ -6,6 +6,7 @@ type xftfont (* opaque type for xft font structure *)
 (* X event definitions *)
 type xevent =
   | Focus of bool
+  | SetRegion of { x: int; y: int }
   | KeyPress of { mods: int; rune: int }
   | MouseClick of { mods: int; btn: int; x: int; y: int; nclicks: int }
   | MouseRelease of { mods: int; btn: int; x: int; y: int }
