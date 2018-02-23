@@ -3,6 +3,7 @@ open X11
 let tags_view = ref (View.empty 640 480)
 let edit_view = ref (View.empty 640 480)
 let divider = ref 0
+let modifiers = ref 0
 let focus_view = ref edit_view
 
 (* Mouse Actions
@@ -62,16 +63,19 @@ let onfocus focused =
 let onsetregion x y =
   Printf.printf "setregion %d %d %b" x y (y <= !divider);
   print_endline "";
-  if y <= !divider then
-    focus_view := tags_view
-  else
-    focus_view := edit_view
+  if !modifiers == 0 then
+    if y <= !divider then
+      focus_view := tags_view
+    else
+      focus_view := edit_view
 
 let onkeypress mods rune =
+  modifiers := mods;
   Printf.printf "keypress %d %d" mods rune;
   print_endline ""
 
 let onmousebtn mods btn x y pressed nclicks =
+  modifiers := mods;
   if pressed then match btn with
   | 1 -> onselect mods x y nclicks
   | 2 -> onexec mods x y nclicks
@@ -81,6 +85,7 @@ let onmousebtn mods btn x y pressed nclicks =
   | _ -> ()
 
 let onmousemove mods x y =
+  modifiers := mods;
   Printf.printf "select (%d,%d)" x y;
   print_endline "";
   select_at ~extend:true !focus_view x y
