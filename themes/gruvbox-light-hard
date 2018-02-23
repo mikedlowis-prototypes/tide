@@ -1,0 +1,37 @@
+!-------------------------------------------------------------------------------
+! Monokai - Based on default scheme for Sublime Text
+!-------------------------------------------------------------------------------
+! 16-color Palette Definition
+tide.palette.00: 0xfff9f5d7
+tide.palette.01: 0xffebdbb2
+tide.palette.02: 0xffd5c4a1
+tide.palette.03: 0xffbdae93
+tide.palette.04: 0xff665c54
+tide.palette.05: 0xff504945
+tide.palette.06: 0xff3c3836
+tide.palette.07: 0xff282828
+tide.palette.08: 0xff9d0006
+tide.palette.09: 0xffaf3a03
+tide.palette.10: 0xffb57614
+tide.palette.11: 0xff79740e
+tide.palette.12: 0xff427b58
+tide.palette.13: 0xff076678
+tide.palette.14: 0xff8f3f71
+tide.palette.15: 0xffd65d0e
+
+tide.colors.syntax.normal:       0x0005
+tide.colors.syntax.comment:      0x0003
+tide.colors.syntax.preprocessor: 0x0008
+tide.colors.syntax.keyword:      0x0008
+tide.colors.syntax.type:         0x000D
+tide.colors.syntax.constant:     0x000E
+tide.colors.syntax.number:       0x000E
+tide.colors.syntax.boolean:      0x000E
+tide.colors.syntax.float:        0x000E
+tide.colors.syntax.string:       0x000A
+tide.colors.syntax.character:    0x000A
+tide.colors.syntax.variable:     0x0008
+tide.colors.syntax.operator:     0x000C
+tide.colors.syntax.function:     0x000D
+tide.colors.syntax.statement:    0x000F
+tide.colors.syntax.special:      0x000F
