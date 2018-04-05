@@ -54,22 +54,24 @@ let max_scan_dist = intvar "tide.input.max_scan_dist" 0
 module Color = struct
   (* color palette *)
   let palette = [|
-    intvar "tide.palette.00" 0xff002b36;
-    intvar "tide.palette.01" 0xff073642;
-    intvar "tide.palette.02" 0xff40565d;
-    intvar "tide.palette.03" 0xff657b83;
-    intvar "tide.palette.04" 0xff839496;
-    intvar "tide.palette.05" 0xff93a1a1;
-    intvar "tide.palette.06" 0xffeee8d5;
-    intvar "tide.palette.07" 0xfffdf6e3;
-    intvar "tide.palette.08" 0xffb58900;
-    intvar "tide.palette.09" 0xffcb4b16;
-    intvar "tide.palette.10" 0xffdc322f;
-    intvar "tide.palette.11" 0xffd33682;
-    intvar "tide.palette.12" 0xff6c71c4;
-    intvar "tide.palette.13" 0xff268bd2;
-    intvar "tide.palette.14" 0xff2aa198;
-    intvar "tide.palette.15" 0xff859900;
+    intvar "tide.palette.00" 0xefefda; (* Edit background *)
+    intvar "tide.palette.01" 0xdaefef; (* Tags background *)
+    intvar "tide.palette.02" 0xdede8e; (* Edit selection *)
+    intvar "tide.palette.03" 0x8edede; (* Tags Selection *)
+    intvar "tide.palette.04" 0x000000; (* Text and cursor *)
+    intvar "tide.palette.05" 0x89893c; (* Scroll background *)
+    intvar "tide.palette.06" 0x7878bc; (* Border color *)
+    intvar "tide.palette.07" 0x000000; (* unused *)
+
+    intvar "tide.palette.08" 0x772222; (* Red *)
+    intvar "tide.palette.09" 0x227722; (* Green *)
+    intvar "tide.palette.10" 0x222277; (* Blue *)
+
+    intvar "tide.palette.11" 0x004488; (*  *)
+    intvar "tide.palette.12" 0x770077; (*  *)
+    intvar "tide.palette.13" 0x007777; (*  *)
+    intvar "tide.palette.14" 0xeeeecc; (*  *)
+    intvar "tide.palette.15" 0xff8c00; (*  *)
   |]
 
   (* UI color index definitions *)
@@ -90,12 +92,12 @@ module Color = struct
 
   (* syntax color definitions *)
   module Syntax = struct
-    let normal    = intvar "tide.colors.syntax.normal"    5
-    let comment   = intvar "tide.colors.syntax.comment"   3
-    let constant  = intvar "tide.colors.syntax.constant"  14
-    let keyword   = intvar "tide.colors.syntax.keyword"   15
-    let typedef   = intvar "tide.colors.syntax.typedef"   8
-    let preproc   = intvar "tide.colors.syntax.preproc"   9
+    let normal    = intvar "tide.colors.syntax.normal"    4
+    let comment   = intvar "tide.colors.syntax.comment"   8
+    let constant  = intvar "tide.colors.syntax.constant"  9
+    let keyword   = intvar "tide.colors.syntax.keyword"   10
+    let typedef   = intvar "tide.colors.syntax.typedef"   10
+    let preproc   = intvar "tide.colors.syntax.preproc"   4
 (*
     let number    = intvar "tide.colors.syntax.number"    14
     let boolean   = intvar "tide.colors.syntax.boolean"   14

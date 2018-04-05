@@ -113,8 +113,8 @@ let rectangle color width height csr =
 (* curried helpers *)
 let dark_bkg = rectangle Cfg.Color.palette.(0)
 let light_bkg = rectangle Cfg.Color.palette.(1)
-let rule_bkg = rectangle Cfg.Color.palette.(3)
-let draw_cursor = rectangle Cfg.Color.palette.(6) 1 font_height
+let rule_bkg = rectangle Cfg.Color.palette.(5)
+let draw_cursor = rectangle Cfg.Color.palette.(4) 1 font_height
 
 let hrule width csr =
   rule_bkg width 1 csr;

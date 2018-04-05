@@ -9,9 +9,7 @@ CAMLprim value load_file(value path) {
     CAMLlocal1(str);
     int fd, nread;
     struct stat sb;
-    if (((fd = open(String_val(path), O_RDONLY, 0)) < 0) ||
-        (fstat(fd, &sb) < 0) ||
-        (sb.st_size == 0)) {
+    if (((fd = open(path, O_RDONLY, 0)) < 0) || (fstat(fd, &sb) < 0) || (sb.st_size == 0)) {
         str = caml_alloc_string(0);
     } else {
         str = caml_alloc_string(sb.st_size);

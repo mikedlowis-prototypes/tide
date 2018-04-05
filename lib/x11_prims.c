@@ -581,7 +581,7 @@ static int32_t special_keys(int32_t key) {
  ******************************************************************************/
 static void xftcolor(XftColor* xc, int c) {
     #define COLOR(c) ((c) | ((c) >> 8))
-    xc->color.alpha = COLOR((c & 0xFF000000) >> 16);
+    xc->color.alpha = 0xFFFF;
     xc->color.red   = COLOR((c & 0x00FF0000) >> 8);
     xc->color.green = COLOR((c & 0x0000FF00));
     xc->color.blue  = COLOR((c & 0x000000FF) << 8);
